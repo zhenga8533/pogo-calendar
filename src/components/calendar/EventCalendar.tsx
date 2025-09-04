@@ -16,7 +16,7 @@ import {
   Paper,
   useTheme,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { CalendarEvent } from "../../types/events";
 
 const categoryColors: { [key: string]: string } = {
@@ -34,11 +34,20 @@ const categoryColors: { [key: string]: string } = {
 
 interface EventCalendarProps {
   events: CalendarEvent[];
+  isMobile: boolean;
 }
 
-function EventCalendar({ events }: EventCalendarProps) {
+function EventCalendar({ events, isMobile }: EventCalendarProps) {
   const theme = useTheme();
+  const calendarRef = useRef<FullCalendar>(null);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+
+  useEffect(() => {
+    const calendarApi = calendarRef.current?.getApi();
+    if (calendarApi) {
+      calendarApi.changeView(isMobile ? "listWeek" : "dayGridMonth");
+    }
+  }, [isMobile]);
 
   const handleEventClick = (clickInfo: EventClickArg) => {
     setSelectedEvent({
@@ -81,19 +90,29 @@ function EventCalendar({ events }: EventCalendarProps) {
 
   return (
     <>
-      <Paper elevation={3} sx={{ p: 2, backgroundColor: theme.palette.background.paper }}>
+      <Paper elevation={3} sx={{ p: { xs: 1, md: 2 }, backgroundColor: theme.palette.background.paper }}>
         <FullCalendar
+          ref={calendarRef}
           plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
-          headerToolbar={{
-            left: "prev,next today",
-            center: "title",
-            right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek",
-          }}
+          headerToolbar={
+            isMobile
+              ? {
+                  left: "prev,next",
+                  center: "title",
+                  right: "listWeek,dayGridMonth",
+                }
+              : {
+                  left: "prev,next today",
+                  center: "title",
+                  right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek",
+                }
+          }
           initialView="dayGridMonth"
           events={events}
           eventClick={handleEventClick}
           eventContent={renderEventContent}
-          aspectRatio={1.75}
+          height={isMobile ? "75vh" : "auto"}
+          aspectRatio={isMobile ? 1.2 : 1.75}
         />
       </Paper>
 

@@ -1,11 +1,21 @@
-import { Box, CircularProgress } from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
+import { Box, Button, CircularProgress, Drawer, useMediaQuery, useTheme } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import { fetchEvents } from "../../services/eventService";
 import type { CalendarEvent } from "../../types/events";
 import EventCalendar from "../calendar/EventCalendar";
 import EventFilter from "../filters/EventFilter";
 
+const timeOfDayRanges: { [key: string]: [number, number] } = {
+  morning: [6, 12],
+  afternoon: [12, 18],
+  evening: [18, 24],
+};
+
 function CalendarView() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [allEvents, setAllEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [filters, setFilters] = useState({
@@ -72,6 +82,8 @@ function CalendarView() {
     });
   }, [allEvents, filters]);
 
+  const filterComponent = <EventFilter filters={filters} onFilterChange={setFilters} allCategories={allCategories} />;
+
   if (loading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
@@ -82,8 +94,19 @@ function CalendarView() {
 
   return (
     <Box>
-      <EventFilter filters={filters} onFilterChange={setFilters} allCategories={allCategories} />
-      <EventCalendar events={filteredEvents} />
+      {isMobile ? (
+        <>
+          <Button variant="contained" startIcon={<MenuIcon />} onClick={() => setDrawerOpen(true)} sx={{ mb: 2 }}>
+            Show Filters
+          </Button>
+          <Drawer anchor="left" open={drawerOpen} onClose={() => setDrawerOpen(false)}>
+            <Box sx={{ width: 300, p: 2 }}>{filterComponent}</Box>
+          </Drawer>
+        </>
+      ) : (
+        filterComponent
+      )}
+      <EventCalendar events={filteredEvents} isMobile={isMobile} />
     </Box>
   );
 }

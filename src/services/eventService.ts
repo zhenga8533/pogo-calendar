@@ -17,7 +17,10 @@ export const fetchEvents = async (): Promise<CalendarEvent[]> => {
         start: new Date(event.start_timestamp * 1000),
         end: new Date(event.end_timestamp * 1000),
         allDay: false,
-        resource: { category: event.category },
+        resource: {
+          category: event.category,
+          article_url: event.article_url,
+        },
       });
     });
   }

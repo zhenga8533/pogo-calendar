@@ -5,6 +5,7 @@ export interface CalendarEvent {
   allDay: boolean;
   resource: {
     category: string;
+    article_url: string;
   };
 }
 
@@ -13,4 +14,5 @@ export interface ApiEvent {
   category: string;
   start_timestamp: number;
   end_timestamp: number;
+  article_url: string;
 }

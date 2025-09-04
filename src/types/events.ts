@@ -2,8 +2,7 @@ export interface CalendarEvent {
   title: string;
   start: Date;
   end: Date;
-  allDay: boolean;
-  resource: {
+  extendedProps: {
     category: string;
     article_url: string;
   };

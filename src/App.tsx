@@ -1,12 +1,12 @@
 import { AppBar, Box, Container, CssBaseline, ThemeProvider, Toolbar, Typography } from "@mui/material";
-import EventCalendar from "./components/calendar/EventCalendar";
+import CalendarView from "./components/views/CalendarView";
 import { theme } from "./theme";
 
 function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+      <Box>
         <AppBar position="static">
           <Toolbar>
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
@@ -17,14 +17,12 @@ function App() {
         <Box
           component="main"
           sx={{
-            flexGrow: 1,
             p: 3,
             backgroundColor: theme.palette.background.default,
-            overflowY: "auto",
           }}
         >
           <Container maxWidth="xl">
-            <EventCalendar />
+            <CalendarView />
           </Container>
         </Box>
       </Box>

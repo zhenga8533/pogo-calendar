@@ -7,7 +7,6 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import {
   Box,
   Button,
-  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -17,8 +16,7 @@ import {
   Paper,
   useTheme,
 } from "@mui/material";
-import { useEffect, useState } from "react";
-import { fetchEvents } from "../../services/eventService";
+import { useState } from "react";
 import type { CalendarEvent } from "../../types/events";
 
 const categoryColors: { [key: string]: string } = {
@@ -34,26 +32,13 @@ const categoryColors: { [key: string]: string } = {
   Season: "#795548",
 };
 
-function EventCalendar() {
+interface EventCalendarProps {
+  events: CalendarEvent[];
+}
+
+function EventCalendar({ events }: EventCalendarProps) {
   const theme = useTheme();
-  const [events, setEvents] = useState<CalendarEvent[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
-
-  useEffect(() => {
-    const getEvents = async () => {
-      try {
-        const eventData = await fetchEvents();
-        setEvents(eventData);
-      } catch (error) {
-        console.error("Error fetching events:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    getEvents();
-  }, []);
 
   const handleEventClick = (clickInfo: EventClickArg) => {
     setSelectedEvent({
@@ -94,23 +79,9 @@ function EventCalendar() {
     );
   };
 
-  if (loading) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
   return (
     <>
-      <Paper
-        elevation={3}
-        sx={{
-          p: 2,
-          backgroundColor: theme.palette.background.paper,
-        }}
-      >
+      <Paper elevation={3} sx={{ p: 2, backgroundColor: theme.palette.background.paper }}>
         <FullCalendar
           plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
           headerToolbar={{
@@ -122,7 +93,7 @@ function EventCalendar() {
           events={events}
           eventClick={handleEventClick}
           eventContent={renderEventContent}
-          height="85vh"
+          aspectRatio={1.75}
         />
       </Paper>
 

@@ -20,7 +20,25 @@ function CalendarView() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [allEvents, setAllEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [filters, setFilters] = useState(initialFilters);
+
+  const [filters, setFilters] = useState(() => {
+    const savedFilters = localStorage.getItem("eventFilters");
+    if (savedFilters) {
+      const parsedFilters = JSON.parse(savedFilters);
+      if (parsedFilters.startDate) {
+        parsedFilters.startDate = new Date(parsedFilters.startDate);
+      }
+      if (parsedFilters.endDate) {
+        parsedFilters.endDate = new Date(parsedFilters.endDate);
+      }
+      return parsedFilters;
+    }
+    return initialFilters;
+  });
+
+  useEffect(() => {
+    localStorage.setItem("eventFilters", JSON.stringify(filters));
+  }, [filters]);
 
   useEffect(() => {
     const getEvents = async () => {

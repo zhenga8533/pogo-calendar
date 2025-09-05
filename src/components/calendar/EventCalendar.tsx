@@ -134,6 +134,9 @@ function EventCalendar({ events, isMobile, savedEventIds, onToggleSaveEvent }: E
           eventContent={renderEventContent}
           height={isMobile ? "75vh" : "auto"}
           aspectRatio={isMobile ? 1.2 : 1.75}
+          eventTimeFormat={{
+            hour: "numeric",
+          }}
         />
       </Paper>
 
@@ -160,6 +163,7 @@ function EventCalendar({ events, isMobile, savedEventIds, onToggleSaveEvent }: E
                 year: "numeric",
                 hour: "numeric",
                 minute: "2-digit",
+                timeZoneName: "short",
               })}
               <br />
               <strong>Ends:</strong>{" "}
@@ -169,6 +173,7 @@ function EventCalendar({ events, isMobile, savedEventIds, onToggleSaveEvent }: E
                 year: "numeric",
                 hour: "numeric",
                 minute: "2-digit",
+                timeZoneName: "short",
               })}
             </DialogContentText>
           </DialogContent>

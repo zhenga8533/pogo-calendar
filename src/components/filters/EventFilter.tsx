@@ -1,9 +1,11 @@
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ReplayIcon from "@mui/icons-material/Replay";
 import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
   Box,
+  Button,
   Checkbox,
   FormControlLabel,
   FormGroup,
@@ -28,6 +30,7 @@ interface Filters {
 interface EventFilterProps {
   filters: Filters;
   onFilterChange: (newFilters: Filters) => void;
+  onResetFilters: () => void;
   allCategories: string[];
 }
 
@@ -46,7 +49,7 @@ function formatTime(value: number) {
   return `${hour} ${ampm}`;
 }
 
-function EventFilter({ filters, onFilterChange, allCategories }: EventFilterProps) {
+function EventFilter({ filters, onFilterChange, onResetFilters, allCategories }: EventFilterProps) {
   const theme = useTheme();
 
   const handleFilterChange = (field: keyof Filters, value: any) => {
@@ -65,7 +68,7 @@ function EventFilter({ filters, onFilterChange, allCategories }: EventFilterProp
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <Box sx={{ display: "flex", flexWrap: "wrap", mx: -1.5, mb: 3 }}>
-        <Box sx={{ p: 1.5, width: { xs: "100%", md: "50%" } }}>
+        <Box sx={{ p: 1.5, width: { xs: "100%", md: "40%" } }}>
           <TextField
             fullWidth
             label="Search by Event Title"
@@ -74,7 +77,7 @@ function EventFilter({ filters, onFilterChange, allCategories }: EventFilterProp
             onChange={(e) => handleFilterChange("searchTerm", e.target.value)}
           />
         </Box>
-        <Box sx={{ p: 1.5, width: { xs: "100%", md: "50%" } }}>
+        <Box sx={{ p: 1.5, width: { xs: "100%", md: "40%" } }}>
           <Box sx={{ display: "flex", gap: 2 }}>
             <DatePicker
               label="Start Date"
@@ -87,6 +90,11 @@ function EventFilter({ filters, onFilterChange, allCategories }: EventFilterProp
               onChange={(date) => handleFilterChange("endDate", date)}
             />
           </Box>
+        </Box>
+        <Box sx={{ p: 1.5, width: { xs: "100%", md: "20%" }, alignSelf: "center" }}>
+          <Button variant="outlined" onClick={onResetFilters} startIcon={<ReplayIcon />} fullWidth>
+            Reset
+          </Button>
         </Box>
         <Box sx={{ p: 1.5, width: "100%" }}>
           <Box sx={{ px: 1 }}>

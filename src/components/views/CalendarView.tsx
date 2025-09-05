@@ -6,10 +6,12 @@ import type { CalendarEvent } from "../../types/events";
 import EventCalendar from "../calendar/EventCalendar";
 import EventFilter from "../filters/EventFilter";
 
-const timeOfDayRanges: { [key: string]: [number, number] } = {
-  morning: [6, 12],
-  afternoon: [12, 18],
-  evening: [18, 24],
+const initialFilters = {
+  searchTerm: "",
+  selectedCategories: [] as string[],
+  startDate: null as Date | null,
+  endDate: null as Date | null,
+  timeRange: [0, 24],
 };
 
 function CalendarView() {
@@ -18,13 +20,7 @@ function CalendarView() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [allEvents, setAllEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [filters, setFilters] = useState({
-    searchTerm: "",
-    selectedCategories: [] as string[],
-    startDate: null as Date | null,
-    endDate: null as Date | null,
-    timeRange: [0, 24],
-  });
+  const [filters, setFilters] = useState(initialFilters);
 
   useEffect(() => {
     const getEvents = async () => {
@@ -39,6 +35,10 @@ function CalendarView() {
     };
     getEvents();
   }, []);
+
+  const handleResetFilters = () => {
+    setFilters(initialFilters);
+  };
 
   const allCategories = useMemo(() => {
     const categories = new Set(allEvents.map((event) => event.extendedProps.category));
@@ -82,7 +82,14 @@ function CalendarView() {
     });
   }, [allEvents, filters]);
 
-  const filterComponent = <EventFilter filters={filters} onFilterChange={setFilters} allCategories={allCategories} />;
+  const filterComponent = (
+    <EventFilter
+      filters={filters}
+      onFilterChange={setFilters}
+      onResetFilters={handleResetFilters}
+      allCategories={allCategories}
+    />
+  );
 
   if (loading) {
     return (

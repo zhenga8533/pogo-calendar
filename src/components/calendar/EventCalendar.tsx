@@ -81,8 +81,7 @@ function EventCalendar({ events, isMobile, savedEventIds, onToggleSaveEvent }: E
         }}
       >
         <Box sx={{ p: "2px 8px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-          <b>{eventInfo.timeText}</b>
-          <i>{eventInfo.event.title}</i>
+          <b>{eventInfo.timeText}</b> <i>{eventInfo.event.title}</i>
         </Box>
         <IconButton
           size="small"
@@ -125,8 +124,6 @@ function EventCalendar({ events, isMobile, savedEventIds, onToggleSaveEvent }: E
           aspectRatio={isMobile ? 1.2 : 1.75}
           eventTimeFormat={{
             hour: "numeric",
-            minute: "2-digit",
-            timeZoneName: "short",
           }}
         />
       </Paper>

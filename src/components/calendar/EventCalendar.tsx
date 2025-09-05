@@ -63,6 +63,7 @@ function EventCalendar({ events, isMobile, savedEventIds, onToggleSaveEvent }: E
       extendedProps: {
         category: clickInfo.event.extendedProps.category,
         article_url: clickInfo.event.extendedProps.article_url,
+        banner_url: clickInfo.event.extendedProps.banner_url,
       },
     });
   };
@@ -136,6 +137,8 @@ function EventCalendar({ events, isMobile, savedEventIds, onToggleSaveEvent }: E
           aspectRatio={isMobile ? 1.2 : 1.75}
           eventTimeFormat={{
             hour: "numeric",
+            minute: "2-digit",
+            timeZoneName: "short",
           }}
         />
       </Paper>
@@ -153,6 +156,16 @@ function EventCalendar({ events, isMobile, savedEventIds, onToggleSaveEvent }: E
             </Box>
           </DialogTitle>
           <DialogContent>
+            <Box
+              component="img"
+              src={selectedEvent.extendedProps.banner_url}
+              alt={`${selectedEvent.title} banner`}
+              sx={{
+                width: "100%",
+                borderRadius: 1,
+                mb: 2,
+              }}
+            />
             <DialogContentText component="div">
               <strong>Category:</strong> {selectedEvent.extendedProps.category}
               <br />

@@ -5,6 +5,7 @@ export interface CalendarEvent {
   extendedProps: {
     category: string;
     article_url: string;
+    banner_url: string;
   };
 }
 

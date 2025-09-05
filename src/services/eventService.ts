@@ -30,6 +30,7 @@ export const fetchEvents = async (): Promise<CalendarEvent[]> => {
         extendedProps: {
           category: event.category,
           article_url: event.article_url,
+          banner_url: event.banner_url,
         },
       });
     });

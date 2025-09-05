@@ -60,7 +60,7 @@ function EventDetailDialog({ event, onClose, savedEventIds, onToggleSaveEvent }:
   const combinedDateTimeOptions: Intl.DateTimeFormatOptions = { ...dateOptions, ...timeOptions };
 
   return (
-    <Dialog open={true} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog open={true} onClose={onClose} maxWidth="sm" fullWidth disableRestoreFocus>
       <DialogContent sx={{ p: 0, position: "relative" }}>
         <IconButton
           onClick={() => onToggleSaveEvent(event.extendedProps.article_url)}

@@ -88,6 +88,7 @@ function EventCalendar({ events, isMobile, savedEventIds, onToggleSaveEvent }: E
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          cursor: "pointer",
         }}
       >
         <Box sx={{ p: "2px 8px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>

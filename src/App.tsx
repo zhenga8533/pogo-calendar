@@ -1,8 +1,13 @@
-import { AppBar, Box, Container, CssBaseline, ThemeProvider, Toolbar, Typography } from "@mui/material";
+import InfoIcon from "@mui/icons-material/Info";
+import { AppBar, Box, Container, CssBaseline, IconButton, ThemeProvider, Toolbar, Typography } from "@mui/material";
+import { useState } from "react";
+import InfoDialog from "./components/info/InfoDialog";
 import CalendarView from "./components/views/CalendarView";
 import { theme } from "./theme";
 
 function App() {
+  const [infoOpen, setInfoOpen] = useState(false);
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -10,8 +15,11 @@ function App() {
         <AppBar position="static">
           <Toolbar>
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              Pokémon GO Events
+              Pokémon GO Calendar
             </Typography>
+            <IconButton color="inherit" onClick={() => setInfoOpen(true)}>
+              <InfoIcon />
+            </IconButton>
           </Toolbar>
         </AppBar>
         <Box
@@ -26,6 +34,8 @@ function App() {
           </Container>
         </Box>
       </Box>
+
+      <InfoDialog open={infoOpen} onClose={() => setInfoOpen(false)} />
     </ThemeProvider>
   );
 }

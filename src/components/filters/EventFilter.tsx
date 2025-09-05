@@ -15,7 +15,6 @@ import {
   Slider,
   TextField,
   Typography,
-  useTheme,
 } from "@mui/material";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -53,8 +52,6 @@ function formatTime(value: number) {
 }
 
 function EventFilter({ filters, onFilterChange, onResetFilters, allCategories }: EventFilterProps) {
-  const theme = useTheme();
-
   const handleFilterChange = (field: keyof Filters, value: any) => {
     onFilterChange({ ...filters, [field]: value });
   };
@@ -115,24 +112,11 @@ function EventFilter({ filters, onFilterChange, onResetFilters, allCategories }:
           </Box>
         </Box>
         <Box sx={{ p: 1.5, width: "100%" }}>
-          <Accordion sx={{ position: "relative" }}>
+          <Accordion>
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
               <Typography>Filter by Category</Typography>
             </AccordionSummary>
-            <AccordionDetails
-              sx={{
-                position: "absolute",
-                top: "100%",
-                left: 0,
-                right: 0,
-                zIndex: 10,
-                backgroundColor: theme.palette.background.paper,
-                boxShadow: theme.shadows[3],
-                borderBottomLeftRadius: theme.shape.borderRadius,
-                borderBottomRightRadius: theme.shape.borderRadius,
-                p: 2,
-              }}
-            >
+            <AccordionDetails>
               <FormGroup sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, auto))" }}>
                 <FormControlLabel
                   key="saved-events"

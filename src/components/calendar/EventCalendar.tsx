@@ -6,22 +6,10 @@ import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  IconButton,
-  Link,
-  Paper,
-  Typography,
-  useTheme,
-} from "@mui/material";
+import { Box, IconButton, Paper, useTheme } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import type { CalendarEvent } from "../../types/events";
+import EventDetailDialog from "./EventDetailDialog";
 
 const categoryColors: { [key: string]: string } = {
   "Community Day": "#E91E63",
@@ -143,67 +131,12 @@ function EventCalendar({ events, isMobile, savedEventIds, onToggleSaveEvent }: E
         />
       </Paper>
 
-      {selectedEvent && (
-        <Dialog open={true} onClose={handleCloseDialog}>
-          <DialogTitle>
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <Typography variant="h6" component="div" sx={{ mr: 2 }}>
-                {selectedEvent.title}
-              </Typography>
-              <IconButton onClick={() => onToggleSaveEvent(selectedEvent.extendedProps.article_url)} color="primary">
-                {savedEventIds.includes(selectedEvent.extendedProps.article_url) ? <StarIcon /> : <StarBorderIcon />}
-              </IconButton>
-            </Box>
-          </DialogTitle>
-          <DialogContent>
-            <Box
-              component="img"
-              src={selectedEvent.extendedProps.banner_url}
-              alt={`${selectedEvent.title} banner`}
-              sx={{
-                width: "100%",
-                borderRadius: 1,
-                mb: 2,
-              }}
-            />
-            <DialogContentText component="div">
-              <strong>Category:</strong> {selectedEvent.extendedProps.category}
-              <br />
-              <strong>Starts:</strong>{" "}
-              {new Date(selectedEvent.start!).toLocaleString("en-US", {
-                month: "long",
-                day: "numeric",
-                year: "numeric",
-                hour: "numeric",
-                minute: "2-digit",
-                timeZoneName: "short",
-              })}
-              <br />
-              <strong>Ends:</strong>{" "}
-              {new Date(selectedEvent.end!).toLocaleString("en-US", {
-                month: "long",
-                day: "numeric",
-                year: "numeric",
-                hour: "numeric",
-                minute: "2-digit",
-                timeZoneName: "short",
-              })}
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleCloseDialog}>Close</Button>
-            <Button
-              component={Link}
-              href={selectedEvent.extendedProps.article_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              variant="contained"
-            >
-              Learn More
-            </Button>
-          </DialogActions>
-        </Dialog>
-      )}
+      <EventDetailDialog
+        event={selectedEvent}
+        onClose={handleCloseDialog}
+        savedEventIds={savedEventIds}
+        onToggleSaveEvent={onToggleSaveEvent}
+      />
     </>
   );
 }

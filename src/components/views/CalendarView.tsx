@@ -1,71 +1,20 @@
 import MenuIcon from "@mui/icons-material/Menu";
 import { Box, Button, CircularProgress, Drawer, useMediaQuery, useTheme } from "@mui/material";
-import { useEffect, useMemo, useState } from "react";
-import { fetchEvents } from "../../services/eventService";
-import type { CalendarEvent } from "../../types/events";
+import { useMemo, useState } from "react";
+import { useEventData } from "../../hooks/useEventData";
+import { useFilters } from "../../hooks/useFilters";
+import { useSavedEvents } from "../../hooks/useSavedEvents";
 import EventCalendar from "../calendar/EventCalendar";
 import EventFilter from "../filters/EventFilter";
-
-const initialFilters = {
-  searchTerm: "",
-  selectedCategories: [] as string[],
-  startDate: null as Date | null,
-  endDate: null as Date | null,
-  timeRange: [0, 24],
-};
 
 function CalendarView() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [allEvents, setAllEvents] = useState<CalendarEvent[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
 
-  const [savedEventIds, setSavedEventIds] = useState<string[]>(() => {
-    const saved = localStorage.getItem("savedEventIds");
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  const [filters, setFilters] = useState(() => {
-    const savedFilters = localStorage.getItem("eventFilters");
-    if (savedFilters) {
-      const parsedFilters = JSON.parse(savedFilters);
-      if (parsedFilters.startDate) parsedFilters.startDate = new Date(parsedFilters.startDate);
-      if (parsedFilters.endDate) parsedFilters.endDate = new Date(parsedFilters.endDate);
-      return parsedFilters;
-    }
-    return initialFilters;
-  });
-
-  useEffect(() => {
-    localStorage.setItem("eventFilters", JSON.stringify(filters));
-  }, [filters]);
-
-  useEffect(() => {
-    localStorage.setItem("savedEventIds", JSON.stringify(savedEventIds));
-  }, [savedEventIds]);
-
-  useEffect(() => {
-    const getEvents = async () => {
-      try {
-        const eventData = await fetchEvents();
-        setAllEvents(eventData);
-      } catch (error) {
-        console.error("Error fetching events:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    getEvents();
-  }, []);
-
-  const handleResetFilters = () => {
-    setFilters(initialFilters);
-  };
-
-  const handleToggleSaveEvent = (eventId: string) => {
-    setSavedEventIds((prev) => (prev.includes(eventId) ? prev.filter((id) => id !== eventId) : [...prev, eventId]));
-  };
+  const { allEvents, loading } = useEventData();
+  const { filters, setFilters, handleResetFilters } = useFilters();
+  const { savedEventIds, handleToggleSaveEvent } = useSavedEvents();
 
   const allCategories = useMemo(() => {
     const categories = new Set(allEvents.map((event) => event.extendedProps.category));
@@ -73,13 +22,9 @@ function CalendarView() {
   }, [allEvents]);
 
   const filteredEvents = useMemo(() => {
-    const { selectedCategories } = filters;
-    const isSavedFilterActive = selectedCategories.includes("Saved");
-    const otherSelectedCategories = selectedCategories.filter((c: string) => c !== "Saved");
-
     let eventsToFilter = allEvents;
 
-    if (isSavedFilterActive) {
+    if (filters.showOnlySaved) {
       eventsToFilter = eventsToFilter.filter((event) => savedEventIds.includes(event.extendedProps.article_url));
     }
 
@@ -87,7 +32,7 @@ function CalendarView() {
       const searchMatch = event.title.toLowerCase().includes(filters.searchTerm.toLowerCase());
 
       const categoryMatch =
-        otherSelectedCategories.length === 0 || otherSelectedCategories.includes(event.extendedProps.category);
+        filters.selectedCategories.length === 0 || filters.selectedCategories.includes(event.extendedProps.category);
 
       const eventStart = new Date(event.start!);
       const eventEnd = new Date(event.end!);
@@ -113,10 +58,6 @@ function CalendarView() {
         } else {
           timeOfDayMatch = eventStartHour >= startHour && eventStartHour < endHour;
         }
-      }
-
-      if (isSavedFilterActive && otherSelectedCategories.length === 0) {
-        return searchMatch && dateMatch && timeOfDayMatch;
       }
 
       return searchMatch && categoryMatch && dateMatch && timeOfDayMatch;

@@ -1,17 +1,22 @@
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import {
   Box,
   Button,
+  Chip,
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
-  DialogTitle,
+  Divider,
   IconButton,
   Link,
+  Stack,
   Typography,
 } from "@mui/material";
+import React from "react";
 import type { CalendarEvent } from "../../types/events";
 
 interface EventDetailDialogProps {
@@ -21,61 +26,106 @@ interface EventDetailDialogProps {
   onToggleSaveEvent: (eventId: string) => void;
 }
 
+function DetailItem({ icon, text }: { icon: React.ReactNode; text: string }) {
+  return (
+    <Stack direction="row" spacing={1.5} alignItems="center">
+      {icon}
+      <Typography variant="body1">{text}</Typography>
+    </Stack>
+  );
+}
+
 function EventDetailDialog({ event, onClose, savedEventIds, onToggleSaveEvent }: EventDetailDialogProps) {
   if (!event) {
     return null;
   }
 
   const isSaved = savedEventIds.includes(event.extendedProps.article_url);
+  const startDate = new Date(event.start!);
+  const endDate = new Date(event.end!);
+  const isSingleDay = startDate.toDateString() === endDate.toDateString();
+
+  const dateOptions: Intl.DateTimeFormatOptions = {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  };
+
+  const timeOptions: Intl.DateTimeFormatOptions = {
+    hour: "numeric",
+    minute: "2-digit",
+    timeZoneName: "short",
+  };
+
+  const combinedDateTimeOptions: Intl.DateTimeFormatOptions = { ...dateOptions, ...timeOptions };
 
   return (
-    <Dialog open={true} onClose={onClose}>
-      <DialogTitle>
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <Typography variant="h6" component="div" sx={{ mr: 2 }}>
-            {event.title}
-          </Typography>
-          <IconButton onClick={() => onToggleSaveEvent(event.extendedProps.article_url)} color="primary">
-            {isSaved ? <StarIcon /> : <StarBorderIcon />}
-          </IconButton>
-        </Box>
-      </DialogTitle>
-      <DialogContent>
+    <Dialog open={true} onClose={onClose} maxWidth="sm" fullWidth>
+      <DialogContent sx={{ p: 0, position: "relative" }}>
+        <IconButton
+          onClick={() => onToggleSaveEvent(event.extendedProps.article_url)}
+          sx={{
+            position: "absolute",
+            top: 8,
+            right: 8,
+            backgroundColor: "rgba(0, 0, 0, 0.4)",
+            color: "white",
+            "&:hover": {
+              backgroundColor: "rgba(0, 0, 0, 0.6)",
+            },
+          }}
+        >
+          {isSaved ? <StarIcon /> : <StarBorderIcon />}
+        </IconButton>
+
         <Box
           component="img"
           src={event.extendedProps.banner_url}
           alt={`${event.title} banner`}
           sx={{
             width: "100%",
-            borderRadius: 1,
-            mb: 2,
+            aspectRatio: "16 / 9",
+            objectFit: "cover",
           }}
         />
-        <DialogContentText component="div">
-          <strong>Category:</strong> {event.extendedProps.category}
-          <br />
-          <strong>Starts:</strong>{" "}
-          {new Date(event.start!).toLocaleString("en-US", {
-            month: "long",
-            day: "numeric",
-            year: "numeric",
-            hour: "numeric",
-            minute: "2-digit",
-            timeZoneName: "short",
-          })}
-          <br />
-          <strong>Ends:</strong>{" "}
-          {new Date(event.end!).toLocaleString("en-US", {
-            month: "long",
-            day: "numeric",
-            year: "numeric",
-            hour: "numeric",
-            minute: "2-digit",
-            timeZoneName: "short",
-          })}
-        </DialogContentText>
+
+        <Box sx={{ p: 3 }}>
+          <Chip label={event.extendedProps.category} color="primary" sx={{ mb: 2 }} />
+          <Typography variant="h5" component="div" gutterBottom>
+            {event.title}
+          </Typography>
+          <Divider sx={{ my: 2 }} />
+          <Stack spacing={2}>
+            {isSingleDay ? (
+              <>
+                <DetailItem
+                  icon={<CalendarTodayIcon color="action" />}
+                  text={startDate.toLocaleDateString("en-US", dateOptions)}
+                />
+                <DetailItem
+                  icon={<AccessTimeIcon color="action" />}
+                  text={`${startDate.toLocaleTimeString("en-US", timeOptions)} — ${endDate.toLocaleTimeString(
+                    "en-US",
+                    timeOptions
+                  )}`}
+                />
+              </>
+            ) : (
+              <>
+                <DetailItem
+                  icon={<CalendarTodayIcon color="action" />}
+                  text={`Starts: ${startDate.toLocaleString("en-US", combinedDateTimeOptions)}`}
+                />
+                <DetailItem
+                  icon={<CalendarTodayIcon color="action" />}
+                  text={`Ends: ${endDate.toLocaleString("en-US", combinedDateTimeOptions)}`}
+                />
+              </>
+            )}
+          </Stack>
+        </Box>
       </DialogContent>
-      <DialogActions>
+      <DialogActions sx={{ p: "16px 24px" }}>
         <Button onClick={onClose}>Close</Button>
         <Button
           component={Link}
@@ -83,6 +133,7 @@ function EventDetailDialog({ event, onClose, savedEventIds, onToggleSaveEvent }:
           target="_blank"
           rel="noopener noreferrer"
           variant="contained"
+          endIcon={<OpenInNewIcon />}
         >
           Learn More
         </Button>

@@ -12,10 +12,21 @@ export const fetchEvents = async (): Promise<CalendarEvent[]> => {
   const allEvents: CalendarEvent[] = [];
   for (const category in data) {
     data[category].forEach((event: ApiEvent) => {
+      let startDate: Date;
+      let endDate: Date;
+
+      if (event.is_local_time) {
+        startDate = new Date(event.start_time as string);
+        endDate = new Date(event.end_time as string);
+      } else {
+        startDate = new Date((event.start_time as number) * 1000);
+        endDate = new Date((event.end_time as number) * 1000);
+      }
+
       allEvents.push({
         title: event.title,
-        start: new Date(event.start_timestamp * 1000),
-        end: new Date(event.end_timestamp * 1000),
+        start: startDate,
+        end: endDate,
         extendedProps: {
           category: event.category,
           article_url: event.article_url,

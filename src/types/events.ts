@@ -11,7 +11,9 @@ export interface CalendarEvent {
 export interface ApiEvent {
   title: string;
   category: string;
-  start_timestamp: number;
-  end_timestamp: number;
+  is_local_time: boolean;
+  start_time: string | number;
+  end_time: string | number;
   article_url: string;
+  banner_url: string;
 }

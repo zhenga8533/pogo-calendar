@@ -21,16 +21,17 @@ function CalendarView() {
   const [allEvents, setAllEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
+  const [savedEventIds, setSavedEventIds] = useState<string[]>(() => {
+    const saved = localStorage.getItem("savedEventIds");
+    return saved ? JSON.parse(saved) : [];
+  });
+
   const [filters, setFilters] = useState(() => {
     const savedFilters = localStorage.getItem("eventFilters");
     if (savedFilters) {
       const parsedFilters = JSON.parse(savedFilters);
-      if (parsedFilters.startDate) {
-        parsedFilters.startDate = new Date(parsedFilters.startDate);
-      }
-      if (parsedFilters.endDate) {
-        parsedFilters.endDate = new Date(parsedFilters.endDate);
-      }
+      if (parsedFilters.startDate) parsedFilters.startDate = new Date(parsedFilters.startDate);
+      if (parsedFilters.endDate) parsedFilters.endDate = new Date(parsedFilters.endDate);
       return parsedFilters;
     }
     return initialFilters;
@@ -39,6 +40,10 @@ function CalendarView() {
   useEffect(() => {
     localStorage.setItem("eventFilters", JSON.stringify(filters));
   }, [filters]);
+
+  useEffect(() => {
+    localStorage.setItem("savedEventIds", JSON.stringify(savedEventIds));
+  }, [savedEventIds]);
 
   useEffect(() => {
     const getEvents = async () => {
@@ -58,17 +63,31 @@ function CalendarView() {
     setFilters(initialFilters);
   };
 
+  const handleToggleSaveEvent = (eventId: string) => {
+    setSavedEventIds((prev) => (prev.includes(eventId) ? prev.filter((id) => id !== eventId) : [...prev, eventId]));
+  };
+
   const allCategories = useMemo(() => {
     const categories = new Set(allEvents.map((event) => event.extendedProps.category));
     return Array.from(categories).sort();
   }, [allEvents]);
 
   const filteredEvents = useMemo(() => {
-    return allEvents.filter((event) => {
+    const { selectedCategories } = filters;
+    const isSavedFilterActive = selectedCategories.includes("Saved");
+    const otherSelectedCategories = selectedCategories.filter((c: string) => c !== "Saved");
+
+    let eventsToFilter = allEvents;
+
+    if (isSavedFilterActive) {
+      eventsToFilter = eventsToFilter.filter((event) => savedEventIds.includes(event.extendedProps.article_url));
+    }
+
+    return eventsToFilter.filter((event) => {
       const searchMatch = event.title.toLowerCase().includes(filters.searchTerm.toLowerCase());
 
       const categoryMatch =
-        filters.selectedCategories.length === 0 || filters.selectedCategories.includes(event.extendedProps.category);
+        otherSelectedCategories.length === 0 || otherSelectedCategories.includes(event.extendedProps.category);
 
       const eventStart = new Date(event.start!);
       const eventEnd = new Date(event.end!);
@@ -96,9 +115,13 @@ function CalendarView() {
         }
       }
 
+      if (isSavedFilterActive && otherSelectedCategories.length === 0) {
+        return searchMatch && dateMatch && timeOfDayMatch;
+      }
+
       return searchMatch && categoryMatch && dateMatch && timeOfDayMatch;
     });
-  }, [allEvents, filters]);
+  }, [allEvents, filters, savedEventIds]);
 
   const filterComponent = (
     <EventFilter
@@ -131,7 +154,12 @@ function CalendarView() {
       ) : (
         filterComponent
       )}
-      <EventCalendar events={filteredEvents} isMobile={isMobile} />
+      <EventCalendar
+        events={filteredEvents}
+        isMobile={isMobile}
+        savedEventIds={savedEventIds}
+        onToggleSaveEvent={handleToggleSaveEvent}
+      />
     </Box>
   );
 }

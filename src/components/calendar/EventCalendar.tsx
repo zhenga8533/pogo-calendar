@@ -4,6 +4,8 @@ import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
+import StarIcon from "@mui/icons-material/Star";
+import StarBorderIcon from "@mui/icons-material/StarBorder";
 import {
   Box,
   Button,
@@ -12,8 +14,10 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  IconButton,
   Link,
   Paper,
+  Typography,
   useTheme,
 } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
@@ -35,9 +39,11 @@ const categoryColors: { [key: string]: string } = {
 interface EventCalendarProps {
   events: CalendarEvent[];
   isMobile: boolean;
+  savedEventIds: string[];
+  onToggleSaveEvent: (eventId: string) => void;
 }
 
-function EventCalendar({ events, isMobile }: EventCalendarProps) {
+function EventCalendar({ events, isMobile, savedEventIds, onToggleSaveEvent }: EventCalendarProps) {
   const theme = useTheme();
   const calendarRef = useRef<FullCalendar>(null);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
@@ -52,8 +58,8 @@ function EventCalendar({ events, isMobile }: EventCalendarProps) {
   const handleEventClick = (clickInfo: EventClickArg) => {
     setSelectedEvent({
       title: clickInfo.event.title,
-      start: clickInfo.event.start,
-      end: clickInfo.event.end,
+      start: clickInfo.event.start ?? new Date(),
+      end: clickInfo.event.end ?? new Date(),
       extendedProps: {
         category: clickInfo.event.extendedProps.category,
         article_url: clickInfo.event.extendedProps.article_url,
@@ -66,24 +72,38 @@ function EventCalendar({ events, isMobile }: EventCalendarProps) {
   };
 
   const renderEventContent = (eventInfo: EventContentArg) => {
-    const category = eventInfo.event.extendedProps.category;
+    const { category, article_url } = eventInfo.event.extendedProps;
     const backgroundColor = categoryColors[category] || theme.palette.primary.main;
+    const isSaved = savedEventIds.includes(article_url);
+
     return (
       <Box
         sx={{
           backgroundColor,
           color: "#fff",
           borderRadius: "4px",
-          p: "2px 8px",
           overflow: "hidden",
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap",
           width: "100%",
           height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
         }}
       >
-        <b>{eventInfo.timeText}</b>
-        <i>{eventInfo.event.title}</i>
+        <Box sx={{ p: "2px 8px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          <b>{eventInfo.timeText}</b>
+          <i>{eventInfo.event.title}</i>
+        </Box>
+        <IconButton
+          size="small"
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleSaveEvent(article_url);
+          }}
+          sx={{ color: "#fff" }}
+        >
+          {isSaved ? <StarIcon fontSize="inherit" /> : <StarBorderIcon fontSize="inherit" />}
+        </IconButton>
       </Box>
     );
   };
@@ -118,7 +138,16 @@ function EventCalendar({ events, isMobile }: EventCalendarProps) {
 
       {selectedEvent && (
         <Dialog open={true} onClose={handleCloseDialog}>
-          <DialogTitle>{selectedEvent.title}</DialogTitle>
+          <DialogTitle>
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <Typography variant="h6" component="div" sx={{ mr: 2 }}>
+                {selectedEvent.title}
+              </Typography>
+              <IconButton onClick={() => onToggleSaveEvent(selectedEvent.extendedProps.article_url)} color="primary">
+                {savedEventIds.includes(selectedEvent.extendedProps.article_url) ? <StarIcon /> : <StarBorderIcon />}
+              </IconButton>
+            </Box>
+          </DialogTitle>
           <DialogContent>
             <DialogContentText component="div">
               <strong>Category:</strong> {selectedEvent.extendedProps.category}

@@ -1,5 +1,7 @@
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ReplayIcon from "@mui/icons-material/Replay";
+import StarIcon from "@mui/icons-material/Star";
+import StarBorderIcon from "@mui/icons-material/StarBorder";
 import {
   Accordion,
   AccordionDetails,
@@ -7,6 +9,7 @@ import {
   Box,
   Button,
   Checkbox,
+  Divider,
   FormControlLabel,
   FormGroup,
   Slider,
@@ -131,6 +134,20 @@ function EventFilter({ filters, onFilterChange, onResetFilters, allCategories }:
               }}
             >
               <FormGroup sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, auto))" }}>
+                <FormControlLabel
+                  key="saved-events"
+                  control={
+                    <Checkbox
+                      checked={filters.selectedCategories.includes("Saved")}
+                      onChange={handleCategoryChange}
+                      name="Saved"
+                      icon={<StarBorderIcon />}
+                      checkedIcon={<StarIcon />}
+                    />
+                  }
+                  label="Saved Events"
+                />
+                <Divider sx={{ gridColumn: "1 / -1", my: 1 }} />
                 {allCategories.map((category) => (
                   <FormControlLabel
                     key={category}

@@ -1,0 +1,15 @@
+export const categoryColors: { [key: string]: string } = {
+  "Community Day": "#E91E63",
+  "Raid Day": "#D32F2F",
+  "Raid Weekend": "#FF5722",
+  "Raid Hour": "#673AB7",
+  Event: "#2196F3",
+  "GO Battle League": "#4CAF50",
+  "Pokémon Spotlight Hour": "#FFC107",
+  "Raid Battles": "#009688",
+  "City Safari": "#8BC34A",
+  Season: "#03A9F4",
+  "GO Pass": "#607D8B",
+  "Max Mondays": "#795548",
+  "Wild Area": "#4E342E",
+};

@@ -15,11 +15,13 @@ import {
   Slider,
   TextField,
   Typography,
+  useTheme,
 } from "@mui/material";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import React from "react";
+import { categoryColors } from "../../config/colorMapping";
 
 interface Filters {
   searchTerm: string;
@@ -50,6 +52,26 @@ function formatTime(value: number) {
   const hour = value % 12 === 0 ? 12 : value % 12;
   return `${hour} ${ampm}`;
 }
+
+const ColorKeyLabel = ({ category, color }: { category: string; color?: string }) => {
+  const theme = useTheme();
+  return (
+    <Box sx={{ display: "flex", alignItems: "center" }}>
+      <Box
+        component="span"
+        sx={{
+          width: 14,
+          height: 14,
+          borderRadius: "50%",
+          mr: 1.5,
+          backgroundColor: color || theme.palette.primary.main,
+          border: `1px solid ${theme.palette.divider}`,
+        }}
+      />
+      {category}
+    </Box>
+  );
+};
 
 function EventFilter({ filters, onFilterChange, onResetFilters, allCategories }: EventFilterProps) {
   const handleFilterChange = (field: keyof Filters, value: any) => {
@@ -142,7 +164,7 @@ function EventFilter({ filters, onFilterChange, onResetFilters, allCategories }:
                         name={category}
                       />
                     }
-                    label={category}
+                    label={<ColorKeyLabel category={category} color={categoryColors[category]} />}
                   />
                 ))}
               </FormGroup>

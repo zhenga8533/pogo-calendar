@@ -8,21 +8,9 @@ import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import { Box, IconButton, Paper, useTheme } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
+import { categoryColors } from "../../config/colorMapping";
 import type { CalendarEvent } from "../../types/events";
 import EventDetailDialog from "./EventDetailDialog";
-
-const categoryColors: { [key: string]: string } = {
-  "Community Day": "#E91E63",
-  "Raid Day": "#F44336",
-  "Raid Hour": "#9C27B0",
-  Event: "#2196F3",
-  "GO Battle League": "#4CAF50",
-  "Pokémon Spotlight Hour": "#FF9800",
-  "Raid Battles": "#607D8B",
-  "Raid Weekend": "#D32F2F",
-  "City Safari": "#009688",
-  Season: "#795548",
-};
 
 interface EventCalendarProps {
   events: CalendarEvent[];
@@ -124,6 +112,8 @@ function EventCalendar({ events, isMobile, savedEventIds, onToggleSaveEvent }: E
           aspectRatio={isMobile ? 1.2 : 1.75}
           eventTimeFormat={{
             hour: "numeric",
+            minute: "2-digit",
+            timeZoneName: "short",
           }}
         />
       </Paper>

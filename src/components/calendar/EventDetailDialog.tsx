@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import React from "react";
 import type { CalendarEvent } from "../../types/events";
+import { getColorForCategory } from "../../utils/colorUtils";
 
 interface EventDetailDialogProps {
   event: CalendarEvent | null;
@@ -90,7 +91,15 @@ function EventDetailDialog({ event, onClose, savedEventIds, onToggleSaveEvent }:
         />
 
         <Box sx={{ p: 3 }}>
-          <Chip label={event.extendedProps.category} color="primary" sx={{ mb: 2 }} />
+          <Chip
+            label={event.extendedProps.category}
+            sx={{
+              mb: 2,
+              backgroundColor: getColorForCategory(event.extendedProps.category),
+              color: "#fff",
+              fontWeight: "bold",
+            }}
+          />
           <Typography variant="h5" component="div" gutterBottom>
             {event.title}
           </Typography>

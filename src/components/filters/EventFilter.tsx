@@ -21,7 +21,7 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import React from "react";
-import { categoryColors } from "../../config/colorMapping";
+import { getColorForCategory } from "../../utils/colorUtils";
 
 interface Filters {
   searchTerm: string;
@@ -53,7 +53,7 @@ function formatTime(value: number) {
   return `${hour} ${ampm}`;
 }
 
-const ColorKeyLabel = ({ category, color }: { category: string; color?: string }) => {
+const ColorKeyLabel = ({ category }: { category: string }) => {
   const theme = useTheme();
   return (
     <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -64,7 +64,7 @@ const ColorKeyLabel = ({ category, color }: { category: string; color?: string }
           height: 14,
           borderRadius: "50%",
           mr: 1.5,
-          backgroundColor: color || theme.palette.primary.main,
+          backgroundColor: getColorForCategory(category),
           border: `1px solid ${theme.palette.divider}`,
         }}
       />
@@ -164,7 +164,7 @@ function EventFilter({ filters, onFilterChange, onResetFilters, allCategories }:
                         name={category}
                       />
                     }
-                    label={<ColorKeyLabel category={category} color={categoryColors[category]} />}
+                    label={<ColorKeyLabel category={category} />}
                   />
                 ))}
               </FormGroup>

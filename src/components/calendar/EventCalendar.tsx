@@ -8,8 +8,8 @@ import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import { Box, IconButton, Paper, useTheme } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
-import { categoryColors } from "../../config/colorMapping";
 import type { CalendarEvent } from "../../types/events";
+import { getColorForCategory } from "../../utils/colorUtils";
 import EventDetailDialog from "./EventDetailDialog";
 
 interface EventCalendarProps {
@@ -50,7 +50,7 @@ function EventCalendar({ events, isMobile, savedEventIds, onToggleSaveEvent }: E
 
   const renderEventContent = (eventInfo: EventContentArg) => {
     const { category, article_url } = eventInfo.event.extendedProps;
-    const backgroundColor = categoryColors[category] || theme.palette.primary.main;
+    const backgroundColor = getColorForCategory(category);
     const isSaved = savedEventIds.includes(article_url);
 
     return (

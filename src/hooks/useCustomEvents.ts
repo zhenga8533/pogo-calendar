@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
+import defaultBanner from "../assets/images/default-banner.jpg";
 import type { CalendarEvent } from "../types/events";
 
 export type NewEventData = {
@@ -42,7 +43,7 @@ export function useCustomEvents() {
       extendedProps: {
         category: "Custom Event",
         article_url: uuidv4(),
-        banner_url: "https://cdn.leekduck.com/assets/img/events/events-default-img.jpg",
+        banner_url: defaultBanner,
       },
     };
     setCustomEvents((prev) => [...prev, newEvent]);

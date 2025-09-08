@@ -1,27 +1,16 @@
-import Brightness4Icon from "@mui/icons-material/Brightness4";
-import Brightness7Icon from "@mui/icons-material/Brightness7";
-import InfoIcon from "@mui/icons-material/Info";
-import {
-  AppBar,
-  Box,
-  Container,
-  CssBaseline,
-  IconButton,
-  type PaletteMode,
-  ThemeProvider,
-  Toolbar,
-  Typography,
-} from "@mui/material";
+import { Box, Container, CssBaseline, type PaletteMode, ThemeProvider } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
+import Footer from "./components/layout/Footer";
+import Header from "./components/layout/Header";
 import InfoDialog from "./components/shared/InfoDialog";
 import CalendarView from "./pages/CalendarView";
 import { CalendarDarkStyles } from "./styles/calendarDarkStyles";
 import { getTheme } from "./theme";
 
 /**
- * Main App component rendering the Pokémon GO Calendar application.
+ * Main application component that sets up theming, layout, and state management.
  *
- * @returns The main App component rendering the Pokémon GO Calendar application.
+ * @returns The main application component that sets up theming, layout, and state management.
  */
 function App() {
   const [infoOpen, setInfoOpen] = useState(false);
@@ -30,6 +19,7 @@ function App() {
     return savedMode === "light" || savedMode === "dark" ? savedMode : "light";
   });
 
+  // Persist theme mode to localStorage
   useEffect(() => {
     localStorage.setItem("themeMode", mode);
   }, [mode]);
@@ -40,27 +30,17 @@ function App() {
     setMode((prevMode) => (prevMode === "light" ? "dark" : "light"));
   };
 
+  // Render the application with theming and layout
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <CalendarDarkStyles />
-      <Box>
-        <AppBar position="static">
-          <Toolbar>
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              Pokémon GO Calendar
-            </Typography>
-            <IconButton sx={{ ml: 1 }} onClick={toggleColorMode} color="inherit">
-              {theme.palette.mode === "dark" ? <Brightness7Icon /> : <Brightness4Icon />}
-            </IconButton>
-            <IconButton color="inherit" onClick={() => setInfoOpen(true)}>
-              <InfoIcon />
-            </IconButton>
-          </Toolbar>
-        </AppBar>
+      <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+        <Header onToggleTheme={toggleColorMode} onInfoClick={() => setInfoOpen(true)} mode={mode} />
         <Box
           component="main"
           sx={{
+            flexGrow: 1,
             p: 3,
             backgroundColor: theme.palette.background.default,
           }}
@@ -69,6 +49,7 @@ function App() {
             <CalendarView />
           </Container>
         </Box>
+        <Footer />
       </Box>
 
       <InfoDialog open={infoOpen} onClose={() => setInfoOpen(false)} />

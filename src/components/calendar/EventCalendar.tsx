@@ -60,7 +60,7 @@ function EventCalendar({ events, isMobile, savedEventIds, onToggleSaveEvent }: E
   // Render custom event content with category color and save icon
   const renderEventContent = (eventInfo: EventContentArg) => {
     const { category, article_url } = eventInfo.event.extendedProps;
-    const backgroundColor = getColorForCategory(category);
+    const backgroundColor = getColorForCategory(category, theme.palette.mode);
     const isSaved = savedEventIds.includes(article_url);
 
     return (
@@ -95,7 +95,7 @@ function EventCalendar({ events, isMobile, savedEventIds, onToggleSaveEvent }: E
     );
   };
 
-  // Render the calendar and event detail dialog
+  // Render the FullCalendar component with event details dialog
   return (
     <>
       <Paper elevation={3} sx={{ p: { xs: 1, md: 2 }, backgroundColor: theme.palette.background.paper }}>

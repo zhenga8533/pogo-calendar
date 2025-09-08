@@ -60,12 +60,12 @@ function formatTime(value: number) {
 }
 
 /**
- * Render a colored key label for the specified category.
+ * ColorKeyLabel component to display a colored circle and category name.
  *
- * @param param0 Props containing category name
- * @returns The rendered colored key label component.
+ * @param param0 Props containing category name.
+ * @returns The rendered ColorKeyLabel component.
  */
-function ColorKeyLabel({ category }: { category: string }) {
+const ColorKeyLabel = ({ category }: { category: string }) => {
   const theme = useTheme();
   return (
     <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -76,19 +76,19 @@ function ColorKeyLabel({ category }: { category: string }) {
           height: 14,
           borderRadius: "50%",
           mr: 1.5,
-          backgroundColor: getColorForCategory(category),
+          backgroundColor: getColorForCategory(category, theme.palette.mode),
           border: `1px solid ${theme.palette.divider}`,
         }}
       />
       {category}
     </Box>
   );
-}
+};
 
 /**
- * EventFilter component to filter events by various criteria.
+ * EventFilter component to filter events based on various criteria.
  *
- * @param param0 Props containing filters, change handlers, and all categories
+ * @param param0 Props containing current filters, change handlers, and all categories.
  * @returns The rendered EventFilter component.
  */
 function EventFilter({ filters, onFilterChange, onResetFilters, allCategories }: EventFilterProps) {
@@ -97,7 +97,7 @@ function EventFilter({ filters, onFilterChange, onResetFilters, allCategories }:
     onFilterChange({ ...filters, [field]: value });
   };
 
-  // Handle changes to category selection
+  // Handle changes to category checkboxes
   const handleCategoryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const category = event.target.name;
     const isChecked = event.target.checked;

@@ -15,6 +15,7 @@ import {
   Link,
   Stack,
   Typography,
+  useTheme,
 } from "@mui/material";
 import React from "react";
 import type { CalendarEvent } from "../../types/events";
@@ -49,6 +50,8 @@ function DetailItem({ icon, text }: { icon: React.ReactNode; text: string }) {
  * @returns The rendered EventDetailDialog component or null if no event is provided.
  */
 function EventDetailDialog({ event, onClose, savedEventIds, onToggleSaveEvent }: EventDetailDialogProps) {
+  const theme = useTheme();
+
   if (!event) {
     return null;
   }
@@ -109,8 +112,10 @@ function EventDetailDialog({ event, onClose, savedEventIds, onToggleSaveEvent }:
             label={event.extendedProps.category}
             sx={{
               mb: 2,
-              backgroundColor: getColorForCategory(event.extendedProps.category),
-              color: "#fff",
+              backgroundColor: getColorForCategory(event.extendedProps.category, theme.palette.mode),
+              color: theme.palette.getContrastText(
+                getColorForCategory(event.extendedProps.category, theme.palette.mode)
+              ),
               fontWeight: "bold",
             }}
           />

@@ -1,6 +1,6 @@
 import MenuIcon from "@mui/icons-material/Menu";
 import { Alert, Box, Button, CircularProgress, Drawer, Snackbar, useMediaQuery, useTheme } from "@mui/material";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { type NewEventData, useCustomEvents } from "../../hooks/useCustomEvents";
 import { useEventData } from "../../hooks/useEventData";
 import { useFilters } from "../../hooks/useFilters";
@@ -33,17 +33,6 @@ function CalendarView() {
     savedEventIds
   );
 
-  // Ensure "Custom Event" category is removed if there are no custom events
-  useEffect(() => {
-    if (customEvents.length === 0 && filters.selectedCategories.includes("Custom Event")) {
-      setFilters((prevFilters) => ({
-        ...prevFilters,
-        selectedCategories: prevFilters.selectedCategories.filter((c) => c !== "Custom Event"),
-      }));
-    }
-  }, [customEvents, filters.selectedCategories, setFilters]);
-
-  // Extract all unique categories from combined events for filter options
   const allCategories = useMemo(() => {
     const categories = new Set(combinedEvents.map((event) => event.extendedProps.category));
     return Array.from(categories).sort();
@@ -53,18 +42,12 @@ function CalendarView() {
   const handleSaveNewEvent = (eventData: NewEventData) => {
     addCustomEvent(eventData);
     setCreateDialogOpen(false);
-
-    setFilters((prevFilters) => {
-      if (prevFilters.selectedCategories.length === 0) {
-        return prevFilters;
-      }
-
-      return {
+    if (filters.selectedCategories.length > 0) {
+      setFilters((prevFilters) => ({
         ...prevFilters,
         selectedCategories: [...new Set([...prevFilters.selectedCategories, "Custom Event"])],
-      };
-    });
-
+      }));
+    }
     setToast({ open: true, message: "Event created successfully!", severity: "success" });
   };
 
@@ -82,7 +65,7 @@ function CalendarView() {
     setToast({ ...toast, open: false });
   };
 
-  // Filter component to be used in both drawer and sidebar
+  // Filter component to be used in both drawer and inline
   const filterComponent = (
     <EventFilter
       filters={filters}
@@ -90,10 +73,11 @@ function CalendarView() {
       onResetFilters={handleResetFilters}
       onNewEventClick={() => setCreateDialogOpen(true)}
       allCategories={allCategories}
+      isMobile={isMobile}
     />
   );
 
-  // Render loading spinner while events are being fetched
+  // Show loading spinner while events are being fetched
   if (loading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>

@@ -111,7 +111,7 @@ function EventCalendar({
     );
   };
 
-  // Render the FullCalendar component with event details dialog
+  // Render the FullCalendar component with event detail dialog
   return (
     <>
       <Paper elevation={3} sx={{ p: { xs: 1, md: 2 }, backgroundColor: theme.palette.background.paper }}>
@@ -142,6 +142,7 @@ function EventCalendar({
           datesSet={(dateInfo) => {
             onViewChange(dateInfo.view.type);
           }}
+          titleFormat={isMobile ? { month: "short", year: "numeric" } : { month: "long", year: "numeric" }}
         />
       </Paper>
 

@@ -1,5 +1,6 @@
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import FilterListIcon from "@mui/icons-material/FilterList";
 import ReplayIcon from "@mui/icons-material/Replay";
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
@@ -7,13 +8,17 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  Badge,
   Box,
   Button,
   Checkbox,
   Divider,
   FormControlLabel,
   FormGroup,
+  Menu,
+  Paper,
   Slider,
+  Stack,
   TextField,
   Typography,
   useTheme,
@@ -21,7 +26,7 @@ import {
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import React from "react";
+import React, { useState } from "react";
 import { getColorForCategory } from "../../utils/colorUtils";
 
 interface Filters {
@@ -30,15 +35,15 @@ interface Filters {
   startDate: Date | null;
   endDate: Date | null;
   timeRange: number[];
-  showOnlySaved: boolean;
 }
 
 interface EventFilterProps {
   filters: Filters;
-  onFilterChange: (newFilters: Omit<Filters, "showOnlySaved">) => void;
+  onFilterChange: (newFilters: Filters) => void;
   onResetFilters: () => void;
   onNewEventClick: () => void;
   allCategories: string[];
+  isMobile: boolean;
 }
 
 const marks = [
@@ -89,13 +94,31 @@ function ColorKeyLabel({ category }: { category: string }) {
 }
 
 /**
- * EventFilter component to filter events based on various criteria.
+ * EventFilter component to filter events by search term, date range, time range, and categories.
  *
- * @param param0 Props containing current filters, change handlers, and all categories.
+ * @param param0 Props containing filters, change handlers, categories, and mobile view flag.
  * @returns The rendered EventFilter component.
  */
-function EventFilter({ filters, onFilterChange, onResetFilters, onNewEventClick, allCategories }: EventFilterProps) {
-  // Handle changes to individual filter fields
+function EventFilter({
+  filters,
+  onFilterChange,
+  onResetFilters,
+  onNewEventClick,
+  allCategories,
+  isMobile,
+}: EventFilterProps) {
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+
+  // Menu open/close handlers
+  const handleMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  // Handle changes to any filter field
   const handleFilterChange = (field: keyof Filters, value: any) => {
     onFilterChange({ ...filters, [field]: value });
   };
@@ -110,11 +133,44 @@ function EventFilter({ filters, onFilterChange, onResetFilters, onNewEventClick,
     handleFilterChange("selectedCategories", newSelectedCategories);
   };
 
-  // Render the filter UI
-  return (
-    <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <Box sx={{ display: "flex", flexWrap: "wrap", mx: -1.5, mb: 3 }}>
-        <Box sx={{ p: 1.5, width: { xs: "100%", md: "50%" } }}>
+  // Category filter content for menu and accordion
+  const categoryFilterContent = (
+    <FormGroup>
+      <FormControlLabel
+        key="saved-events"
+        control={
+          <Checkbox
+            checked={filters.selectedCategories.includes("Saved")}
+            onChange={handleCategoryChange}
+            name="Saved"
+            icon={<StarBorderIcon />}
+            checkedIcon={<StarIcon />}
+          />
+        }
+        label="Saved Events"
+      />
+      <Divider sx={{ my: 1 }} />
+      {allCategories.map((category) => (
+        <FormControlLabel
+          key={category}
+          control={
+            <Checkbox
+              checked={filters.selectedCategories.includes(category)}
+              onChange={handleCategoryChange}
+              name={category}
+            />
+          }
+          label={<ColorKeyLabel category={category} />}
+        />
+      ))}
+    </FormGroup>
+  );
+
+  // Render mobile layout if isMobile is true
+  if (isMobile) {
+    return (
+      <LocalizationProvider dateAdapter={AdapterDateFns}>
+        <Stack spacing={3}>
           <TextField
             fullWidth
             label="Search by Event Title"
@@ -122,46 +178,20 @@ function EventFilter({ filters, onFilterChange, onResetFilters, onNewEventClick,
             value={filters.searchTerm}
             onChange={(e) => handleFilterChange("searchTerm", e.target.value)}
           />
-        </Box>
-        <Box sx={{ p: 1.5, width: { xs: "100%", md: "50%" } }}>
-          <Box sx={{ display: "flex", gap: 2 }}>
-            <DatePicker
-              label="Start Date"
-              value={filters.startDate}
-              onChange={(date) => handleFilterChange("startDate", date)}
-            />
-            <DatePicker
-              label="End Date"
-              value={filters.endDate}
-              onChange={(date) => handleFilterChange("endDate", date)}
-            />
-          </Box>
-        </Box>
-        <Box sx={{ p: 1.5, width: { xs: "100%", md: "50%" } }}>
-          <Button
-            variant="contained"
-            onClick={onNewEventClick}
-            startIcon={<AddCircleOutlineIcon />}
-            fullWidth
-            sx={{ height: "56px" }}
-          >
-            New Event
-          </Button>
-        </Box>
-        <Box sx={{ p: 1.5, width: { xs: "100%", md: "50%" } }}>
-          <Button
-            variant="outlined"
-            onClick={onResetFilters}
-            startIcon={<ReplayIcon />}
-            fullWidth
-            sx={{ height: "56px" }}
-          >
-            Reset
-          </Button>
-        </Box>
-        <Box sx={{ p: 1.5, width: "100%" }}>
+          <DatePicker
+            label="Start Date"
+            value={filters.startDate}
+            onChange={(date) => handleFilterChange("startDate", date)}
+          />
+          <DatePicker
+            label="End Date"
+            value={filters.endDate}
+            onChange={(date) => handleFilterChange("endDate", date)}
+          />
           <Box sx={{ px: 1 }}>
-            <Typography gutterBottom>Time of Day</Typography>
+            <Typography gutterBottom variant="body2" color="text.secondary">
+              Time of Day
+            </Typography>
             <Slider
               value={filters.timeRange}
               onChange={(_, value) => handleFilterChange("timeRange", value as number[])}
@@ -173,46 +203,85 @@ function EventFilter({ filters, onFilterChange, onResetFilters, onNewEventClick,
               step={1}
             />
           </Box>
-        </Box>
-        <Box sx={{ p: 1.5, width: "100%" }}>
           <Accordion>
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Typography>Filter by Category</Typography>
+              <Typography>Categories ({filters.selectedCategories.length})</Typography>
             </AccordionSummary>
-            <AccordionDetails>
-              <FormGroup sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, auto))" }}>
-                <FormControlLabel
-                  key="saved-events"
-                  control={
-                    <Checkbox
-                      checked={filters.selectedCategories.includes("Saved")}
-                      onChange={handleCategoryChange}
-                      name="Saved"
-                      icon={<StarBorderIcon />}
-                      checkedIcon={<StarIcon />}
-                    />
-                  }
-                  label="Saved Events"
-                />
-                <Divider sx={{ gridColumn: "1 / -1", my: 1 }} />
-                {allCategories.map((category) => (
-                  <FormControlLabel
-                    key={category}
-                    control={
-                      <Checkbox
-                        checked={filters.selectedCategories.includes(category)}
-                        onChange={handleCategoryChange}
-                        name={category}
-                      />
-                    }
-                    label={<ColorKeyLabel category={category} />}
-                  />
-                ))}
-              </FormGroup>
-            </AccordionDetails>
+            <AccordionDetails>{categoryFilterContent}</AccordionDetails>
           </Accordion>
-        </Box>
-      </Box>
+          <Button variant="contained" onClick={onNewEventClick} startIcon={<AddCircleOutlineIcon />}>
+            New Event
+          </Button>
+          <Button variant="outlined" onClick={onResetFilters} startIcon={<ReplayIcon />}>
+            Reset
+          </Button>
+        </Stack>
+      </LocalizationProvider>
+    );
+  }
+
+  // Render desktop layout
+  return (
+    <LocalizationProvider dateAdapter={AdapterDateFns}>
+      <Paper sx={{ p: 2, mb: 3 }}>
+        <Stack spacing={2}>
+          <TextField
+            fullWidth
+            label="Search by Event Title"
+            variant="outlined"
+            value={filters.searchTerm}
+            onChange={(e) => handleFilterChange("searchTerm", e.target.value)}
+          />
+          <Stack direction="row" spacing={2}>
+            <DatePicker
+              label="Start Date"
+              value={filters.startDate}
+              onChange={(date) => handleFilterChange("startDate", date)}
+              sx={{ width: "100%" }}
+            />
+            <DatePicker
+              label="End Date"
+              value={filters.endDate}
+              onChange={(date) => handleFilterChange("endDate", date)}
+              sx={{ width: "100%" }}
+            />
+          </Stack>
+          <Box sx={{ px: 1 }}>
+            <Typography gutterBottom variant="body2" color="text.secondary">
+              Time of Day
+            </Typography>
+            <Slider
+              value={filters.timeRange}
+              onChange={(_, value) => handleFilterChange("timeRange", value as number[])}
+              valueLabelFormat={formatTime}
+              valueLabelDisplay="auto"
+              marks={marks}
+              min={0}
+              max={24}
+              step={1}
+            />
+          </Box>
+          <Divider />
+          <Stack direction="row" spacing={2} justifyContent="space-between">
+            <Badge badgeContent={filters.selectedCategories.length} color="primary">
+              <Button variant="outlined" startIcon={<FilterListIcon />} onClick={handleMenuClick}>
+                Categories
+              </Button>
+            </Badge>
+            <Menu anchorEl={anchorEl} open={open} onClose={handleMenuClose}>
+              <Box sx={{ p: 2, width: { xs: "250px", md: "500px" } }}>{categoryFilterContent}</Box>
+            </Menu>
+            <Stack direction="row" spacing={2}>
+              <Button variant="contained" onClick={onNewEventClick} startIcon={<AddCircleOutlineIcon />}>
+                New Event
+              </Button>
+              <Button variant="outlined" onClick={onResetFilters} startIcon={<ReplayIcon />}>
+                Reset
+              </Button>
+            </Stack>
+          </Stack>
+        </Stack>
+      </Paper>
     </LocalizationProvider>
   );
 }

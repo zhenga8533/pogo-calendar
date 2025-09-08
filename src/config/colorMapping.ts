@@ -1,4 +1,5 @@
 export const lightCategoryColors: { [key: string]: string } = {
+  "Custom Event": "#AFB42B",
   "City Safari": "#26A69A",
   "Community Day": "#7CB342",
   Event: "#1E88E5",
@@ -16,6 +17,7 @@ export const lightCategoryColors: { [key: string]: string } = {
 };
 
 export const darkCategoryColors: { [key: string]: string } = {
+  "Custom Event": "#D4E157",
   "City Safari": "#4DB6AC",
   "Community Day": "#9CCC65",
   Event: "#64B5F6",

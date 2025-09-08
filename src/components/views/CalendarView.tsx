@@ -1,14 +1,16 @@
 import MenuIcon from "@mui/icons-material/Menu";
-import { Box, Button, CircularProgress, Drawer, useMediaQuery, useTheme } from "@mui/material";
-import { useMemo, useState } from "react";
+import { Alert, Box, Button, CircularProgress, Drawer, Snackbar, useMediaQuery, useTheme } from "@mui/material";
+import React, { useMemo, useState } from "react";
+import { type NewEventData, useCustomEvents } from "../../hooks/useCustomEvents";
 import { useEventData } from "../../hooks/useEventData";
 import { useFilters } from "../../hooks/useFilters";
 import { useSavedEvents } from "../../hooks/useSavedEvents";
 import EventCalendar from "../calendar/EventCalendar";
+import CreateEventDialog from "../events/CreateEventDialog";
 import EventFilter from "../filters/EventFilter";
 
 /**
- * CalendarView component to display the event calendar with filters and saved events.
+ * CalendarView component to display the event calendar with filters, saved events, and custom event creation.
  *
  * @returns The rendered CalendarView component.
  */
@@ -16,19 +18,48 @@ function CalendarView() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [toast, setToast] = useState({ open: false, message: "", severity: "success" as const });
 
-  const { allEvents, loading } = useEventData();
+  const { allEvents: apiEvents, loading } = useEventData();
   const { savedEventIds, handleToggleSaveEvent } = useSavedEvents();
+  const { customEvents, addCustomEvent, deleteCustomEvent } = useCustomEvents();
+
+  const combinedEvents = useMemo(() => [...apiEvents, ...customEvents], [apiEvents, customEvents]);
+
+  // Use filters hook with combined events
   const { filters, setFilters, handleResetFilters, setCurrentView, filteredEvents } = useFilters(
-    allEvents,
+    combinedEvents,
     savedEventIds
   );
 
-  // Extract all unique categories from events for filter options
+  // Extract all unique categories from combined events for filter options
   const allCategories = useMemo(() => {
-    const categories = new Set(allEvents.map((event) => event.extendedProps.category));
+    const categories = new Set(combinedEvents.map((event) => event.extendedProps.category));
     return Array.from(categories).sort();
-  }, [allEvents]);
+  }, [combinedEvents]);
+
+  // Handle saving a new custom event
+  const handleSaveNewEvent = (eventData: NewEventData) => {
+    addCustomEvent(eventData);
+    handleResetFilters();
+    setCreateDialogOpen(false);
+    setToast({ open: true, message: "Event created successfully!", severity: "success" });
+  };
+
+  // Handle deleting a custom event
+  const handleDeleteEvent = (eventId: string) => {
+    deleteCustomEvent(eventId);
+    setToast({ open: true, message: "Event deleted successfully", severity: "success" });
+  };
+
+  // Handle closing the toast notification
+  const handleCloseToast = (_event: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setToast({ ...toast, open: false });
+  };
 
   // Filter component to be used in both drawer and sidebar
   const filterComponent = (
@@ -36,6 +67,7 @@ function CalendarView() {
       filters={filters}
       onFilterChange={setFilters}
       onResetFilters={handleResetFilters}
+      onNewEventClick={() => setCreateDialogOpen(true)}
       allCategories={allCategories}
     />
   );
@@ -70,7 +102,18 @@ function CalendarView() {
         savedEventIds={savedEventIds}
         onToggleSaveEvent={handleToggleSaveEvent}
         onViewChange={setCurrentView}
+        onDeleteEvent={handleDeleteEvent}
       />
+      <CreateEventDialog
+        open={createDialogOpen}
+        onClose={() => setCreateDialogOpen(false)}
+        onSave={handleSaveNewEvent}
+      />
+      <Snackbar open={toast.open} autoHideDuration={6000} onClose={handleCloseToast}>
+        <Alert onClose={handleCloseToast} severity={toast.severity} sx={{ width: "100%" }}>
+          {toast.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

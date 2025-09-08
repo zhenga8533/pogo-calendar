@@ -18,15 +18,23 @@ interface EventCalendarProps {
   savedEventIds: string[];
   onToggleSaveEvent: (eventId: string) => void;
   onViewChange: (viewName: string) => void;
+  onDeleteEvent: (eventId: string) => void;
 }
 
 /**
  * EventCalendar component to display and manage calendar events.
  *
- * @param param0 Props containing events, mobile view flag, saved event IDs, toggle function, and view change handler.
+ * @param param0 Props containing events, mobile view flag, saved event IDs, toggle function, view change handler, and delete handler.
  * @returns The rendered EventCalendar component.
  */
-function EventCalendar({ events, isMobile, savedEventIds, onToggleSaveEvent, onViewChange }: EventCalendarProps) {
+function EventCalendar({
+  events,
+  isMobile,
+  savedEventIds,
+  onToggleSaveEvent,
+  onViewChange,
+  onDeleteEvent,
+}: EventCalendarProps) {
   const theme = useTheme();
   const calendarRef = useRef<FullCalendar>(null);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
@@ -142,6 +150,7 @@ function EventCalendar({ events, isMobile, savedEventIds, onToggleSaveEvent, onV
         onClose={handleCloseDialog}
         savedEventIds={savedEventIds}
         onToggleSaveEvent={onToggleSaveEvent}
+        onDeleteEvent={onDeleteEvent}
       />
     </>
   );

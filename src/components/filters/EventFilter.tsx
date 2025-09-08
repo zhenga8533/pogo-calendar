@@ -1,3 +1,4 @@
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ReplayIcon from "@mui/icons-material/Replay";
 import StarIcon from "@mui/icons-material/Star";
@@ -29,12 +30,14 @@ interface Filters {
   startDate: Date | null;
   endDate: Date | null;
   timeRange: number[];
+  showOnlySaved: boolean;
 }
 
 interface EventFilterProps {
   filters: Filters;
-  onFilterChange: (newFilters: Filters) => void;
+  onFilterChange: (newFilters: Omit<Filters, "showOnlySaved">) => void;
   onResetFilters: () => void;
+  onNewEventClick: () => void;
   allCategories: string[];
 }
 
@@ -65,7 +68,7 @@ function formatTime(value: number) {
  * @param param0 Props containing category name.
  * @returns The rendered ColorKeyLabel component.
  */
-const ColorKeyLabel = ({ category }: { category: string }) => {
+function ColorKeyLabel({ category }: { category: string }) {
   const theme = useTheme();
   return (
     <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -83,7 +86,7 @@ const ColorKeyLabel = ({ category }: { category: string }) => {
       {category}
     </Box>
   );
-};
+}
 
 /**
  * EventFilter component to filter events based on various criteria.
@@ -91,7 +94,7 @@ const ColorKeyLabel = ({ category }: { category: string }) => {
  * @param param0 Props containing current filters, change handlers, and all categories.
  * @returns The rendered EventFilter component.
  */
-function EventFilter({ filters, onFilterChange, onResetFilters, allCategories }: EventFilterProps) {
+function EventFilter({ filters, onFilterChange, onResetFilters, onNewEventClick, allCategories }: EventFilterProps) {
   // Handle changes to individual filter fields
   const handleFilterChange = (field: keyof Filters, value: any) => {
     onFilterChange({ ...filters, [field]: value });
@@ -111,7 +114,7 @@ function EventFilter({ filters, onFilterChange, onResetFilters, allCategories }:
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <Box sx={{ display: "flex", flexWrap: "wrap", mx: -1.5, mb: 3 }}>
-        <Box sx={{ p: 1.5, width: { xs: "100%", md: "40%" } }}>
+        <Box sx={{ p: 1.5, width: { xs: "100%", md: "50%" } }}>
           <TextField
             fullWidth
             label="Search by Event Title"
@@ -120,7 +123,7 @@ function EventFilter({ filters, onFilterChange, onResetFilters, allCategories }:
             onChange={(e) => handleFilterChange("searchTerm", e.target.value)}
           />
         </Box>
-        <Box sx={{ p: 1.5, width: { xs: "100%", md: "40%" } }}>
+        <Box sx={{ p: 1.5, width: { xs: "100%", md: "50%" } }}>
           <Box sx={{ display: "flex", gap: 2 }}>
             <DatePicker
               label="Start Date"
@@ -134,8 +137,25 @@ function EventFilter({ filters, onFilterChange, onResetFilters, allCategories }:
             />
           </Box>
         </Box>
-        <Box sx={{ p: 1.5, width: { xs: "100%", md: "20%" }, alignSelf: "center" }}>
-          <Button variant="outlined" onClick={onResetFilters} startIcon={<ReplayIcon />} fullWidth>
+        <Box sx={{ p: 1.5, width: { xs: "100%", md: "50%" } }}>
+          <Button
+            variant="contained"
+            onClick={onNewEventClick}
+            startIcon={<AddCircleOutlineIcon />}
+            fullWidth
+            sx={{ height: "56px" }}
+          >
+            New Event
+          </Button>
+        </Box>
+        <Box sx={{ p: 1.5, width: { xs: "100%", md: "50%" } }}>
+          <Button
+            variant="outlined"
+            onClick={onResetFilters}
+            startIcon={<ReplayIcon />}
+            fullWidth
+            sx={{ height: "56px" }}
+          >
             Reset
           </Button>
         </Box>

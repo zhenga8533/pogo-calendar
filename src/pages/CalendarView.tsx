@@ -1,13 +1,13 @@
 import MenuIcon from "@mui/icons-material/Menu";
 import { Alert, Box, Button, CircularProgress, Drawer, Snackbar, useMediaQuery, useTheme } from "@mui/material";
 import React, { useEffect, useMemo, useState } from "react";
-import { type NewEventData, useCustomEvents } from "../../hooks/useCustomEvents";
-import { useEventData } from "../../hooks/useEventData";
-import { useFilters } from "../../hooks/useFilters";
-import { useSavedEvents } from "../../hooks/useSavedEvents";
-import EventCalendar from "../calendar/EventCalendar";
-import CreateEventDialog from "../events/CreateEventDialog";
-import EventFilter from "../filters/EventFilter";
+import EventCalendar from "../components//calendar/EventCalendar";
+import CreateEventDialog from "../components//events/CreateEventDialog";
+import EventFilter from "../components/filters/EventFilter";
+import { type NewEventData, useCustomEvents } from "../hooks/useCustomEvents";
+import { useEventData } from "../hooks/useEventData";
+import { useFilters } from "../hooks/useFilters";
+import { useSavedEvents } from "../hooks/useSavedEvents";
 
 /**
  * CalendarView component to display the event calendar with filters, saved events, and custom event creation.

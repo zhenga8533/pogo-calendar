@@ -13,8 +13,8 @@ import {
   Typography,
 } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
-import InfoDialog from "./components/info/InfoDialog";
-import CalendarView from "./components/views/CalendarView";
+import InfoDialog from "./components/shared/InfoDialog";
+import CalendarView from "./pages/CalendarView";
 import { CalendarDarkStyles } from "./styles/calendarDarkStyles";
 import { getTheme } from "./theme";
 

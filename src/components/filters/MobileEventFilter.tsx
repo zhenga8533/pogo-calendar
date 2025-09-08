@@ -20,7 +20,8 @@ import {
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import React from "react";
-import { ColorKeyLabel, type EventFilterProps, type Filters, formatTime, marks } from "./EventFilter";
+import { ColorKeyLabel } from "./ColorKeyLabel";
+import { type EventFilterProps, type Filters, formatTime, marks } from "./EventFilter";
 
 interface MobileEventFilterProps extends Omit<EventFilterProps, "isMobile"> {
   handleFilterChange: (field: keyof Filters, value: any) => void;

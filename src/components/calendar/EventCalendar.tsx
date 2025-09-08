@@ -19,13 +19,14 @@ interface EventCalendarProps {
   onToggleSaveEvent: (eventId: string) => void;
   onViewChange: (viewName: string) => void;
   onDeleteEvent: (eventId: string) => void;
+  onEditEvent: (event: CalendarEvent) => void;
 }
 
 /**
  * EventCalendar component to display and manage calendar events.
  *
- * @param param0 Props containing events, mobile view flag, saved event IDs, toggle function, view change handler, and delete handler.
- * @returns The rendered EventCalendar component.
+ * @param {EventCalendarProps} props Props containing events, mobile flag, saved event IDs, and handlers.
+ * @returns {React.ReactElement} The rendered EventCalendar component.
  */
 function EventCalendar({
   events,
@@ -34,6 +35,7 @@ function EventCalendar({
   onToggleSaveEvent,
   onViewChange,
   onDeleteEvent,
+  onEditEvent,
 }: EventCalendarProps) {
   const theme = useTheme();
   const calendarRef = useRef<FullCalendar>(null);
@@ -152,6 +154,10 @@ function EventCalendar({
         savedEventIds={savedEventIds}
         onToggleSaveEvent={onToggleSaveEvent}
         onDeleteEvent={onDeleteEvent}
+        onEditEvent={(event: CalendarEvent) => {
+          handleCloseDialog();
+          onEditEvent(event);
+        }}
       />
     </>
   );

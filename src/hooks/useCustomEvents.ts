@@ -48,10 +48,21 @@ export function useCustomEvents() {
     setCustomEvents((prev) => [...prev, newEvent]);
   };
 
+  // Function to update an existing custom event by its unique article_url
+  const updateCustomEvent = (eventId: string, eventData: NewEventData) => {
+    setCustomEvents((prev) =>
+      prev.map((event) =>
+        event.extendedProps.article_url === eventId
+          ? { ...event, title: eventData.title, start: eventData.start, end: eventData.end }
+          : event
+      )
+    );
+  };
+
   // Function to delete a custom event by its unique article_url
   const deleteCustomEvent = (eventId: string) => {
     setCustomEvents((prev) => prev.filter((event) => event.extendedProps.article_url !== eventId));
   };
 
-  return { customEvents, addCustomEvent, deleteCustomEvent };
+  return { customEvents, addCustomEvent, updateCustomEvent, deleteCustomEvent };
 }

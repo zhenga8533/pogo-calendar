@@ -1,6 +1,7 @@
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
@@ -23,19 +24,21 @@ import {
 import React, { useState } from "react";
 import type { CalendarEvent } from "../../types/events";
 import { getColorForCategory } from "../../utils/colorUtils";
+
 interface EventDetailDialogProps {
   event: CalendarEvent | null;
   onClose: () => void;
   savedEventIds: string[];
   onToggleSaveEvent: (eventId: string) => void;
   onDeleteEvent: (eventId: string) => void;
+  onEditEvent: (event: CalendarEvent) => void;
 }
 
 /**
  * DetailItem component to display an icon and text in a row.
  *
- * @param param0 Props containing icon and text for the detail item.
- * @returns The rendered DetailItem component.
+ * @param {object} props Props containing icon and text for the detail item.
+ * @returns {React.ReactElement} The rendered DetailItem component.
  */
 function DetailItem({ icon, text }: { icon: React.ReactNode; text: string }) {
   return (
@@ -49,8 +52,8 @@ function DetailItem({ icon, text }: { icon: React.ReactNode; text: string }) {
 /**
  * EventDetailDialog component to display detailed information about a calendar event.
  *
- * @param param0 Props containing the event, close handler, saved event IDs, toggle function, and delete handler.
- * @returns The rendered EventDetailDialog component or null if no event is provided.
+ * @param {EventDetailDialogProps} props Props containing the event data and various event handlers.
+ * @returns {React.ReactElement | null} The rendered EventDetailDialog component or null if no event is provided.
  */
 function EventDetailDialog({
   event,
@@ -58,6 +61,7 @@ function EventDetailDialog({
   savedEventIds,
   onToggleSaveEvent,
   onDeleteEvent,
+  onEditEvent,
 }: EventDetailDialogProps) {
   const theme = useTheme();
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -66,6 +70,7 @@ function EventDetailDialog({
     return null;
   }
 
+  // Handle deletion confirmation
   const handleDelete = () => {
     onDeleteEvent(event.extendedProps.article_url);
     setConfirmOpen(false);
@@ -174,9 +179,14 @@ function EventDetailDialog({
         <DialogActions sx={{ p: "16px 24px", justifyContent: "space-between" }}>
           <Box>
             {isCustomEvent && (
-              <Button onClick={() => setConfirmOpen(true)} color="error" startIcon={<DeleteIcon />}>
-                Delete
-              </Button>
+              <>
+                <Button onClick={() => onEditEvent(event)} color="primary" startIcon={<EditIcon />}>
+                  Edit
+                </Button>
+                <Button onClick={() => setConfirmOpen(true)} color="error" startIcon={<DeleteIcon />}>
+                  Delete
+                </Button>
+              </>
             )}
           </Box>
           <Box>

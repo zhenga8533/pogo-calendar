@@ -8,6 +8,7 @@ import { type NewEventData, useCustomEvents } from "../hooks/useCustomEvents";
 import { useEventData } from "../hooks/useEventData";
 import { useFilters } from "../hooks/useFilters";
 import { useSavedEvents } from "../hooks/useSavedEvents";
+import type { CalendarEvent } from "../types/events";
 
 /**
  * CalendarView component to display the event calendar with filters, saved events, and custom event creation.
@@ -19,11 +20,12 @@ function CalendarView() {
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [eventToEdit, setEventToEdit] = useState<CalendarEvent | null>(null);
   const [toast, setToast] = useState({ open: false, message: "", severity: "success" as const });
 
   const { allEvents: apiEvents, loading } = useEventData();
   const { savedEventIds, handleToggleSaveEvent } = useSavedEvents();
-  const { customEvents, addCustomEvent, deleteCustomEvent } = useCustomEvents();
+  const { customEvents, addCustomEvent, updateCustomEvent, deleteCustomEvent } = useCustomEvents();
 
   const combinedEvents = useMemo(() => [...apiEvents, ...customEvents], [apiEvents, customEvents]);
 
@@ -49,19 +51,29 @@ function CalendarView() {
     }
   }, [allCategories, filters.selectedCategories, setFilters]);
 
-  // Handle saving a new custom event
-  const handleSaveNewEvent = (eventData: NewEventData) => {
-    addCustomEvent(eventData);
+  // Handle opening the dialog to edit an event
+  const handleOpenEditDialog = (event: CalendarEvent) => {
+    setEventToEdit(event);
+    setCreateDialogOpen(true);
+  };
 
-    setCreateDialogOpen(false);
-    if (filters.selectedCategories.length > 0) {
-      setFilters((prevFilters) => ({
-        ...prevFilters,
-        selectedCategories: [...new Set([...prevFilters.selectedCategories, "Custom Event"])],
-      }));
+  // Handle saving a new or updated custom event
+  const handleSaveEvent = (eventData: NewEventData, eventId?: string) => {
+    if (eventId) {
+      updateCustomEvent(eventId, eventData);
+      setToast({ open: true, message: "Event updated successfully!", severity: "success" });
+    } else {
+      addCustomEvent(eventData);
+      if (filters.selectedCategories.length > 0) {
+        setFilters((prevFilters) => ({
+          ...prevFilters,
+          selectedCategories: [...new Set([...prevFilters.selectedCategories, "Custom Event"])],
+        }));
+      }
+      setToast({ open: true, message: "Event created successfully!", severity: "success" });
     }
-
-    setToast({ open: true, message: "Event created successfully!", severity: "success" });
+    setCreateDialogOpen(false);
+    setEventToEdit(null);
   };
 
   // Handle deleting a custom event
@@ -121,11 +133,16 @@ function CalendarView() {
         onToggleSaveEvent={handleToggleSaveEvent}
         onViewChange={setCurrentView}
         onDeleteEvent={handleDeleteEvent}
+        onEditEvent={handleOpenEditDialog}
       />
       <CreateEventDialog
         open={createDialogOpen}
-        onClose={() => setCreateDialogOpen(false)}
-        onSave={handleSaveNewEvent}
+        onClose={() => {
+          setCreateDialogOpen(false);
+          setEventToEdit(null);
+        }}
+        onSave={handleSaveEvent}
+        eventToEdit={eventToEdit}
       />
       <Snackbar open={toast.open} autoHideDuration={6000} onClose={handleCloseToast}>
         <Alert onClose={handleCloseToast} severity={toast.severity} sx={{ width: "100%" }}>

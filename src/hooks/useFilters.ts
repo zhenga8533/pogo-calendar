@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { type Dispatch, type SetStateAction, useEffect, useMemo, useState } from "react";
 import type { CalendarEvent } from "../types/events";
 
 export const initialFilters = {
@@ -8,6 +8,9 @@ export const initialFilters = {
   endDate: null as Date | null,
   timeRange: [0, 24],
 };
+
+type FilterState = typeof initialFilters;
+type SetFilters = Dispatch<SetStateAction<FilterState>>;
 
 const defaultAllFilters = {
   dayGridMonth: initialFilters,
@@ -48,11 +51,12 @@ export function useFilters(allEvents: CalendarEvent[], savedEventIds: string[]) 
   const filtersForCurrentView = allFilters[currentView as keyof typeof allFilters] || initialFilters;
 
   // Set filters for the current view
-  const setFiltersForCurrentView = (newFilters: typeof initialFilters) => {
-    setAllFilters((prev: typeof defaultAllFilters) => ({
-      ...prev,
-      [currentView]: newFilters,
-    }));
+  const setFiltersForCurrentView: SetFilters = (update) => {
+    setAllFilters((prev: typeof defaultAllFilters) => {
+      const currentFilters = prev[currentView as keyof typeof prev] || initialFilters;
+      const newFilters = typeof update === "function" ? update(currentFilters) : update;
+      return { ...prev, [currentView]: newFilters };
+    });
   };
 
   // Reset filters for the current view to initial state

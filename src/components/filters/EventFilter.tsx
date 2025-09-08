@@ -54,6 +54,11 @@ const marks = [
   { value: 24, label: "12 AM" },
 ];
 
+const categoryGroups = {
+  "Major Events": ["City Safari", "Community Day", "Raid Day", "Raid Weekend", "Wild Area"],
+  "Weekly Events": ["Raid Hour", "Pokémon Spotlight Hour", "Max Mondays"],
+};
+
 /**
  * Format hour value to 12-hour time with AM/PM
  *
@@ -88,7 +93,7 @@ function ColorKeyLabel({ category }: { category: string }) {
           border: `1px solid ${theme.palette.divider}`,
         }}
       />
-      {category}
+      <Typography variant="body2">{category}</Typography>
     </Box>
   );
 }
@@ -133,37 +138,79 @@ function EventFilter({
     handleFilterChange("selectedCategories", newSelectedCategories);
   };
 
+  // Handle select all categories
+  const handleSelectAll = () => {
+    const all = ["Saved", ...allCategories];
+    handleFilterChange("selectedCategories", all);
+  };
+
+  // Handle clear all categories
+  const handleClearAll = () => {
+    handleFilterChange("selectedCategories", []);
+  };
+
+  const otherCategories = allCategories.filter((cat) => !Object.values(categoryGroups).flat().includes(cat));
+
   // Category filter content for menu and accordion
   const categoryFilterContent = (
-    <FormGroup>
-      <FormControlLabel
-        key="saved-events"
-        control={
-          <Checkbox
-            checked={filters.selectedCategories.includes("Saved")}
-            onChange={handleCategoryChange}
-            name="Saved"
-            icon={<StarBorderIcon />}
-            checkedIcon={<StarIcon />}
-          />
-        }
-        label="Saved Events"
-      />
-      <Divider sx={{ my: 1 }} />
-      {allCategories.map((category) => (
+    <Stack direction={{ xs: "column", md: "row" }} spacing={{ xs: 1, md: 4 }}>
+      <FormGroup>
         <FormControlLabel
-          key={category}
+          key="saved-events"
           control={
             <Checkbox
-              checked={filters.selectedCategories.includes(category)}
+              checked={filters.selectedCategories.includes("Saved")}
               onChange={handleCategoryChange}
-              name={category}
+              name="Saved"
+              icon={<StarBorderIcon />}
+              checkedIcon={<StarIcon />}
             />
           }
-          label={<ColorKeyLabel category={category} />}
+          label="Saved Events"
         />
-      ))}
-    </FormGroup>
+        <Divider sx={{ my: 1 }} />
+        {Object.entries(categoryGroups).map(([groupName, categories]) => (
+          <React.Fragment key={groupName}>
+            <Typography variant="overline" color="text.secondary">
+              {groupName}
+            </Typography>
+            {categories
+              .filter((c) => allCategories.includes(c))
+              .map((category) => (
+                <FormControlLabel
+                  key={category}
+                  control={
+                    <Checkbox
+                      checked={filters.selectedCategories.includes(category)}
+                      onChange={handleCategoryChange}
+                      name={category}
+                    />
+                  }
+                  label={<ColorKeyLabel category={category} />}
+                />
+              ))}
+          </React.Fragment>
+        ))}
+      </FormGroup>
+      <FormGroup>
+        <Typography variant="overline" color="text.secondary">
+          Other
+        </Typography>
+        {otherCategories.map((category) => (
+          <FormControlLabel
+            key={category}
+            control={
+              <Checkbox
+                checked={filters.selectedCategories.includes(category)}
+                onChange={handleCategoryChange}
+                name={category}
+              />
+            }
+            label={<ColorKeyLabel category={category} />}
+          />
+        ))}
+      </FormGroup>
+    </Stack>
   );
 
   // Render mobile layout if isMobile is true
@@ -213,7 +260,7 @@ function EventFilter({
             New Event
           </Button>
           <Button variant="outlined" onClick={onResetFilters} startIcon={<ReplayIcon />}>
-            Reset
+            Reset All Filters
           </Button>
         </Stack>
       </LocalizationProvider>
@@ -269,7 +316,23 @@ function EventFilter({
               </Button>
             </Badge>
             <Menu anchorEl={anchorEl} open={open} onClose={handleMenuClose}>
-              <Box sx={{ p: 2, width: { xs: "250px", md: "500px" } }}>{categoryFilterContent}</Box>
+              <Box sx={{ p: 2, width: { xs: "280px", md: "550px" } }}>
+                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+                  <Typography variant="h6" component="div">
+                    Categories
+                  </Typography>
+                  <Stack direction="row" spacing={1}>
+                    <Button size="small" onClick={handleSelectAll}>
+                      Select All
+                    </Button>
+                    <Button size="small" onClick={handleClearAll}>
+                      Clear All
+                    </Button>
+                  </Stack>
+                </Stack>
+                <Divider sx={{ mb: 2 }} />
+                {categoryFilterContent}
+              </Box>
             </Menu>
             <Stack direction="row" spacing={2}>
               <Button variant="contained" onClick={onNewEventClick} startIcon={<AddCircleOutlineIcon />}>

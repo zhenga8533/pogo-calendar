@@ -2,6 +2,7 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
+import AddToCalendarIcon from "@mui/icons-material/Event";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
@@ -23,6 +24,7 @@ import {
 } from "@mui/material";
 import React, { useState } from "react";
 import type { CalendarEvent } from "../../types/events";
+import { downloadIcsFile } from "../../utils/calendarUtils";
 import { getColorForCategory } from "../../utils/colorUtils";
 
 interface EventDetailDialogProps {
@@ -33,7 +35,6 @@ interface EventDetailDialogProps {
   onDeleteEvent: (eventId: string) => void;
   onEditEvent: (event: CalendarEvent) => void;
 }
-
 /**
  * DetailItem component to display an icon and text in a row.
  *
@@ -180,7 +181,7 @@ function EventDetailDialog({
           <Box>
             {isCustomEvent && (
               <>
-                <Button onClick={() => onEditEvent(event)} color="primary" startIcon={<EditIcon />}>
+                <Button onClick={() => onEditEvent(event)} startIcon={<EditIcon />}>
                   Edit
                 </Button>
                 <Button onClick={() => setConfirmOpen(true)} color="error" startIcon={<DeleteIcon />}>
@@ -189,8 +190,11 @@ function EventDetailDialog({
               </>
             )}
           </Box>
-          <Box>
+          <Box sx={{ display: "flex", gap: 1 }}>
             <Button onClick={onClose}>Close</Button>
+            <Button variant="outlined" startIcon={<AddToCalendarIcon />} onClick={() => downloadIcsFile(event)}>
+              Add to Calendar
+            </Button>
             {!isCustomEvent && (
               <Button
                 component={Link}

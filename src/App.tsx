@@ -5,6 +5,11 @@ import InfoDialog from "./components/info/InfoDialog";
 import CalendarView from "./components/views/CalendarView";
 import { theme } from "./theme";
 
+/**
+ * Main App component rendering the Pokémon GO Calendar application.
+ *
+ * @returns The main App component rendering the Pokémon GO Calendar application.
+ */
 function App() {
   const [infoOpen, setInfoOpen] = useState(false);
 

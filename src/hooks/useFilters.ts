@@ -9,7 +9,15 @@ export const initialFilters = {
   timeRange: [0, 24],
 };
 
+/**
+ * Custom hook to manage event filters.
+ *
+ * @param allEvents List of all calendar events to be filtered.
+ * @param savedEventIds List of saved event IDs for filtering "Saved" events.
+ * @returns An object containing filters, setFilters, handleResetFilters, and filteredEvents.
+ */
 export function useFilters(allEvents: CalendarEvent[], savedEventIds: string[]) {
+  // Initialize filters from localStorage or use initialFilters
   const [filters, setFilters] = useState(() => {
     const savedFilters = localStorage.getItem("eventFilters");
     if (savedFilters) {
@@ -25,14 +33,17 @@ export function useFilters(allEvents: CalendarEvent[], savedEventIds: string[]) 
     return initialFilters;
   });
 
+  // Persist filters to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem("eventFilters", JSON.stringify(filters));
   }, [filters]);
 
+  // Reset filters to initial state
   const handleResetFilters = () => {
     setFilters(initialFilters);
   };
 
+  // Memoized computation of filtered events based on current filters
   const filteredEvents = useMemo(() => {
     const { selectedCategories } = filters;
     const isSavedFilterActive = selectedCategories.includes("Saved");

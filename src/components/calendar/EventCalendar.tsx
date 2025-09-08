@@ -19,11 +19,18 @@ interface EventCalendarProps {
   onToggleSaveEvent: (eventId: string) => void;
 }
 
+/**
+ * EventCalendar component to display and manage calendar events.
+ *
+ * @param param0 Props containing events, mobile view flag, saved event IDs, and toggle function.
+ * @returns The rendered EventCalendar component.
+ */
 function EventCalendar({ events, isMobile, savedEventIds, onToggleSaveEvent }: EventCalendarProps) {
   const theme = useTheme();
   const calendarRef = useRef<FullCalendar>(null);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
 
+  // Change calendar view based on device type
   useEffect(() => {
     const calendarApi = calendarRef.current?.getApi();
     if (calendarApi) {
@@ -31,6 +38,7 @@ function EventCalendar({ events, isMobile, savedEventIds, onToggleSaveEvent }: E
     }
   }, [isMobile]);
 
+  // Handle event click to open detail dialog
   const handleEventClick = (clickInfo: EventClickArg) => {
     setSelectedEvent({
       title: clickInfo.event.title,
@@ -44,10 +52,12 @@ function EventCalendar({ events, isMobile, savedEventIds, onToggleSaveEvent }: E
     });
   };
 
+  // Close the event detail dialog
   const handleCloseDialog = () => {
     setSelectedEvent(null);
   };
 
+  // Render custom event content with category color and save icon
   const renderEventContent = (eventInfo: EventContentArg) => {
     const { category, article_url } = eventInfo.event.extendedProps;
     const backgroundColor = getColorForCategory(category);
@@ -85,6 +95,7 @@ function EventCalendar({ events, isMobile, savedEventIds, onToggleSaveEvent }: E
     );
   };
 
+  // Render the calendar and event detail dialog
   return (
     <>
       <Paper elevation={3} sx={{ p: { xs: 1, md: 2 }, backgroundColor: theme.palette.background.paper }}>

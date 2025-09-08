@@ -7,6 +7,11 @@ import { useSavedEvents } from "../../hooks/useSavedEvents";
 import EventCalendar from "../calendar/EventCalendar";
 import EventFilter from "../filters/EventFilter";
 
+/**
+ * CalendarView component to display the event calendar with filters and saved events.
+ *
+ * @returns The rendered CalendarView component.
+ */
 function CalendarView() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -16,11 +21,13 @@ function CalendarView() {
   const { savedEventIds, handleToggleSaveEvent } = useSavedEvents();
   const { filters, setFilters, handleResetFilters, filteredEvents } = useFilters(allEvents, savedEventIds);
 
+  // Extract all unique categories from events for filter options
   const allCategories = useMemo(() => {
     const categories = new Set(allEvents.map((event) => event.extendedProps.category));
     return Array.from(categories).sort();
   }, [allEvents]);
 
+  // Filter component to be used in both drawer and sidebar
   const filterComponent = (
     <EventFilter
       filters={filters}
@@ -30,6 +37,7 @@ function CalendarView() {
     />
   );
 
+  // Show loading spinner while events are being fetched
   if (loading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
@@ -38,6 +46,7 @@ function CalendarView() {
     );
   }
 
+  // Render the calendar view with filters and event calendar
   return (
     <Box>
       {isMobile ? (

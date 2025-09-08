@@ -46,6 +46,12 @@ const marks = [
   { value: 24, label: "12 AM" },
 ];
 
+/**
+ * Format hour value to 12-hour time with AM/PM
+ *
+ * @param value The hour value (0-24)
+ * @returns Formatted time string (e.g., "12 AM", "1 PM")
+ */
 function formatTime(value: number) {
   if (value === 24) return "12 AM";
   const ampm = value < 12 ? "AM" : "PM";
@@ -53,7 +59,13 @@ function formatTime(value: number) {
   return `${hour} ${ampm}`;
 }
 
-const ColorKeyLabel = ({ category }: { category: string }) => {
+/**
+ * Render a colored key label for the specified category.
+ *
+ * @param param0 Props containing category name
+ * @returns The rendered colored key label component.
+ */
+function ColorKeyLabel({ category }: { category: string }) {
   const theme = useTheme();
   return (
     <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -71,13 +83,21 @@ const ColorKeyLabel = ({ category }: { category: string }) => {
       {category}
     </Box>
   );
-};
+}
 
+/**
+ * EventFilter component to filter events by various criteria.
+ *
+ * @param param0 Props containing filters, change handlers, and all categories
+ * @returns The rendered EventFilter component.
+ */
 function EventFilter({ filters, onFilterChange, onResetFilters, allCategories }: EventFilterProps) {
+  // Handle changes to individual filter fields
   const handleFilterChange = (field: keyof Filters, value: any) => {
     onFilterChange({ ...filters, [field]: value });
   };
 
+  // Handle changes to category selection
   const handleCategoryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const category = event.target.name;
     const isChecked = event.target.checked;
@@ -87,6 +107,7 @@ function EventFilter({ filters, onFilterChange, onResetFilters, allCategories }:
     handleFilterChange("selectedCategories", newSelectedCategories);
   };
 
+  // Render the filter UI
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <Box sx={{ display: "flex", flexWrap: "wrap", mx: -1.5, mb: 3 }}>

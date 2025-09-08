@@ -2,10 +2,16 @@ import { useEffect, useState } from "react";
 import { fetchEvents } from "../services/eventService";
 import type { CalendarEvent } from "../types/events";
 
+/**
+ * Custom hook to fetch and manage event data.
+ *
+ * @returns An object containing all events and loading state.
+ */
 export function useEventData() {
   const [allEvents, setAllEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
+  // Fetch events on component mount
   useEffect(() => {
     const getEvents = async () => {
       try {

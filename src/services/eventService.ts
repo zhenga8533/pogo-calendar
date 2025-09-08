@@ -2,6 +2,11 @@ import type { ApiEvent, CalendarEvent } from "../types/events";
 
 const API_URL = "https://raw.githubusercontent.com/zhenga8533/leak-duck/data/events.json";
 
+/**
+ * Fetches event data from the API, transforms it into CalendarEvent format, and returns it.
+ *
+ * @returns A promise that resolves to an array of CalendarEvent objects fetched and transformed from the API.
+ */
 export const fetchEvents = async (): Promise<CalendarEvent[]> => {
   const response = await fetch(API_URL);
   if (!response.ok) {
@@ -9,6 +14,7 @@ export const fetchEvents = async (): Promise<CalendarEvent[]> => {
   }
   const data = await response.json();
 
+  // Transform the fetched data into CalendarEvent format
   const allEvents: CalendarEvent[] = [];
   for (const category in data) {
     data[category].forEach((event: ApiEvent) => {

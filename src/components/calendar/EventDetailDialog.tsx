@@ -27,6 +27,12 @@ interface EventDetailDialogProps {
   onToggleSaveEvent: (eventId: string) => void;
 }
 
+/**
+ * DetailItem component to display an icon and text in a row.
+ *
+ * @param param0 Props containing icon and text for the detail item.
+ * @returns The rendered DetailItem component.
+ */
 function DetailItem({ icon, text }: { icon: React.ReactNode; text: string }) {
   return (
     <Stack direction="row" spacing={1.5} alignItems="center">
@@ -36,6 +42,12 @@ function DetailItem({ icon, text }: { icon: React.ReactNode; text: string }) {
   );
 }
 
+/**
+ * EventDetailDialog component to display detailed information about a calendar event.
+ *
+ * @param param0 Props containing event details, close handler, saved event IDs, and toggle function.
+ * @returns The rendered EventDetailDialog component or null if no event is provided.
+ */
 function EventDetailDialog({ event, onClose, savedEventIds, onToggleSaveEvent }: EventDetailDialogProps) {
   if (!event) {
     return null;
@@ -46,6 +58,7 @@ function EventDetailDialog({ event, onClose, savedEventIds, onToggleSaveEvent }:
   const endDate = new Date(event.end!);
   const isSingleDay = startDate.toDateString() === endDate.toDateString();
 
+  // Date and time formatting options
   const dateOptions: Intl.DateTimeFormatOptions = {
     month: "long",
     day: "numeric",
@@ -60,6 +73,7 @@ function EventDetailDialog({ event, onClose, savedEventIds, onToggleSaveEvent }:
 
   const combinedDateTimeOptions: Intl.DateTimeFormatOptions = { ...dateOptions, ...timeOptions };
 
+  // Render the dialog with event details
   return (
     <Dialog open={true} onClose={onClose} maxWidth="sm" fullWidth disableRestoreFocus>
       <DialogContent sx={{ p: 0, position: "relative" }}>

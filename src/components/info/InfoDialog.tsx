@@ -5,6 +5,12 @@ interface InfoDialogProps {
   onClose: () => void;
 }
 
+/**
+ * InfoDialog component to display information about the app.
+ *
+ * @param param0 Props containing open state and close handler.
+ * @returns The rendered InfoDialog component.
+ */
 function InfoDialog({ open, onClose }: InfoDialogProps) {
   return (
     <Dialog open={open} onClose={onClose}>

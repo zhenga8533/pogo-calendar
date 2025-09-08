@@ -52,7 +52,7 @@ function EventCalendar({ events, isMobile, savedEventIds, onToggleSaveEvent }: E
     });
   };
 
-  // Close the event detail dialog
+  // Handle close the event detail dialog
   const handleCloseDialog = () => {
     setSelectedEvent(null);
   };
@@ -76,6 +76,13 @@ function EventCalendar({ events, isMobile, savedEventIds, onToggleSaveEvent }: E
           alignItems: "center",
           justifyContent: "space-between",
           cursor: "pointer",
+          border: "2px solid rgba(0, 0, 0, 0.2)",
+          boxSizing: "border-box",
+          transition: "box-shadow 0.15s ease-in-out, filter 0.15s ease-in-out",
+          "&:hover": {
+            filter: "brightness(1.2)",
+            boxShadow: theme.shadows[4],
+          },
         }}
       >
         <Box sx={{ p: "2px 8px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -121,6 +128,8 @@ function EventCalendar({ events, isMobile, savedEventIds, onToggleSaveEvent }: E
           eventContent={renderEventContent}
           height={isMobile ? "75vh" : "auto"}
           aspectRatio={isMobile ? 1.2 : 1.75}
+          eventBackgroundColor="transparent"
+          eventBorderColor="transparent"
         />
       </Paper>
 

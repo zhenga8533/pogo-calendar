@@ -6,7 +6,7 @@ export const categoryColors: { [key: string]: string } = {
   "GO Pass": "#9E9E9E",
   "Max Mondays": "#E91E63",
   "PokéStop Showcase": "#3F51B5",
-  "Pokémon Spotlight Hour": "#FFEB3B",
+  "Pokémon Spotlight Hour": "#F9DA33",
   "Raid Battles": "#607D8B",
   "Raid Day": "#F44336",
   "Raid Hour": "#673AB7",

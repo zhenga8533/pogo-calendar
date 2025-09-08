@@ -19,7 +19,10 @@ function CalendarView() {
 
   const { allEvents, loading } = useEventData();
   const { savedEventIds, handleToggleSaveEvent } = useSavedEvents();
-  const { filters, setFilters, handleResetFilters, filteredEvents } = useFilters(allEvents, savedEventIds);
+  const { filters, setFilters, handleResetFilters, setCurrentView, filteredEvents } = useFilters(
+    allEvents,
+    savedEventIds
+  );
 
   // Extract all unique categories from events for filter options
   const allCategories = useMemo(() => {
@@ -37,7 +40,7 @@ function CalendarView() {
     />
   );
 
-  // Show loading spinner while events are being fetched
+  // Render loading spinner while events are being fetched
   if (loading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
@@ -66,6 +69,7 @@ function CalendarView() {
         isMobile={isMobile}
         savedEventIds={savedEventIds}
         onToggleSaveEvent={handleToggleSaveEvent}
+        onViewChange={setCurrentView}
       />
     </Box>
   );

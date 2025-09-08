@@ -9,43 +9,60 @@ export const initialFilters = {
   timeRange: [0, 24],
 };
 
+const defaultAllFilters = {
+  dayGridMonth: initialFilters,
+  timeGridWeek: initialFilters,
+  timeGridDay: initialFilters,
+  listWeek: initialFilters,
+};
+
 /**
  * Custom hook to manage event filters.
  *
  * @param allEvents List of all calendar events to be filtered.
  * @param savedEventIds List of saved event IDs for filtering "Saved" events.
- * @returns An object containing filters, setFilters, handleResetFilters, and filteredEvents.
+ * @returns An object containing filters, setFilters, handleResetFilters, setCurrentView, and filteredEvents.
  */
 export function useFilters(allEvents: CalendarEvent[], savedEventIds: string[]) {
-  // Initialize filters from localStorage or use initialFilters
-  const [filters, setFilters] = useState(() => {
-    const savedFilters = localStorage.getItem("eventFilters");
-    if (savedFilters) {
-      const parsedFilters = JSON.parse(savedFilters);
-      if (parsedFilters.startDate) {
-        parsedFilters.startDate = new Date(parsedFilters.startDate);
-      }
-      if (parsedFilters.endDate) {
-        parsedFilters.endDate = new Date(parsedFilters.endDate);
-      }
-      return { ...initialFilters, ...parsedFilters };
+  const [currentView, setCurrentView] = useState("dayGridMonth");
+
+  // Initialize allFilters from localStorage or use defaultAllFilters
+  const [allFilters, setAllFilters] = useState(() => {
+    const saved = localStorage.getItem("allEventFilters");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      Object.keys(parsed).forEach((view) => {
+        if (parsed[view].startDate) parsed[view].startDate = new Date(parsed[view].startDate);
+        if (parsed[view].endDate) parsed[view].endDate = new Date(parsed[view].endDate);
+      });
+      return { ...defaultAllFilters, ...parsed };
     }
-    return initialFilters;
+    return defaultAllFilters;
   });
 
-  // Persist filters to localStorage whenever they change
+  // Persist allFilters to localStorage whenever they change
   useEffect(() => {
-    localStorage.setItem("eventFilters", JSON.stringify(filters));
-  }, [filters]);
+    localStorage.setItem("allEventFilters", JSON.stringify(allFilters));
+  }, [allFilters]);
 
-  // Reset filters to initial state
+  const filtersForCurrentView = allFilters[currentView as keyof typeof allFilters] || initialFilters;
+
+  // Set filters for the current view
+  const setFiltersForCurrentView = (newFilters: typeof initialFilters) => {
+    setAllFilters((prev: typeof defaultAllFilters) => ({
+      ...prev,
+      [currentView]: newFilters,
+    }));
+  };
+
+  // Reset filters for the current view to initial state
   const handleResetFilters = () => {
-    setFilters(initialFilters);
+    setAllFilters((prev: typeof defaultAllFilters) => ({ ...prev, [currentView]: initialFilters }));
   };
 
   // Memoized computation of filtered events based on current filters
   const filteredEvents = useMemo(() => {
-    const { selectedCategories } = filters;
+    const { selectedCategories, searchTerm, startDate, endDate, timeRange } = filtersForCurrentView;
     const isSavedFilterActive = selectedCategories.includes("Saved");
     const otherSelectedCategories = selectedCategories.filter((c: string) => c !== "Saved");
 
@@ -53,49 +70,39 @@ export function useFilters(allEvents: CalendarEvent[], savedEventIds: string[]) 
       const isEventSaved = savedEventIds.includes(event.extendedProps.article_url);
 
       // Saved events filtering
-      if (isSavedFilterActive && !isEventSaved) {
-        return false;
-      }
+      if (isSavedFilterActive && !isEventSaved) return false;
 
       // Category filtering
-      if (otherSelectedCategories.length > 0 && !otherSelectedCategories.includes(event.extendedProps.category)) {
+      if (otherSelectedCategories.length > 0 && !otherSelectedCategories.includes(event.extendedProps.category))
         return false;
-      }
 
       // Search term filtering
-      const searchMatch = event.title.toLowerCase().includes(filters.searchTerm.toLowerCase());
-      if (!searchMatch) return false;
-
-      const eventStart = new Date(event.start!);
-      const eventEnd = new Date(event.end!);
-      const filterStart = filters.startDate;
-      const filterEnd = filters.endDate;
+      if (!event.title.toLowerCase().includes(searchTerm.toLowerCase())) return false;
 
       // Date range filtering
-      if (filterStart && filterEnd && (eventStart >= filterEnd || eventEnd <= filterStart)) {
-        return false;
-      }
-      if (filterStart && !filterEnd && eventEnd < filterStart) {
-        return false;
-      }
-      if (!filterStart && filterEnd && eventStart > filterEnd) {
-        return false;
-      }
+      const eventStart = new Date(event.start!);
+      const eventEnd = new Date(event.end!);
+      if (startDate && endDate && (eventStart >= endDate || eventEnd <= startDate)) return false;
+      if (startDate && !endDate && eventEnd < startDate) return false;
+      if (!startDate && endDate && eventStart > endDate) return false;
 
       // Time range filtering
-      if (filters.timeRange[0] > 0 || filters.timeRange[1] < 24) {
-        const [startHour, endHour] = filters.timeRange;
+      if (timeRange[0] > 0 || timeRange[1] < 24) {
+        const [startHour, endHour] = timeRange;
         const eventStartHour = eventStart.getHours();
         const eventDuration = (eventEnd.getTime() - eventStart.getTime()) / (1000 * 60 * 60);
-
-        if (eventDuration < 24 && (eventStartHour < startHour || eventStartHour >= endHour)) {
-          return false;
-        }
+        if (eventDuration < 24 && (eventStartHour < startHour || eventStartHour >= endHour)) return false;
       }
 
       return true;
     });
-  }, [allEvents, filters, savedEventIds]);
+  }, [allEvents, allFilters, currentView, savedEventIds]);
 
-  return { filters, setFilters, handleResetFilters, filteredEvents };
+  return {
+    filters: filtersForCurrentView,
+    setFilters: setFiltersForCurrentView,
+    handleResetFilters,
+    setCurrentView,
+    filteredEvents,
+  };
 }

@@ -19,7 +19,12 @@ export function CalendarDarkStyles() {
       styles={{
         ".fc": {
           "--fc-border-color": theme.palette.divider,
+          "--fc-day-other-bg-color": theme.palette.action.focus,
           "--fc-today-bg-color": "rgba(144, 202, 249, 0.15)",
+          "--fc-list-day-bg-color": theme.palette.action.hover,
+          "--fc-list-day-side-bg-color": theme.palette.action.hover,
+          "--fc-page-bg-color": theme.palette.background.default,
+          "--fc-neutral-bg-color": theme.palette.background.paper,
         },
         ".fc .fc-button-primary": {
           backgroundColor: theme.palette.primary.main,

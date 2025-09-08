@@ -1,8 +1,9 @@
 import MenuIcon from "@mui/icons-material/Menu";
-import { Alert, Box, Button, CircularProgress, Drawer, Snackbar, useMediaQuery, useTheme } from "@mui/material";
+import { Alert, Box, Button, Drawer, Snackbar, useMediaQuery, useTheme } from "@mui/material";
 import React, { useEffect, useMemo, useState } from "react";
 import EventCalendar from "../components//calendar/EventCalendar";
 import CreateEventDialog from "../components//events/CreateEventDialog";
+import { CalendarSkeleton } from "../components/calendar/CalendarSkeleton";
 import EventFilter from "../components/filters/EventFilter";
 import { type NewEventData, useCustomEvents } from "../hooks/useCustomEvents";
 import { useEventData } from "../hooks/useEventData";
@@ -102,13 +103,9 @@ function CalendarView() {
     />
   );
 
-  // Show loading spinner while events are being fetched
+  // Show loading skeleton while data is being fetched
   if (loading) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <CalendarSkeleton isMobile={isMobile} />;
   }
 
   // Render the calendar view with filters and event calendar

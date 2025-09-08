@@ -1,6 +1,6 @@
 import MenuIcon from "@mui/icons-material/Menu";
 import { Alert, Box, Button, CircularProgress, Drawer, Snackbar, useMediaQuery, useTheme } from "@mui/material";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { type NewEventData, useCustomEvents } from "../../hooks/useCustomEvents";
 import { useEventData } from "../../hooks/useEventData";
 import { useFilters } from "../../hooks/useFilters";
@@ -33,14 +33,26 @@ function CalendarView() {
     savedEventIds
   );
 
+  // Compute all unique categories from combined events
   const allCategories = useMemo(() => {
     const categories = new Set(combinedEvents.map((event) => event.extendedProps.category));
     return Array.from(categories).sort();
   }, [combinedEvents]);
 
+  // Ensure "Custom Event" category is removed if no custom events exist
+  useEffect(() => {
+    if (!allCategories.includes("Custom Event") && filters.selectedCategories.includes("Custom Event")) {
+      setFilters((prevFilters) => ({
+        ...prevFilters,
+        selectedCategories: prevFilters.selectedCategories.filter((c) => c !== "Custom Event"),
+      }));
+    }
+  }, [allCategories, filters.selectedCategories, setFilters]);
+
   // Handle saving a new custom event
   const handleSaveNewEvent = (eventData: NewEventData) => {
     addCustomEvent(eventData);
+
     setCreateDialogOpen(false);
     if (filters.selectedCategories.length > 0) {
       setFilters((prevFilters) => ({
@@ -48,6 +60,7 @@ function CalendarView() {
         selectedCategories: [...new Set([...prevFilters.selectedCategories, "Custom Event"])],
       }));
     }
+
     setToast({ open: true, message: "Event created successfully!", severity: "success" });
   };
 

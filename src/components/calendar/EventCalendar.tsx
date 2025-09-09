@@ -4,9 +4,10 @@ import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
+import EventBusyIcon from "@mui/icons-material/EventBusy";
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
-import { Box, IconButton, Paper, useTheme } from "@mui/material";
+import { Box, IconButton, Paper, Typography, useTheme } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import type { CalendarEvent } from "../../types/events";
 import { getColorForCategory } from "../../utils/colorUtils";
@@ -40,6 +41,7 @@ function EventCalendar({
   const theme = useTheme();
   const calendarRef = useRef<FullCalendar>(null);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [hoveredEventId, setHoveredEventId] = useState<string | null>(null);
 
   // Change calendar view based on device type
   useEffect(() => {
@@ -73,6 +75,7 @@ function EventCalendar({
     const { category, article_url } = eventInfo.event.extendedProps;
     const backgroundColor = getColorForCategory(category, theme.palette.mode);
     const isSaved = savedEventIds.includes(article_url);
+    const isHighlighted = hoveredEventId === article_url;
 
     return (
       <Box
@@ -90,6 +93,8 @@ function EventCalendar({
           border: "2px solid rgba(0, 0, 0, 0.2)",
           boxSizing: "border-box",
           transition: "box-shadow 0.15s ease-in-out, filter 0.15s ease-in-out",
+          filter: isHighlighted ? "brightness(1.2)" : "brightness(1)",
+          boxShadow: isHighlighted ? theme.shadows[4] : "none",
           "&:hover": {
             filter: "brightness(1.2)",
             boxShadow: theme.shadows[4],
@@ -112,6 +117,29 @@ function EventCalendar({
       </Box>
     );
   };
+
+  // Render the FullCalendar component with event detail dialog
+  if (events.length === 0) {
+    return (
+      <Paper
+        elevation={3}
+        sx={{
+          p: { xs: 2, md: 4 },
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "60vh",
+          flexDirection: "column",
+        }}
+      >
+        <EventBusyIcon sx={{ fontSize: 60, color: "text.secondary", mb: 2 }} />
+        <Typography variant="h6" component="p" color="text.secondary">
+          No Events Found
+        </Typography>
+        <Typography color="text.secondary">Try adjusting your filters or creating a new custom event.</Typography>
+      </Paper>
+    );
+  }
 
   // Render the FullCalendar component with event detail dialog
   return (
@@ -137,6 +165,8 @@ function EventCalendar({
           events={events}
           eventClick={handleEventClick}
           eventContent={renderEventContent}
+          eventMouseEnter={(arg) => setHoveredEventId(arg.event.extendedProps.article_url)}
+          eventMouseLeave={() => setHoveredEventId(null)}
           height={isMobile ? "75vh" : "auto"}
           aspectRatio={isMobile ? 1.2 : 1.75}
           eventBackgroundColor="transparent"
@@ -154,10 +184,7 @@ function EventCalendar({
         savedEventIds={savedEventIds}
         onToggleSaveEvent={onToggleSaveEvent}
         onDeleteEvent={onDeleteEvent}
-        onEditEvent={(event: CalendarEvent) => {
-          handleCloseDialog();
-          onEditEvent(event);
-        }}
+        onEditEvent={onEditEvent}
       />
     </>
   );

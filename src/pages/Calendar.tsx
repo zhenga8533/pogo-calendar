@@ -93,6 +93,15 @@ function Calendar() {
   };
 
   // Handle closing the toast notification
+  const handleCalendarDateSelect = (selection: { start: Date; end: Date }) => {
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      startDate: selection.start,
+      endDate: selection.end,
+    }));
+  };
+
+  // Filter component to be used in both drawer and inline
   const handleCloseToast = (_event?: React.SyntheticEvent | Event, reason?: string) => {
     if (reason === "clickaway") {
       return;
@@ -142,6 +151,7 @@ function Calendar() {
         onViewChange={setCurrentView}
         onDeleteEvent={handleDeleteEvent}
         onEditEvent={handleOpenEditDialog}
+        onDateSelect={handleCalendarDateSelect}
       />
       <CreateEventDialog
         open={createDialogOpen}

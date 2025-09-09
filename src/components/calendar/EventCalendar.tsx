@@ -1,4 +1,4 @@
-import type { EventClickArg, EventContentArg } from "@fullcalendar/core";
+import type { DateSelectArg, EventClickArg, EventContentArg } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
@@ -22,6 +22,7 @@ interface EventCalendarProps {
   onViewChange: (viewName: string) => void;
   onDeleteEvent: (eventId: string) => void;
   onEditEvent: (event: CalendarEvent) => void;
+  onDateSelect: (selection: { start: Date; end: Date }) => void;
 }
 
 /**
@@ -39,6 +40,7 @@ function EventCalendar({
   onViewChange,
   onDeleteEvent,
   onEditEvent,
+  onDateSelect,
 }: EventCalendarProps) {
   const theme = useTheme();
   const calendarRef = useRef<FullCalendar>(null);
@@ -70,6 +72,13 @@ function EventCalendar({
   // Handle close the event detail dialog
   const handleCloseDialog = () => {
     setSelectedEvent(null);
+  };
+
+  // Handle date range selection on the calendar
+  const handleDateSelect = (selectionInfo: DateSelectArg) => {
+    const end = new Date(selectionInfo.end);
+    end.setTime(end.getTime() - 1);
+    onDateSelect({ start: selectionInfo.start, end });
   };
 
   // Render custom event content with category color and save icon
@@ -120,7 +129,7 @@ function EventCalendar({
     );
   };
 
-  // Render the FullCalendar component with event detail dialog
+  // Render a message if no events match the current filters
   if (events.length === 0) {
     return (
       <Paper
@@ -178,6 +187,8 @@ function EventCalendar({
           }}
           titleFormat={isMobile ? { month: "short", year: "numeric" } : { month: "long", year: "numeric" }}
           firstDay={firstDay}
+          selectable={true}
+          select={handleDateSelect}
         />
       </Paper>
 

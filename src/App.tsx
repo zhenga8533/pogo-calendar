@@ -1,4 +1,4 @@
-import { Box, Container, CssBaseline, type PaletteMode, ThemeProvider } from "@mui/material";
+import { Box, Container, CssBaseline, type PaletteMode, ThemeProvider, useMediaQuery } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import Footer from "./components/layout/Footer";
 import Header from "./components/layout/Header";
@@ -6,6 +6,7 @@ import InfoDialog from "./components/shared/InfoDialog";
 import Calendar from "./pages/Calendar";
 import { CalendarDarkStyles } from "./styles/calendarDarkStyles";
 import { getTheme } from "./theme";
+import type { ThemeSetting } from "./types/theme";
 
 /**
  * Main application component that sets up theming, layout, and state management.
@@ -14,21 +15,26 @@ import { getTheme } from "./theme";
  */
 function App() {
   const [infoOpen, setInfoOpen] = useState(false);
-  const [mode, setMode] = useState<PaletteMode>(() => {
-    const savedMode = localStorage.getItem("themeMode");
-    return savedMode === "light" || savedMode === "dark" ? savedMode : "light";
+
+  // Theme management state and logic
+  const [themeSetting, setThemeSetting] = useState<ThemeSetting>(() => {
+    const savedMode = localStorage.getItem("themeMode") as ThemeSetting;
+    return savedMode || "auto";
   });
 
-  // Persist theme mode to localStorage
+  const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
+  const mode: PaletteMode = useMemo(() => {
+    if (themeSetting === "auto") {
+      return prefersDarkMode ? "dark" : "light";
+    }
+    return themeSetting;
+  }, [themeSetting, prefersDarkMode]);
+
   useEffect(() => {
-    localStorage.setItem("themeMode", mode);
-  }, [mode]);
+    localStorage.setItem("themeMode", themeSetting);
+  }, [themeSetting]);
 
   const theme = useMemo(() => getTheme(mode), [mode]);
-
-  const toggleColorMode = () => {
-    setMode((prevMode) => (prevMode === "light" ? "dark" : "light"));
-  };
 
   // Render the application with theming and layout
   return (
@@ -36,7 +42,7 @@ function App() {
       <CssBaseline />
       <CalendarDarkStyles />
       <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-        <Header onToggleTheme={toggleColorMode} onInfoClick={() => setInfoOpen(true)} mode={mode} />
+        <Header themeSetting={themeSetting} setThemeSetting={setThemeSetting} onInfoClick={() => setInfoOpen(true)} />
         <Box
           component="main"
           sx={{

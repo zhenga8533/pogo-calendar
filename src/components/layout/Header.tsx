@@ -1,26 +1,30 @@
-import Brightness4Icon from "@mui/icons-material/Brightness4";
-import Brightness7Icon from "@mui/icons-material/Brightness7";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
 import InfoIcon from "@mui/icons-material/Info";
+import LightModeIcon from "@mui/icons-material/LightMode";
+import SettingsBrightnessIcon from "@mui/icons-material/SettingsBrightness";
 import SyncIcon from "@mui/icons-material/Sync";
 import {
   AppBar,
   Box,
   Divider,
+  FormControl,
   IconButton,
+  MenuItem,
+  Select,
   Stack,
   Toolbar,
   Tooltip,
   Typography,
   useScrollTrigger,
-  type PaletteMode,
 } from "@mui/material";
 import { useLastUpdated } from "../../hooks/useLastUpdated";
+import type { ThemeSetting } from "../../types/theme";
 
 /**
  * Displays the last updated time with loading and error states.
  *
- * @returns A component that displays the last updated time with loading and error states.
+ * @returns {React.ReactElement} A component that displays the last updated time.
  */
 function LastUpdatedDisplay() {
   const { lastUpdated, loading, error } = useLastUpdated();
@@ -54,24 +58,24 @@ function LastUpdatedDisplay() {
 }
 
 interface HeaderProps {
-  onToggleTheme: () => void;
+  themeSetting: ThemeSetting;
+  setThemeSetting: (setting: ThemeSetting) => void;
   onInfoClick: () => void;
-  mode: PaletteMode;
 }
 
 /**
- * Header component that displays the app bar with theme toggle and info button.
+ * Header component that displays the app bar with theme selector and info button.
  *
- * @param param0 Props including theme toggle handler, info click handler, and current theme mode.
- * @returns A component that renders the app bar with various controls.
+ * @param {HeaderProps} props Props including theme setting, handler, and info click handler.
+ * @returns {React.ReactElement} A component that renders the app bar with various controls.
  */
-function Header({ onToggleTheme, onInfoClick, mode }: HeaderProps) {
+function Header({ themeSetting, setThemeSetting, onInfoClick }: HeaderProps) {
   const trigger = useScrollTrigger({
     disableHysteresis: true,
     threshold: 0,
   });
 
-  // Render the app bar with title, last updated display, theme toggle, and info button
+  // Render the app bar with title, last updated display, theme selector, and info button
   return (
     <AppBar
       position="sticky"
@@ -104,9 +108,42 @@ function Header({ onToggleTheme, onInfoClick, mode }: HeaderProps) {
             flexItem
             sx={{ borderColor: "inherit", my: 1.5, display: { xs: "none", sm: "block" } }}
           />
-          <IconButton sx={{ ml: 1 }} onClick={onToggleTheme} color="inherit">
-            {mode === "dark" ? <Brightness7Icon /> : <Brightness4Icon />}
-          </IconButton>
+          <FormControl variant="standard" sx={{ minWidth: 50 }}>
+            <Select
+              value={themeSetting}
+              onChange={(e) => setThemeSetting(e.target.value as ThemeSetting)}
+              disableUnderline
+              sx={{
+                color: "inherit",
+                "& .MuiSvgIcon-root": {
+                  color: "inherit",
+                },
+                "& .MuiSelect-select": {
+                  display: "flex",
+                  alignItems: "center",
+                },
+              }}
+            >
+              <MenuItem value="light">
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <LightModeIcon fontSize="small" />
+                  <Typography variant="body2">Light</Typography>
+                </Stack>
+              </MenuItem>
+              <MenuItem value="dark">
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <DarkModeIcon fontSize="small" />
+                  <Typography variant="body2">Dark</Typography>
+                </Stack>
+              </MenuItem>
+              <MenuItem value="auto">
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <SettingsBrightnessIcon fontSize="small" />
+                  <Typography variant="body2">Auto</Typography>
+                </Stack>
+              </MenuItem>
+            </Select>
+          </FormControl>
           <IconButton color="inherit" onClick={onInfoClick}>
             <InfoIcon />
           </IconButton>

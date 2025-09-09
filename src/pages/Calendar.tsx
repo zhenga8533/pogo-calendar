@@ -1,26 +1,29 @@
 import MenuIcon from "@mui/icons-material/Menu";
 import { Alert, Box, Button, Drawer, Snackbar, useMediaQuery, useTheme } from "@mui/material";
 import React, { useEffect, useMemo, useState } from "react";
-import EventCalendar from "../components//calendar/EventCalendar";
-import CreateEventDialog from "../components//events/CreateEventDialog";
 import { CalendarSkeleton } from "../components/calendar/CalendarSkeleton";
+import EventCalendar from "../components/calendar/EventCalendar";
+import CreateEventDialog from "../components/events/CreateEventDialog";
+import { ExportEventDialog } from "../components/events/ExportEventDialog";
 import EventFilter from "../components/filters/EventFilter";
 import { type NewEventData, useCustomEvents } from "../hooks/useCustomEvents";
 import { useEventData } from "../hooks/useEventData";
 import { useFilters } from "../hooks/useFilters";
 import { useSavedEvents } from "../hooks/useSavedEvents";
 import type { CalendarEvent } from "../types/events";
+import { downloadIcsForEvents } from "../utils/calendarUtils";
 
 /**
- * CalendarView component to display the event calendar with filters, saved events, and custom event creation.
+ * Calendar page component to display the event calendar with filters, saved events, and custom event creation.
  *
- * @returns The rendered CalendarView component.
+ * @returns The rendered Calendar page component.
  */
-function CalendarView() {
+function Calendar() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [eventToEdit, setEventToEdit] = useState<CalendarEvent | null>(null);
   const [toast, setToast] = useState({ open: false, message: "", severity: "success" as const });
 
@@ -83,6 +86,12 @@ function CalendarView() {
     setToast({ open: true, message: "Event deleted successfully", severity: "success" });
   };
 
+  // Handle exporting selected events
+  const handleExport = (eventsToExport: CalendarEvent[]) => {
+    downloadIcsForEvents(eventsToExport);
+    setToast({ open: true, message: `Exported ${eventsToExport.length} events!`, severity: "success" });
+  };
+
   // Handle closing the toast notification
   const handleCloseToast = (_event?: React.SyntheticEvent | Event, reason?: string) => {
     if (reason === "clickaway") {
@@ -98,6 +107,7 @@ function CalendarView() {
       onFilterChange={setFilters}
       onResetFilters={handleResetFilters}
       onNewEventClick={() => setCreateDialogOpen(true)}
+      onOpenExportDialog={() => setExportDialogOpen(true)}
       allCategories={allCategories}
       isMobile={isMobile}
     />
@@ -141,6 +151,14 @@ function CalendarView() {
         onSave={handleSaveEvent}
         eventToEdit={eventToEdit}
       />
+      <ExportEventDialog
+        open={exportDialogOpen}
+        onClose={() => setExportDialogOpen(false)}
+        onExport={handleExport}
+        allEvents={combinedEvents}
+        filteredEvents={filteredEvents}
+        savedEventIds={savedEventIds}
+      />
       <Snackbar open={toast.open} autoHideDuration={6000} onClose={handleCloseToast}>
         <Alert onClose={handleCloseToast} severity={toast.severity} sx={{ width: "100%" }}>
           {toast.message}
@@ -150,4 +168,4 @@ function CalendarView() {
   );
 }
 
-export default CalendarView;
+export default Calendar;

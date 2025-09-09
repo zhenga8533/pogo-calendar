@@ -1,4 +1,5 @@
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import ReplayIcon from "@mui/icons-material/Replay";
 import StarIcon from "@mui/icons-material/Star";
@@ -31,6 +32,7 @@ interface DesktopEventFilterProps extends Omit<EventFilterProps, "isMobile"> {
   handleCategoryChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleSelectAll: () => void;
   handleClearAll: () => void;
+  onOpenExportDialog: () => void;
 }
 
 /**
@@ -43,6 +45,7 @@ export function DesktopEventFilter({
   filters,
   onNewEventClick,
   onResetFilters,
+  onOpenExportDialog,
   allCategories,
   anchorEl,
   handleMenuClick,
@@ -177,6 +180,9 @@ export function DesktopEventFilter({
             </Box>
           </Menu>
           <Stack direction="row" spacing={2}>
+            <Button variant="outlined" onClick={onOpenExportDialog} startIcon={<FileDownloadIcon />}>
+              Export
+            </Button>
             <Button variant="contained" onClick={onNewEventClick} startIcon={<AddCircleOutlineIcon />}>
               New Event
             </Button>

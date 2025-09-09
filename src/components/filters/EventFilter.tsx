@@ -17,6 +17,7 @@ export interface EventFilterProps {
   onFilterChange: (newFilters: Filters) => void;
   onResetFilters: () => void;
   onNewEventClick: () => void;
+  onOpenExportDialog: () => void;
   allCategories: string[];
   isMobile: boolean;
 }
@@ -50,8 +51,8 @@ export function formatTime(value: number) {
 /**
  * EventFilter component to filter events by search term, date range, time range, and categories.
  *
- * @param param0 Props containing filters, change handlers, categories, and mobile view flag.
- * @returns The rendered EventFilter component.
+ * @param {EventFilterProps} props Props containing filters, change handlers, categories, and mobile view flag.
+ * @returns {React.ReactElement} The rendered EventFilter component.
  */
 function EventFilter(props: EventFilterProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);

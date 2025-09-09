@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import Footer from "./components/layout/Footer";
 import Header from "./components/layout/Header";
 import InfoDialog from "./components/shared/InfoDialog";
-import CalendarView from "./pages/CalendarView";
+import Calendar from "./pages/Calendar";
 import { CalendarDarkStyles } from "./styles/calendarDarkStyles";
 import { getTheme } from "./theme";
 
@@ -46,7 +46,7 @@ function App() {
           }}
         >
           <Container maxWidth="xl">
-            <CalendarView />
+            <Calendar />
           </Container>
         </Box>
         <Footer />

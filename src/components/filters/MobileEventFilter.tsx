@@ -1,5 +1,6 @@
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import ReplayIcon from "@mui/icons-material/Replay";
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
@@ -26,6 +27,7 @@ import { type EventFilterProps, type Filters, formatTime, marks } from "./EventF
 interface MobileEventFilterProps extends Omit<EventFilterProps, "isMobile"> {
   handleFilterChange: (field: keyof Filters, value: any) => void;
   handleCategoryChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onOpenExportDialog: () => void;
 }
 
 /**
@@ -38,6 +40,7 @@ export function MobileEventFilter({
   filters,
   onNewEventClick,
   onResetFilters,
+  onOpenExportDialog,
   allCategories,
   handleFilterChange,
   handleCategoryChange,
@@ -108,6 +111,9 @@ export function MobileEventFilter({
           </FormGroup>
         </AccordionDetails>
       </Accordion>
+      <Button variant="outlined" onClick={onOpenExportDialog} startIcon={<FileDownloadIcon />}>
+        Export Filtered
+      </Button>
       <Button variant="contained" onClick={onNewEventClick} startIcon={<AddCircleOutlineIcon />}>
         New Event
       </Button>

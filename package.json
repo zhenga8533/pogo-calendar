@@ -15,6 +15,7 @@
   "dependencies": {
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.14.1",
+    "@fullcalendar/core": "^6.1.19",
     "@fullcalendar/daygrid": "^6.1.19",
     "@fullcalendar/interaction": "^6.1.19",
     "@fullcalendar/list": "^6.1.19",
@@ -23,7 +24,6 @@
     "@mui/icons-material": "^7.3.2",
     "@mui/material": "^7.3.2",
     "@mui/x-date-pickers": "^8.11.1",
-    "@types/react-big-calendar": "^1.16.2",
     "date-fns": "^4.1.0",
     "ics": "^3.8.1",
     "react": "^19.1.1",

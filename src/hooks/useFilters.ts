@@ -7,13 +7,13 @@ export const initialFilters = {
   startDate: null as Date | null,
   endDate: null as Date | null,
   timeRange: [0, 24],
-  firstDay: 0,
+  firstDay: 0, // 0 for Sunday, 1 for Monday, etc.
 };
 
 type FilterState = typeof initialFilters;
 type SetFilters = Dispatch<SetStateAction<FilterState>>;
 
-const defaultAllFilters = {
+const defaultAllFilters: Record<string, FilterState> = {
   dayGridMonth: initialFilters,
   timeGridWeek: initialFilters,
   timeGridDay: initialFilters,
@@ -35,11 +35,13 @@ export function useFilters(allEvents: CalendarEvent[], savedEventIds: string[]) 
     const saved = localStorage.getItem("allEventFilters");
     if (saved) {
       const parsed = JSON.parse(saved);
-      Object.keys(parsed).forEach((view) => {
+      // Ensure all views have a complete filter object
+      Object.keys(defaultAllFilters).forEach((view) => {
+        parsed[view] = { ...initialFilters, ...parsed[view] };
         if (parsed[view].startDate) parsed[view].startDate = new Date(parsed[view].startDate);
         if (parsed[view].endDate) parsed[view].endDate = new Date(parsed[view].endDate);
       });
-      return { ...defaultAllFilters, ...parsed };
+      return parsed;
     }
     return defaultAllFilters;
   });
@@ -53,7 +55,7 @@ export function useFilters(allEvents: CalendarEvent[], savedEventIds: string[]) 
 
   // Set filters for the current view
   const setFiltersForCurrentView: SetFilters = (update) => {
-    setAllFilters((prev: typeof defaultAllFilters) => {
+    setAllFilters((prev: Record<string, FilterState>) => {
       const currentFilters = prev[currentView as keyof typeof prev] || initialFilters;
       const newFilters = typeof update === "function" ? update(currentFilters) : update;
       return { ...prev, [currentView]: newFilters };
@@ -62,7 +64,7 @@ export function useFilters(allEvents: CalendarEvent[], savedEventIds: string[]) 
 
   // Reset filters for the current view to initial state
   const handleResetFilters = () => {
-    setAllFilters((prev: typeof defaultAllFilters) => ({ ...prev, [currentView]: initialFilters }));
+    setAllFilters((prev: Record<string, FilterState>) => ({ ...prev, [currentView]: initialFilters }));
   };
 
   // Memoized computation of filtered events based on current filters

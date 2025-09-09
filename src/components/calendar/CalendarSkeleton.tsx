@@ -7,7 +7,7 @@ interface CalendarSkeletonProps {
 /**
  * CalendarSkeleton component to display a loading state for the calendar.
  *
- * @param param0 - Props containing isMobile flag.
+ * @param param0 Props containing isMobile flag.
  * @returns The rendered CalendarSkeleton component.
  */
 export function CalendarSkeleton({ isMobile }: CalendarSkeletonProps) {
@@ -26,7 +26,10 @@ export function CalendarSkeleton({ isMobile }: CalendarSkeletonProps) {
     <Box>
       <Paper sx={{ p: 2, mb: 3 }}>
         <Stack spacing={2}>
-          <Skeleton variant="text" height={56} />
+          <Stack direction="row" spacing={2}>
+            <Skeleton variant="rounded" sx={{ flexGrow: 3 }} height={56} />
+            <Skeleton variant="rounded" sx={{ flexGrow: 1 }} height={56} />
+          </Stack>
           <Stack direction="row" spacing={2}>
             <Skeleton variant="rounded" width="100%" height={56} />
             <Skeleton variant="rounded" width="100%" height={56} />
@@ -41,6 +44,7 @@ export function CalendarSkeleton({ isMobile }: CalendarSkeletonProps) {
             <Stack direction="row" spacing={2}>
               <Skeleton variant="rounded" width={120} height={36} />
               <Skeleton variant="rounded" width={100} height={36} />
+              <Skeleton variant="rounded" width={100} height={36} />
             </Stack>
           </Stack>
         </Stack>
@@ -52,9 +56,9 @@ export function CalendarSkeleton({ isMobile }: CalendarSkeletonProps) {
             <Skeleton variant="rounded" height={50} sx={{ mb: 1 }} />
           </Grid>
           {[...Array(5)].map((_, rowIndex) => (
-            <Grid key={rowIndex} container spacing={1} sx={{ width: "100%" }}>
+            <Grid key={rowIndex} container spacing={1} sx={{ width: "100%", mb: 1 }}>
               {[...Array(7)].map((_, colIndex) => (
-                <Grid key={colIndex} sx={{ flexGrow: 1, flexBasis: 0, maxWidth: "100%" }}>
+                <Grid key={colIndex} sx={{ flex: 1 }}>
                   <Skeleton variant="rounded" height={100} />
                 </Grid>
               ))}

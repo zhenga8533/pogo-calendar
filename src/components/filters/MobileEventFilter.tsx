@@ -12,8 +12,12 @@ import {
   Button,
   Checkbox,
   Divider,
+  FormControl,
   FormControlLabel,
   FormGroup,
+  InputLabel,
+  MenuItem,
+  Select,
   Slider,
   Stack,
   TextField,
@@ -22,7 +26,7 @@ import {
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import React from "react";
 import { ColorKeyLabel } from "./ColorKeyLabel";
-import { type EventFilterProps, type Filters, formatTime, marks } from "./EventFilter";
+import { dayOptions, type EventFilterProps, type Filters, formatTime, marks } from "./EventFilter";
 
 interface MobileEventFilterProps extends Omit<EventFilterProps, "isMobile"> {
   handleFilterChange: (field: keyof Filters, value: any) => void;
@@ -33,8 +37,8 @@ interface MobileEventFilterProps extends Omit<EventFilterProps, "isMobile"> {
 /**
  * MobileEventFilter component to render the mobile version of the event filter.
  *
- * @param param0 Props containing filters, change handlers, categories, and menu state.
- * @returns The rendered MobileEventFilter component.
+ * @param {MobileEventFilterProps} props Props containing filters, change handlers, categories, and event handlers.
+ * @returns {React.ReactElement} The rendered MobileEventFilter component.
  */
 export function MobileEventFilter({
   filters,
@@ -60,6 +64,20 @@ export function MobileEventFilter({
         onChange={(date) => handleFilterChange("startDate", date)}
       />
       <DatePicker label="End Date" value={filters.endDate} onChange={(date) => handleFilterChange("endDate", date)} />
+      <FormControl fullWidth>
+        <InputLabel>Week Starts On</InputLabel>
+        <Select
+          value={filters.firstDay}
+          label="Week Starts On"
+          onChange={(e) => handleFilterChange("firstDay", e.target.value)}
+        >
+          {dayOptions.map((day) => (
+            <MenuItem key={day.value} value={day.value}>
+              {day.label}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
       <Box sx={{ px: 1 }}>
         <Typography gutterBottom variant="body2" color="text.secondary">
           Time of Day
@@ -112,7 +130,7 @@ export function MobileEventFilter({
         </AccordionDetails>
       </Accordion>
       <Button variant="outlined" onClick={onOpenExportDialog} startIcon={<FileDownloadIcon />}>
-        Export Filtered
+        Export
       </Button>
       <Button variant="contained" onClick={onNewEventClick} startIcon={<AddCircleOutlineIcon />}>
         New Event

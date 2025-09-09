@@ -10,6 +10,7 @@ export interface Filters {
   startDate: Date | null;
   endDate: Date | null;
   timeRange: number[];
+  firstDay: number;
 }
 
 export interface EventFilterProps {
@@ -28,6 +29,16 @@ export const marks = [
   { value: 12, label: "12 PM" },
   { value: 18, label: "6 PM" },
   { value: 24, label: "12 AM" },
+];
+
+export const dayOptions = [
+  { value: 0, label: "Sunday" },
+  { value: 1, label: "Monday" },
+  { value: 2, label: "Tuesday" },
+  { value: 3, label: "Wednesday" },
+  { value: 4, label: "Thursday" },
+  { value: 5, label: "Friday" },
+  { value: 6, label: "Saturday" },
 ];
 
 export const categoryGroups = {

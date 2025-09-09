@@ -10,10 +10,14 @@ import {
   Button,
   Checkbox,
   Divider,
+  FormControl,
   FormControlLabel,
   FormGroup,
+  InputLabel,
   Menu,
+  MenuItem,
   Paper,
+  Select,
   Slider,
   Stack,
   TextField,
@@ -22,7 +26,7 @@ import {
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import React from "react";
 import { ColorKeyLabel } from "./ColorKeyLabel";
-import { type EventFilterProps, type Filters, categoryGroups, formatTime, marks } from "./EventFilter";
+import { type EventFilterProps, type Filters, categoryGroups, dayOptions, formatTime, marks } from "./EventFilter";
 
 interface DesktopEventFilterProps extends Omit<EventFilterProps, "isMobile"> {
   anchorEl: HTMLElement | null;
@@ -38,8 +42,8 @@ interface DesktopEventFilterProps extends Omit<EventFilterProps, "isMobile"> {
 /**
  * DesktopEventFilter component to render the desktop version of the event filter.
  *
- * @param param0 Props containing filters, change handlers, categories, and menu state.
- * @returns The rendered DesktopEventFilter component.
+ * @param {DesktopEventFilterProps} props Props containing filters, change handlers, categories, and menu state.
+ * @returns {React.ReactElement} The rendered DesktopEventFilter component.
  */
 export function DesktopEventFilter({
   filters,
@@ -60,13 +64,30 @@ export function DesktopEventFilter({
   return (
     <Paper sx={{ p: 2, mb: 3 }}>
       <Stack spacing={2}>
-        <TextField
-          fullWidth
-          label="Search by Event Title"
-          variant="outlined"
-          value={filters.searchTerm}
-          onChange={(e) => handleFilterChange("searchTerm", e.target.value)}
-        />
+        <Stack direction="row" spacing={2}>
+          <TextField
+            fullWidth
+            label="Search by Event Title"
+            variant="outlined"
+            value={filters.searchTerm}
+            onChange={(e) => handleFilterChange("searchTerm", e.target.value)}
+            sx={{ flexGrow: 3 }}
+          />
+          <FormControl sx={{ flexGrow: 1, minWidth: 180 }}>
+            <InputLabel>Week Starts On</InputLabel>
+            <Select
+              value={filters.firstDay}
+              label="Week Starts On"
+              onChange={(e) => handleFilterChange("firstDay", e.target.value)}
+            >
+              {dayOptions.map((day) => (
+                <MenuItem key={day.value} value={day.value}>
+                  {day.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Stack>
         <Stack direction="row" spacing={2}>
           <DatePicker
             label="Start Date"

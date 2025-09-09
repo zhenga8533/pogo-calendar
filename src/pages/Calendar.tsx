@@ -137,6 +137,7 @@ function Calendar() {
         events={filteredEvents}
         isMobile={isMobile}
         savedEventIds={savedEventIds}
+        firstDay={filters.firstDay}
         onToggleSaveEvent={handleToggleSaveEvent}
         onViewChange={setCurrentView}
         onDeleteEvent={handleDeleteEvent}

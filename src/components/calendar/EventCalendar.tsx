@@ -17,6 +17,7 @@ interface EventCalendarProps {
   events: CalendarEvent[];
   isMobile: boolean;
   savedEventIds: string[];
+  firstDay: number;
   onToggleSaveEvent: (eventId: string) => void;
   onViewChange: (viewName: string) => void;
   onDeleteEvent: (eventId: string) => void;
@@ -33,6 +34,7 @@ function EventCalendar({
   events,
   isMobile,
   savedEventIds,
+  firstDay,
   onToggleSaveEvent,
   onViewChange,
   onDeleteEvent,
@@ -175,6 +177,7 @@ function EventCalendar({
             onViewChange(dateInfo.view.type);
           }}
           titleFormat={isMobile ? { month: "short", year: "numeric" } : { month: "long", year: "numeric" }}
+          firstDay={firstDay}
         />
       </Paper>
 

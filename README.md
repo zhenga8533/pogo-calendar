@@ -1,27 +1,45 @@
 # Pokémon GO Event Calendar
 
-A responsive and feature-rich event calendar for Pokémon GO, built with React, TypeScript, and Material-UI. This application allows users to view, filter, and save upcoming in-game events to create a personalized schedule.
+A comprehensive and polished single-page application for tracking Pokémon GO events. This project was built from the ground up, evolving from a simple data display into a full-featured, interactive calendar with advanced filtering, custom event management, and a modern, responsive user interface.
 
 ---
 
 ## Live Demo
 
-You can view the live application here: https://zhenga8533.github.io/pogo-calendar
+You can view the live application here: `https://zhenga8533.github.io/pogo-calendar`
 
 ---
 
 ## Features
 
-- **Interactive Calendar:** View events in a full calendar with Month, Week, Day, and List views, powered by FullCalendar.
-- **Color-Coded Events:** Events are color-coded by their category for easy at-a-glance identification.
-- **Comprehensive Filtering:**
-  - **Search:** Instantly filter events by their title.
-  - **Category:** Select one or more categories to display.
-  - **Date Range:** Use date pickers to view events within a specific period.
-  - **Time of Day:** Use a range slider to show events that start within certain hours of the day.
-- **Save/Favorite Events:** Mark your favorite events with a star. A "Saved Events" filter allows you to see your personalized schedule.
-- **Persistent State:** Your filter settings and saved events are automatically saved in your browser's `localStorage` for your next visit.
-- **Fully Responsive:** A clean, mobile-friendly layout with a collapsible filter panel in a drawer for smaller screens.
+### Dynamic Calendar & Theming
+
+- **Multiple Views:** View events in a full calendar with Month, Week, Day, and List views, powered by FullCalendar.
+- **Light & Dark Modes:** A theme toggle with persistence in `localStorage`.
+- **Custom Dark Mode Theming:** Thoroughly styled dark mode that covers all aspects of the calendar, including headers and pop-ups.
+- **Responsive Header:** A modern "glassmorphism" header that becomes opaque on scroll and adapts its layout for mobile.
+
+### Event Management
+
+- **Color-Coded Events:** Events are colored by category, with dynamically generated colors for any new, unknown categories.
+- **Save/Favorite Events:** Mark events as "saved" with a star icon, both on the event and in the details pop-up.
+- **Custom Events:** Full CRUD (Create, Read, Update, Delete) functionality for user-created events.
+- **"Add to Calendar":** Export any event to a universal `.ics` file that can be imported into Google Calendar, Apple Calendar, Outlook, etc.
+
+### Advanced Filtering
+
+- **Multi-faceted Filtering:** Filter events by search term, date range, and a specific time-of-day range using a slider.
+- **Optimized Category Filter:** A modern pop-up menu for category selection with grouping, color keys, "Select All," and "Clear All" actions.
+- **Integrated "Saved" Filter:** Filter by your saved events directly from the category menu.
+- **View-Specific Filters:** Each calendar view (Month, Week, Day, List) remembers its own unique filter settings.
+
+### Polished User Experience
+
+- **Persistent State:** All filters and user data (saved & custom events) are saved in the browser's `localStorage`.
+- **Fully Responsive:** A clean, mobile-friendly layout with a collapsible filter drawer.
+- **Skeleton Loaders:** A modern skeleton screen is shown during the initial data fetch for improved perceived performance.
+- **Empty State:** A user-friendly message appears when filters result in no events.
+- **Toast Notifications:** Clear feedback is provided for actions like creating and deleting events.
 
 ---
 
@@ -32,19 +50,42 @@ You can view the live application here: https://zhenga8533.github.io/pogo-calend
 - **Calendar:** FullCalendar
 - **State Management:** React Hooks (including custom hooks for logic separation)
 - **Date Handling:** `date-fns` & `@mui/x-date-pickers`
+- **Client-Side Storage:** `localStorage`
+- **Utilities:** `uuid` (for unique IDs), `ics` (for calendar file generation)
 - **Build Tool:** Vite
+
+---
+
+## Project Structure
+
+The project is organized into a clean, scalable structure that separates concerns:
+
+```
+src/
+├── App.tsx
+├── pages/
+│   └── CalendarView.tsx
+├── components/
+│   ├── calendar/
+│   ├── events/
+│   ├── filters/
+│   ├── info/
+│   └── layout/
+├── config/
+├── hooks/
+├── services/
+├── styles/
+├── types/
+└── utils/
+```
 
 ---
 
 ## Getting Started
 
-### Prerequisites
-
-Make sure you have Node.js (v18 or later) and npm installed on your machine.
-
 ### Installation
 
-1.  Clone the repository to your local machine:
+1.  Clone the repository:
     ```bash
     git clone https://github.com/zhenga8533/pogo-calendar.git
     ```
@@ -52,14 +93,12 @@ Make sure you have Node.js (v18 or later) and npm installed on your machine.
     ```bash
     cd pogo-calendar
     ```
-3.  Install the required dependencies:
+3.  Install dependencies:
     ```bash
     npm install
     ```
 
 ### Running the Development Server
-
-To run the app locally, use the following command. This will start a development server, typically at `http://localhost:5173`.
 
 ```bash
 npm run dev
@@ -69,64 +108,37 @@ npm run dev
 
 ## Deployment to GitHub Pages
 
-To deploy this application to GitHub Pages, follow these steps:
-
-1.  **Install `gh-pages`**
-    Install the `gh-pages` package as a dev-dependency.
-
+1.  **Install `gh-pages`**:
     ```bash
     npm install gh-pages --save-dev
     ```
-
-2.  **Update `vite.config.ts`**
-    Add a `base` property to your Vite configuration file, setting it to your repository name.
-
+2.  **Update `vite.config.ts`**: Add the `base` property.
     ```ts
-    import { defineConfig } from "vite";
-    import react from "@vitejs/plugin-react";
-
-    // https://vitejs.dev/config/
     export default defineConfig({
       plugins: [react()],
       base: "/pogo-calendar/",
     });
     ```
-
-3.  **Update `package.json`**
-    Add a `homepage` property and `predeploy`/`deploy` scripts to your `package.json` file.
-
+3.  **Update `package.json`**: Add a `homepage` URL and `deploy` scripts.
     ```json
     {
       "name": "pogo-calendar",
       "homepage": "https://zhenga8533.github.io/pogo-calendar",
-      "private": true,
-      "version": "0.0.0",
-      "type": "module",
       "scripts": {
-        "dev": "vite",
-        "build": "tsc && vite build",
         "predeploy": "npm run build",
-        "deploy": "gh-pages -d dist",
-        "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-        "preview": "vite preview"
+        "deploy": "gh-pages -d dist"
       }
-      // ... rest of the file
     }
     ```
-
-4.  **Deploy the App**
-    Run the deploy script from your terminal. This will build your application and push the contents of the `dist` folder to a new `gh-pages` branch on your repository.
-
+4.  **Run the deploy script**:
     ```bash
     npm run deploy
     ```
-
-5.  **Configure GitHub Repository**
-    Finally, go to your repository's settings on GitHub. Under the "Pages" tab, set the source to deploy from the **`gh-pages`** branch. After a minute or two, your site will be live at the `homepage` URL you specified.
+5.  **Configure GitHub:** In your repository's **Settings \> Pages**, set the source to deploy from the **`gh-pages`** branch.
 
 ---
 
 ## Credits & Attribution
 
-- The source code for the data scraper used to gather event information is available at [github.com/zhenga8533/leak-duck](https://github.com/zhenga8533/leak-duck).
+- The source code for the data scraper is available at [github.com/zhenga8533/leak-duck](https://github.com/zhenga8533/leak-duck).
 - All event information is gratefully sourced from [LeekDuck.com](https://leekduck.com/events/).

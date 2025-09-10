@@ -11,21 +11,19 @@ type EventStatus = "active" | "upcoming" | "finished";
  */
 function formatTimeDifference(targetDate: Date, showSeconds: boolean = true): string {
   const difference = targetDate.getTime() - new Date().getTime();
-  if (difference <= 0) return ""; // If difference is 0 or negative, it's already passed
+  if (difference <= 0) return "";
 
   const days = Math.floor(difference / (1000 * 60 * 60 * 24));
   const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
   const minutes = Math.floor((difference / 1000 / 60) % 60);
   const seconds = Math.floor((difference / 1000) % 60);
 
-  let parts = [];
+  const parts = [];
   if (days > 0) parts.push(`${days}d`);
   if (hours > 0) parts.push(`${hours}h`);
   if (minutes > 0) parts.push(`${minutes}m`);
   if (showSeconds && seconds > 0) parts.push(`${seconds}s`);
-  // If no parts (e.g., all 0s), and showSeconds is false, return empty
-  // Or if it's less than a minute and showSeconds is true, just show seconds
-  if (parts.length === 0 && difference > 0 && showSeconds) return `<1s`; // For very short remaining time
+  if (parts.length === 0 && difference > 0 && showSeconds) return `<1s`;
 
   return parts.join(" ");
 }
@@ -38,24 +36,18 @@ function formatTimeDifference(targetDate: Date, showSeconds: boolean = true): st
  */
 function formatTimeAgo(pastDate: Date): string {
   const difference = new Date().getTime() - pastDate.getTime();
-  if (difference < 0) return ""; // Event hasn't finished yet
+  if (difference < 0) return "";
 
   const seconds = Math.floor(difference / 1000);
+  if (seconds < 60) return "just now";
   const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
   const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
   const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
   const weeks = Math.floor(days / 7);
-  const months = Math.floor(days / 30.44); // Average days per month
-  const years = Math.floor(days / 365.25); // Average days per year
-
-  if (years > 0) return `${years}y ago`;
-  if (months > 0) return `${months}mo ago`;
-  if (weeks > 0) return `${weeks}w ago`;
-  if (days > 0) return `${days}d ago`;
-  if (hours > 0) return `${hours}h ago`;
-  if (minutes > 0) return `${minutes}m ago`;
-  if (seconds > 0) return `${seconds}s ago`;
-  return "just now";
+  return `${weeks}w ago`;
 }
 
 /**
@@ -67,7 +59,7 @@ function formatTimeAgo(pastDate: Date): string {
  */
 export function useEventStatus(start: Date | null, end: Date | null) {
   const [status, setStatus] = useState<EventStatus>("finished");
-  const [displayTime, setDisplayTime] = useState<string>(""); // Consolidated display time string
+  const [displayTime, setDisplayTime] = useState<string>("");
 
   // Update status and display time every second
   useEffect(() => {

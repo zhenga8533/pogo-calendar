@@ -23,7 +23,7 @@ import {
   useTheme,
 } from "@mui/material";
 import React, { useState } from "react";
-import { useEventStatus } from "../../hooks/useEventStatus"; // New import for the hook
+import { useEventStatus } from "../../hooks/useEventStatus";
 import type { CalendarEvent } from "../../types/events";
 import { downloadIcsFile } from "../../utils/calendarUtils";
 import { getColorForCategory } from "../../utils/colorUtils";
@@ -69,7 +69,6 @@ function EventDetailDialog({
   const theme = useTheme();
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  // Use the new hook to get event status and display time
   const { status, displayTime } = useEventStatus(event?.start ?? null, event?.end ?? null);
 
   if (!event) {
@@ -89,7 +88,6 @@ function EventDetailDialog({
   const endDate = new Date(event.end!);
   const isSingleDay = startDate.toDateString() === endDate.toDateString();
 
-  // Date and time formatting options
   const dateOptions: Intl.DateTimeFormatOptions = {
     month: "long",
     day: "numeric",
@@ -104,11 +102,10 @@ function EventDetailDialog({
 
   const combinedDateTimeOptions: Intl.DateTimeFormatOptions = { ...dateOptions, ...timeOptions };
 
-  // Define status label and color for the custom status tag
   const statusInfo = {
     active: { label: "Active Now", color: theme.palette.success.main, prefix: "Ends in:" },
     upcoming: { label: "Upcoming", color: theme.palette.warning.main, prefix: "Starts in:" },
-    finished: { label: "Finished", color: theme.palette.action.disabled, prefix: "" }, // No prefix needed for finished
+    finished: { label: "Finished", color: theme.palette.action.disabled, prefix: "Finished:" },
   };
 
   // Render the dialog with event details
@@ -116,7 +113,6 @@ function EventDetailDialog({
     <>
       <Dialog open={true} onClose={onClose} maxWidth="sm" fullWidth disableRestoreFocus>
         <DialogContent sx={{ p: 0, position: "relative" }}>
-          {/* Save/Unsave Button */}
           <IconButton
             onClick={() => onToggleSaveEvent(event.extendedProps.article_url)}
             sx={{
@@ -128,13 +124,12 @@ function EventDetailDialog({
               "&:hover": {
                 backgroundColor: "rgba(0, 0, 0, 0.6)",
               },
-              zIndex: 1, // Ensure it's above the image
+              zIndex: 1,
             }}
           >
             {isSaved ? <StarIcon /> : <StarBorderIcon />}
           </IconButton>
 
-          {/* Event Banner Image */}
           <Box
             component="img"
             src={event.extendedProps.banner_url}
@@ -147,27 +142,22 @@ function EventDetailDialog({
           />
 
           <Box sx={{ p: 3 }}>
-            {/* Event Category Chip */}
-            <Chip
-              label={event.extendedProps.category}
-              sx={{
-                mb: 2, // Spacing below the category chip
-                backgroundColor: getColorForCategory(event.extendedProps.category, theme.palette.mode),
-                color: theme.palette.getContrastText(
-                  getColorForCategory(event.extendedProps.category, theme.palette.mode)
-                ),
-                fontWeight: "bold",
-              }}
-            />
-
-            {/* Event Title */}
-            <Typography variant="h5" component="div" gutterBottom>
-              {event.title}
-            </Typography>
-
-            {/* New section for Status and Dynamic Time */}
-            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-              {/* Status Tag (Left) */}
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+              sx={{ mb: 2, flexWrap: "wrap", gap: 1 }}
+            >
+              <Chip
+                label={event.extendedProps.category}
+                sx={{
+                  backgroundColor: getColorForCategory(event.extendedProps.category, theme.palette.mode),
+                  color: theme.palette.getContrastText(
+                    getColorForCategory(event.extendedProps.category, theme.palette.mode)
+                  ),
+                  fontWeight: "bold",
+                }}
+              />
               <Box
                 sx={{
                   backgroundColor: statusInfo[status].color,
@@ -183,7 +173,7 @@ function EventDetailDialog({
                 }}
               >
                 {statusInfo[status].label}
-                {displayTime && ( // Only show time if it's not empty
+                {displayTime && (
                   <Typography variant="caption" color="inherit" component="span" sx={{ ml: 0.5 }}>
                     {statusInfo[status].prefix} {displayTime}
                   </Typography>
@@ -191,9 +181,12 @@ function EventDetailDialog({
               </Box>
             </Stack>
 
+            <Typography variant="h5" component="div" gutterBottom>
+              {event.title}
+            </Typography>
+
             <Divider sx={{ my: 2 }} />
 
-            {/* Date and Time Details */}
             <Stack spacing={2}>
               {isSingleDay ? (
                 <>
@@ -225,7 +218,6 @@ function EventDetailDialog({
           </Box>
         </DialogContent>
 
-        {/* Dialog Actions (Edit, Delete, Close, Add to Calendar, Learn More) */}
         <DialogActions sx={{ p: "16px 24px", justifyContent: "space-between" }}>
           <Box>
             {isCustomEvent && (
@@ -260,7 +252,6 @@ function EventDetailDialog({
         </DialogActions>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
       <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)} disableRestoreFocus>
         <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>

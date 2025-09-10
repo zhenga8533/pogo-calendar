@@ -23,6 +23,7 @@ import {
   useTheme,
 } from "@mui/material";
 import React, { useState } from "react";
+import { useEventStatus } from "../../hooks/useEventStatus"; // New import for the hook
 import type { CalendarEvent } from "../../types/events";
 import { downloadIcsFile } from "../../utils/calendarUtils";
 import { getColorForCategory } from "../../utils/colorUtils";
@@ -35,6 +36,7 @@ interface EventDetailDialogProps {
   onDeleteEvent: (eventId: string) => void;
   onEditEvent: (event: CalendarEvent) => void;
 }
+
 /**
  * DetailItem component to display an icon and text in a row.
  *
@@ -66,6 +68,9 @@ function EventDetailDialog({
 }: EventDetailDialogProps) {
   const theme = useTheme();
   const [confirmOpen, setConfirmOpen] = useState(false);
+
+  // Use the new hook to get event status and display time
+  const { status, displayTime } = useEventStatus(event?.start ?? null, event?.end ?? null);
 
   if (!event) {
     return null;
@@ -99,11 +104,19 @@ function EventDetailDialog({
 
   const combinedDateTimeOptions: Intl.DateTimeFormatOptions = { ...dateOptions, ...timeOptions };
 
+  // Define status label and color for the custom status tag
+  const statusInfo = {
+    active: { label: "Active Now", color: theme.palette.success.main, prefix: "Ends in:" },
+    upcoming: { label: "Upcoming", color: theme.palette.warning.main, prefix: "Starts in:" },
+    finished: { label: "Finished", color: theme.palette.action.disabled, prefix: "" }, // No prefix needed for finished
+  };
+
   // Render the dialog with event details
   return (
     <>
       <Dialog open={true} onClose={onClose} maxWidth="sm" fullWidth disableRestoreFocus>
         <DialogContent sx={{ p: 0, position: "relative" }}>
+          {/* Save/Unsave Button */}
           <IconButton
             onClick={() => onToggleSaveEvent(event.extendedProps.article_url)}
             sx={{
@@ -115,11 +128,13 @@ function EventDetailDialog({
               "&:hover": {
                 backgroundColor: "rgba(0, 0, 0, 0.6)",
               },
+              zIndex: 1, // Ensure it's above the image
             }}
           >
             {isSaved ? <StarIcon /> : <StarBorderIcon />}
           </IconButton>
 
+          {/* Event Banner Image */}
           <Box
             component="img"
             src={event.extendedProps.banner_url}
@@ -132,10 +147,11 @@ function EventDetailDialog({
           />
 
           <Box sx={{ p: 3 }}>
+            {/* Event Category Chip */}
             <Chip
               label={event.extendedProps.category}
               sx={{
-                mb: 2,
+                mb: 2, // Spacing below the category chip
                 backgroundColor: getColorForCategory(event.extendedProps.category, theme.palette.mode),
                 color: theme.palette.getContrastText(
                   getColorForCategory(event.extendedProps.category, theme.palette.mode)
@@ -143,10 +159,41 @@ function EventDetailDialog({
                 fontWeight: "bold",
               }}
             />
+
+            {/* Event Title */}
             <Typography variant="h5" component="div" gutterBottom>
               {event.title}
             </Typography>
+
+            {/* New section for Status and Dynamic Time */}
+            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+              {/* Status Tag (Left) */}
+              <Box
+                sx={{
+                  backgroundColor: statusInfo[status].color,
+                  color: theme.palette.getContrastText(statusInfo[status].color),
+                  borderRadius: "4px",
+                  px: 1.5,
+                  py: 0.5,
+                  fontSize: "0.875rem",
+                  fontWeight: "bold",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 0.5,
+                }}
+              >
+                {statusInfo[status].label}
+                {displayTime && ( // Only show time if it's not empty
+                  <Typography variant="caption" color="inherit" component="span" sx={{ ml: 0.5 }}>
+                    {statusInfo[status].prefix} {displayTime}
+                  </Typography>
+                )}
+              </Box>
+            </Stack>
+
             <Divider sx={{ my: 2 }} />
+
+            {/* Date and Time Details */}
             <Stack spacing={2}>
               {isSingleDay ? (
                 <>
@@ -177,6 +224,8 @@ function EventDetailDialog({
             </Stack>
           </Box>
         </DialogContent>
+
+        {/* Dialog Actions (Edit, Delete, Close, Add to Calendar, Learn More) */}
         <DialogActions sx={{ p: "16px 24px", justifyContent: "space-between" }}>
           <Box>
             {isCustomEvent && (
@@ -211,6 +260,7 @@ function EventDetailDialog({
         </DialogActions>
       </Dialog>
 
+      {/* Delete Confirmation Dialog */}
       <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)} disableRestoreFocus>
         <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>

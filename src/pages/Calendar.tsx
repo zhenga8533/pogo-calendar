@@ -144,6 +144,7 @@ function Calendar() {
       )}
       <EventCalendar
         events={filteredEvents}
+        allOriginalEvents={combinedEvents}
         isMobile={isMobile}
         savedEventIds={savedEventIds}
         firstDay={filters.firstDay}

@@ -8,13 +8,15 @@ import EventBusyIcon from "@mui/icons-material/EventBusy";
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import { Box, IconButton, Paper, Typography, useTheme } from "@mui/material";
-import { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import type { CalendarEvent } from "../../types/events";
 import { getColorForCategory } from "../../utils/colorUtils";
 import EventDetailDialog from "./EventDetailDialog";
+import EventHoverPopover from "./EventHoverPopover";
 
 interface EventCalendarProps {
   events: CalendarEvent[];
+  allOriginalEvents: CalendarEvent[];
   isMobile: boolean;
   savedEventIds: string[];
   firstDay: number;
@@ -28,11 +30,12 @@ interface EventCalendarProps {
 /**
  * EventCalendar component to display and manage calendar events.
  *
- * @param {EventCalendarProps} props Props containing events, mobile flag, saved event IDs, and handlers.
+ * @param {EventCalendarProps} props Props containing event data and handlers.
  * @returns {React.ReactElement} The rendered EventCalendar component.
  */
 function EventCalendar({
   events,
+  allOriginalEvents,
   isMobile,
   savedEventIds,
   firstDay,
@@ -45,7 +48,13 @@ function EventCalendar({
   const theme = useTheme();
   const calendarRef = useRef<FullCalendar>(null);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
-  const [hoveredEventId, setHoveredEventId] = useState<string | null>(null);
+
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const [popoverEvent, setPopoverEvent] = useState<CalendarEvent | null>(null);
+  const [mousePosition, setMousePosition] = useState<{ top: number; left: number } | null>(null);
+
+  const open = Boolean(anchorEl);
+  const id = open ? "mouse-over-popover" : undefined;
 
   // Change calendar view based on device type
   useEffect(() => {
@@ -57,36 +66,56 @@ function EventCalendar({
 
   // Handle event click to open detail dialog
   const handleEventClick = (clickInfo: EventClickArg) => {
-    setSelectedEvent({
-      title: clickInfo.event.title,
-      start: clickInfo.event.start ?? new Date(),
-      end: clickInfo.event.end ?? new Date(),
-      extendedProps: {
-        category: clickInfo.event.extendedProps.category,
-        article_url: clickInfo.event.extendedProps.article_url,
-        banner_url: clickInfo.event.extendedProps.banner_url,
-      },
-    });
+    const eventId = clickInfo.event.extendedProps.article_url;
+    const originalEvent = allOriginalEvents.find((e) => e.extendedProps.article_url === eventId);
+    if (originalEvent) {
+      setSelectedEvent(originalEvent);
+    }
   };
 
-  // Handle close the event detail dialog
+  // Close the event detail dialog
   const handleCloseDialog = () => {
     setSelectedEvent(null);
   };
 
-  // Handle date range selection on the calendar
+  // Handle date selection to create a new event
   const handleDateSelect = (selectionInfo: DateSelectArg) => {
     const end = new Date(selectionInfo.end);
     end.setTime(end.getTime() - 1);
     onDateSelect({ start: selectionInfo.start, end });
   };
 
-  // Render custom event content with category color and save icon
+  // Handle popover open on event hover
+  const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>, calendarEvent: CalendarEvent) => {
+    setPopoverEvent(calendarEvent);
+    setAnchorEl(event.currentTarget);
+    setMousePosition({ top: event.clientY, left: event.clientX });
+  };
+
+  // Handle popover close
+  const handlePopoverClose = () => {
+    setAnchorEl(null);
+    setPopoverEvent(null);
+    setMousePosition(null);
+  };
+
+  // Track mouse position for popover placement
+  const handleMouseMove = useCallback(
+    (event: React.MouseEvent) => {
+      if (open) {
+        setMousePosition({ top: event.clientY, left: event.clientX });
+      }
+    },
+    [open]
+  );
+
+  // Render custom event content with styling and save button
   const renderEventContent = (eventInfo: EventContentArg) => {
     const { category, article_url } = eventInfo.event.extendedProps;
     const backgroundColor = getColorForCategory(category, theme.palette.mode);
     const isSaved = savedEventIds.includes(article_url);
-    const isHighlighted = hoveredEventId === article_url;
+
+    const originalEventForHover = allOriginalEvents.find((e) => e.extendedProps.article_url === article_url);
 
     return (
       <Box
@@ -104,13 +133,15 @@ function EventCalendar({
           border: "2px solid rgba(0, 0, 0, 0.2)",
           boxSizing: "border-box",
           transition: "box-shadow 0.15s ease-in-out, filter 0.15s ease-in-out",
-          filter: isHighlighted ? "brightness(1.2)" : "brightness(1)",
-          boxShadow: isHighlighted ? theme.shadows[4] : "none",
           "&:hover": {
             filter: "brightness(1.2)",
             boxShadow: theme.shadows[4],
           },
         }}
+        aria-owns={open ? "mouse-over-popover" : undefined}
+        aria-haspopup="true"
+        onMouseEnter={(e) => originalEventForHover && handlePopoverOpen(e, originalEventForHover)}
+        onMouseLeave={handlePopoverClose}
       >
         <Box sx={{ p: "2px 8px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
           <b>{eventInfo.timeText}</b> <i>{eventInfo.event.title}</i>
@@ -129,7 +160,7 @@ function EventCalendar({
     );
   };
 
-  // Render a message if no events match the current filters
+  // Render message when no events are available
   if (events.length === 0) {
     return (
       <Paper
@@ -152,10 +183,14 @@ function EventCalendar({
     );
   }
 
-  // Render the FullCalendar component with event detail dialog
+  // Main render of the EventCalendar component
   return (
     <>
-      <Paper elevation={3} sx={{ p: { xs: 1, md: 2 }, backgroundColor: theme.palette.background.paper }}>
+      <Paper
+        elevation={3}
+        sx={{ p: { xs: 1, md: 2 }, backgroundColor: theme.palette.background.paper }}
+        onMouseMove={handleMouseMove}
+      >
         <FullCalendar
           ref={calendarRef}
           plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
@@ -176,8 +211,6 @@ function EventCalendar({
           events={events}
           eventClick={handleEventClick}
           eventContent={renderEventContent}
-          eventMouseEnter={(arg) => setHoveredEventId(arg.event.extendedProps.article_url)}
-          eventMouseLeave={() => setHoveredEventId(null)}
           height={isMobile ? "75vh" : "auto"}
           aspectRatio={isMobile ? 1.2 : 1.75}
           eventBackgroundColor="transparent"
@@ -191,6 +224,14 @@ function EventCalendar({
           select={handleDateSelect}
         />
       </Paper>
+
+      <EventHoverPopover
+        open={open}
+        id={id}
+        mousePosition={mousePosition}
+        popoverEvent={popoverEvent}
+        onClose={handlePopoverClose}
+      />
 
       <EventDetailDialog
         event={selectedEvent}

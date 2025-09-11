@@ -50,15 +50,17 @@ function EventHoverDetails({ open, id, mousePosition, event, onClose }: EventHov
     if (eventStatus === "Upcoming" && startDate) {
       const duration = intervalToDuration({ start: now, end: startDate });
       const formatted = formatDurationFromInterval(duration);
-      return formatted ? `Starts in ${formatted}` : "Starts soon";
+      return formatted ? `in ${formatted}` : "Starts soon";
     }
     if (eventStatus === "Finished" && endDate) {
       const duration = intervalToDuration({ start: endDate, end: now });
       const formatted = formatDurationFromInterval(duration);
-      return formatted ? `Ended ${formatted} ago` : "Ended recently";
+      return formatted ? `${formatted} ago` : "Ended recently";
     }
     if (eventStatus === "Active") {
-      return "Currently active";
+      const duration = intervalToDuration({ start: startDate!, end: now });
+      const formatted = formatDurationFromInterval(duration);
+      return formatted ? `${formatted} left` : "Ongoing";
     }
     return "";
   }, [eventStatus, startDate, endDate]);

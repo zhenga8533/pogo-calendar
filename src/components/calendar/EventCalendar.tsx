@@ -11,7 +11,7 @@ import { Box, IconButton, Paper, Typography, useTheme } from "@mui/material";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import type { CalendarEvent } from "../../types/events";
 import { getColorForCategory } from "../../utils/colorUtils";
-import EventDetailDialog from "./EventDetailDialog";
+import EventDetailDialog from "../events/EventDetailDialog";
 import EventHoverPopover from "./EventHoverPopover";
 
 interface EventCalendarProps {

@@ -18,3 +18,9 @@ export interface ApiEvent {
   article_url: string;
   banner_url: string;
 }
+
+export type NewEventData = {
+  title: string;
+  start: Date;
+  end: Date;
+};

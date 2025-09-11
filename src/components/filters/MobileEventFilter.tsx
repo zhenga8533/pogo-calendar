@@ -25,8 +25,9 @@ import {
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import React from "react";
-import { ColorKeyLabel } from "./ColorKeyLabel";
-import { dayOptions, type EventFilterProps, type Filters, formatTime, marks } from "./EventFilter";
+import { dayOptions, formatTime, marks, SAVED_EVENTS_CATEGORY } from "../../config/eventFilter";
+import type { EventFilterProps, Filters } from "../../types/filters";
+import { CategoryCheckbox } from "./CategoryCheckbox";
 
 interface MobileEventFilterProps extends Omit<EventFilterProps, "isMobile"> {
   handleFilterChange: (field: keyof Filters, value: any) => void;
@@ -34,13 +35,69 @@ interface MobileEventFilterProps extends Omit<EventFilterProps, "isMobile"> {
   onOpenExportDialog: () => void;
 }
 
+const CategoryFilterAccordion = React.memo(
+  /**
+   * Renders the accordion for selecting event categories.
+   *
+   * @param param0 Props for the CategoryFilterAccordion component.
+   * @returns An accordion for selecting event categories.
+   */
+  function CategoryFilterAccordion({
+    selectedCategories,
+    allCategories,
+    onCategoryChange,
+  }: {
+    selectedCategories: string[];
+    allCategories: string[];
+    onCategoryChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  }) {
+    return (
+      <Accordion>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography>Categories ({selectedCategories.length})</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <FormGroup>
+            {/* Special "Saved Events" checkbox */}
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={selectedCategories.includes(SAVED_EVENTS_CATEGORY)}
+                  onChange={onCategoryChange}
+                  name={SAVED_EVENTS_CATEGORY}
+                  icon={<StarBorderIcon />}
+                  checkedIcon={<StarIcon />}
+                />
+              }
+              label="Saved Events"
+            />
+
+            {/* Divider */}
+            <Divider sx={{ my: 1 }} />
+
+            {/* Render all other categories using the reusable component */}
+            {allCategories.map((category) => (
+              <CategoryCheckbox
+                key={category}
+                category={category}
+                isChecked={selectedCategories.includes(category)}
+                onChange={onCategoryChange}
+              />
+            ))}
+          </FormGroup>
+        </AccordionDetails>
+      </Accordion>
+    );
+  }
+);
+
 /**
- * MobileEventFilter component to render the mobile version of the event filter.
+ * Renders the mobile version of the event filter component.
  *
- * @param {MobileEventFilterProps} props Props containing filters, change handlers, categories, and event handlers.
- * @returns {React.ReactElement} The rendered MobileEventFilter component.
+ * @param param0 Props for the MobileEventFilter component.
+ * @returns The mobile version of the event filter component.
  */
-export function MobileEventFilter({
+function MobileEventFilterComponent({
   filters,
   onNewEventClick,
   onResetFilters,
@@ -51,6 +108,7 @@ export function MobileEventFilter({
 }: MobileEventFilterProps) {
   return (
     <Stack spacing={3}>
+      {/* Search Field */}
       <TextField
         fullWidth
         label="Search by Event Title"
@@ -58,6 +116,8 @@ export function MobileEventFilter({
         value={filters.searchTerm}
         onChange={(e) => handleFilterChange("searchTerm", e.target.value)}
       />
+
+      {/* Date Pickers */}
       <DatePicker
         label="Start Date"
         value={filters.startDate}
@@ -78,6 +138,8 @@ export function MobileEventFilter({
           ))}
         </Select>
       </FormControl>
+
+      {/* Time of Day Slider */}
       <Box sx={{ px: 1 }}>
         <Typography gutterBottom variant="body2" color="text.secondary">
           Time of Day
@@ -93,42 +155,15 @@ export function MobileEventFilter({
           step={1}
         />
       </Box>
-      <Accordion>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography>Categories ({filters.selectedCategories.length})</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <FormGroup>
-            <FormControlLabel
-              key="saved-events"
-              control={
-                <Checkbox
-                  checked={filters.selectedCategories.includes("Saved")}
-                  onChange={handleCategoryChange}
-                  name="Saved"
-                  icon={<StarBorderIcon />}
-                  checkedIcon={<StarIcon />}
-                />
-              }
-              label="Saved Events"
-            />
-            <Divider sx={{ my: 1 }} />
-            {allCategories.map((category) => (
-              <FormControlLabel
-                key={category}
-                control={
-                  <Checkbox
-                    checked={filters.selectedCategories.includes(category)}
-                    onChange={handleCategoryChange}
-                    name={category}
-                  />
-                }
-                label={<ColorKeyLabel category={category} />}
-              />
-            ))}
-          </FormGroup>
-        </AccordionDetails>
-      </Accordion>
+
+      {/* Category Filter Accordion */}
+      <CategoryFilterAccordion
+        selectedCategories={filters.selectedCategories}
+        allCategories={allCategories}
+        onCategoryChange={handleCategoryChange}
+      />
+
+      {/* Action Buttons */}
       <Button variant="outlined" onClick={onOpenExportDialog} startIcon={<FileDownloadIcon />}>
         Export
       </Button>
@@ -141,3 +176,5 @@ export function MobileEventFilter({
     </Stack>
   );
 }
+
+export const MobileEventFilter = React.memo(MobileEventFilterComponent);

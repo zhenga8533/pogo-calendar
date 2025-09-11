@@ -1,42 +1,49 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Link } from "@mui/material";
+import React from "react";
 
 interface InfoDialogProps {
   open: boolean;
   onClose: () => void;
 }
 
+const links = {
+  appSource: "https://github.com/zhenga8533/pogo-calendar",
+  dataSource: "https://leekduck.com/events/",
+  scraperSource: "https://github.com/zhenga8533/leak-duck",
+};
+
 /**
- * InfoDialog component to display information about the app.
+ * Renders a dialog displaying information about the app.
  *
- * @param param0 Props containing open state and close handler.
- * @returns The rendered InfoDialog component.
+ * @param param0 Props for the InfoDialog component.
+ * @returns A dialog displaying information about the app.
  */
-function InfoDialog({ open, onClose }: InfoDialogProps) {
+function InfoDialogComponent({ open, onClose }: InfoDialogProps) {
   return (
     <Dialog open={open} onClose={onClose}>
       <DialogTitle>About This App</DialogTitle>
       <DialogContent>
-        <DialogContentText>
+        <DialogContentText paragraph>
           This is a Pokémon GO event calendar created using React, TypeScript, and Material-UI.
         </DialogContentText>
-        <DialogContentText sx={{ mt: 2 }}>
+        <DialogContentText paragraph>
           You can search, filter by category, date, and time of day, and save your favorite events to create a
           personalized schedule. Your filters and saved events are stored in your browser's local storage.
         </DialogContentText>
-        <DialogContentText sx={{ mt: 2 }}>
+        <DialogContentText paragraph>
           The source code for this app is available on{" "}
-          <Link href="https://github.com/zhenga8533/pogo-calendar" target="_blank" rel="noopener noreferrer">
+          <Link href={links.appSource} target="_blank" rel="noopener noreferrer">
             GitHub
           </Link>
           .
         </DialogContentText>
-        <DialogContentText sx={{ mt: 2 }}>
+        <DialogContentText>
           Event data is gratefully sourced from{" "}
-          <Link href="https://leekduck.com/events/" target="_blank" rel="noopener noreferrer">
+          <Link href={links.dataSource} target="_blank" rel="noopener noreferrer">
             LeekDuck.com
           </Link>{" "}
           using a custom scraper, the code for which is also available on{" "}
-          <Link href="https://github.com/zhenga8533/leak-duck" target="_blank" rel="noopener noreferrer">
+          <Link href={links.scraperSource} target="_blank" rel="noopener noreferrer">
             GitHub
           </Link>
           .
@@ -49,4 +56,5 @@ function InfoDialog({ open, onClose }: InfoDialogProps) {
   );
 }
 
+const InfoDialog = React.memo(InfoDialogComponent);
 export default InfoDialog;

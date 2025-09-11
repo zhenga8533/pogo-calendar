@@ -2,9 +2,8 @@ import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, TextF
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { useEffect, useState } from "react";
-import type { NewEventData } from "../../hooks/useCustomEvents";
-import type { CalendarEvent } from "../../types/events";
+import { useCallback, useEffect, useState } from "react";
+import type { CalendarEvent, NewEventData } from "../../types/events";
 
 interface CreateEventDialogProps {
   open: boolean;
@@ -14,65 +13,135 @@ interface CreateEventDialogProps {
 }
 
 /**
- * CreateEventDialog component to create a new custom calendar event.
+ * Generates the initial form data for creating a new event.
  *
- * @param param0 Props containing open state, event to edit, and handlers.
- * @returns The CreateEventDialog component.
+ * @returns Initial form data for creating a new event.
+ */
+const getInitialFormData = () => ({
+  title: "",
+  start: new Date(),
+  end: new Date(),
+});
+
+/**
+ * Generates the initial error state for the form fields.
+ *
+ * @returns Initial error state for the form fields.
+ */
+const getInitialErrors = () => ({
+  title: null as string | null,
+  end: null as string | null,
+});
+
+/**
+ * A dialog component for creating or editing calendar events.
+ *
+ * @param param0 Props for the CreateEventDialog component.
+ * @returns A dialog for creating or editing calendar events.
  */
 function CreateEventDialog({ open, eventToEdit, onClose, onSave }: CreateEventDialogProps) {
-  const [title, setTitle] = useState("");
-  const [start, setStart] = useState<Date | null>(new Date());
-  const [end, setEnd] = useState<Date | null>(new Date());
-  const [error, setError] = useState("");
+  const [formData, setFormData] = useState(getInitialFormData());
+  const [errors, setErrors] = useState(getInitialErrors());
 
-  // Populate fields if editing an event
   useEffect(() => {
-    if (eventToEdit) {
-      setTitle(eventToEdit.title);
-      setStart(eventToEdit.start);
-      setEnd(eventToEdit.end);
-    } else {
-      setTitle("");
-      setStart(new Date());
-      setEnd(new Date());
-      setError("");
+    if (open) {
+      if (eventToEdit) {
+        setFormData({
+          title: eventToEdit.title,
+          start: eventToEdit.start as Date,
+          end: eventToEdit.end as Date,
+        });
+      } else {
+        setFormData(getInitialFormData());
+      }
+      setErrors(getInitialErrors());
     }
   }, [eventToEdit, open]);
 
-  // Handle saving the new or edited event
-  const handleSave = () => {
-    if (!title || !start || !end) {
-      setError("All fields are required.");
-      return;
+  // Handles changes to form fields and updates the form data state.
+  const handleChange = useCallback(
+    (field: keyof typeof formData, value: any) => {
+      setFormData((prev) => ({ ...prev, [field]: value }));
+      if (errors.title && field === "title") {
+        // Clear title error if user modifies the title field.
+        setErrors((prev) => ({ ...prev, title: null }));
+      }
+      if (errors.end && (field === "start" || field === "end")) {
+        // Clear end time error if user modifies start or end fields.
+        setErrors((prev) => ({ ...prev, end: null }));
+      }
+    },
+    [errors.title, errors.end]
+  );
+
+  // Validates the form data and sets error messages if validation fails.
+  const validateForm = () => {
+    const newErrors = getInitialErrors();
+    let isValid = true;
+
+    if (!formData.title.trim()) {
+      newErrors.title = "Event title is required.";
+      isValid = false;
     }
-    if (end < start) {
-      setError("End date must be after the start date.");
-      return;
+    if (!formData.start || !formData.end) {
+      newErrors.end = "Start and end times are required.";
+      isValid = false;
+    } else if (formData.end < formData.start) {
+      newErrors.end = "End time must be after the start time.";
+      isValid = false;
     }
-    onSave({ title, start, end }, eventToEdit?.extendedProps.article_url);
+
+    setErrors(newErrors);
+    return isValid;
   };
 
-  // Render the dialog component
+  // Handles the save action, validating the form and invoking the onSave callback if valid.
+  const handleSave = useCallback(() => {
+    if (validateForm()) {
+      onSave(formData, eventToEdit?.extendedProps.article_url);
+    }
+  }, [formData, eventToEdit, onSave]);
+
+  // Render the dialog component with form fields and actions.
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
         <DialogTitle>{eventToEdit ? "Edit Custom Event" : "Create Custom Event"}</DialogTitle>
         <DialogContent>
           <Stack spacing={3} sx={{ mt: 1 }}>
+            {/* Event Title Input Field */}
             <TextField
               autoFocus
               label="Event Title"
               fullWidth
               variant="outlined"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              error={!!error}
-              helperText={error}
+              value={formData.title}
+              onChange={(e) => handleChange("title", e.target.value)}
+              error={!!errors.title}
+              helperText={errors.title}
             />
-            <DateTimePicker label="Start Time" value={start} onChange={setStart} />
-            <DateTimePicker label="End Time" value={end} onChange={setEnd} />
+
+            {/* Start and End Time Pickers */}
+            <DateTimePicker
+              label="Start Time"
+              value={formData.start}
+              onChange={(newValue) => handleChange("start", newValue)}
+            />
+            <DateTimePicker
+              label="End Time"
+              value={formData.end}
+              onChange={(newValue) => handleChange("end", newValue)}
+              slotProps={{
+                textField: {
+                  error: !!errors.end,
+                  helperText: errors.end,
+                },
+              }}
+            />
           </Stack>
         </DialogContent>
+
+        {/* Dialog Action Buttons */}
         <DialogActions>
           <Button onClick={onClose}>Cancel</Button>
           <Button onClick={handleSave} variant="contained">

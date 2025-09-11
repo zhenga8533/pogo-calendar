@@ -1,19 +1,12 @@
-import { type Dispatch, type SetStateAction, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type Dispatch, type SetStateAction } from "react";
+import { initialFilters, SAVED_EVENTS_CATEGORY } from "../config/eventFilter";
+import { ALL_FILTERS_KEY } from "../config/storage";
 import type { CalendarEvent } from "../types/events";
+import type { Filters } from "../types/filters";
 
-export const initialFilters = {
-  searchTerm: "",
-  selectedCategories: [] as string[],
-  startDate: null as Date | null,
-  endDate: null as Date | null,
-  timeRange: [0, 24],
-  firstDay: 0, // 0 for Sunday, 1 for Monday, etc.
-};
+type SetFilters = Dispatch<SetStateAction<Filters>>;
 
-type FilterState = typeof initialFilters;
-type SetFilters = Dispatch<SetStateAction<FilterState>>;
-
-const defaultAllFilters: Record<string, FilterState> = {
+const defaultAllFilters: Record<string, Filters> = {
   dayGridMonth: initialFilters,
   timeGridWeek: initialFilters,
   timeGridDay: initialFilters,
@@ -21,87 +14,95 @@ const defaultAllFilters: Record<string, FilterState> = {
 };
 
 /**
- * Custom hook to manage event filters.
+ * Custom hook to manage event filters with localStorage persistence and multi-view support.
  *
- * @param allEvents List of all calendar events to be filtered.
- * @param savedEventIds List of saved event IDs for filtering "Saved" events.
- * @returns An object containing filters, setFilters, handleResetFilters, setCurrentView, and filteredEvents.
+ * @param allEvents All calendar events to be filtered.
+ * @param savedEventIds IDs of saved events for filtering purposes.
+ * @returns A custom hook to manage event filters with localStorage persistence and multi-view support.
  */
 export function useFilters(allEvents: CalendarEvent[], savedEventIds: string[]) {
   const [currentView, setCurrentView] = useState("dayGridMonth");
 
-  // Initialize allFilters from localStorage or use defaultAllFilters
   const [allFilters, setAllFilters] = useState(() => {
-    const saved = localStorage.getItem("allEventFilters");
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      // Ensure all views have a complete filter object
-      Object.keys(defaultAllFilters).forEach((view) => {
-        parsed[view] = { ...initialFilters, ...parsed[view] };
-        if (parsed[view].startDate) parsed[view].startDate = new Date(parsed[view].startDate);
-        if (parsed[view].endDate) parsed[view].endDate = new Date(parsed[view].endDate);
-      });
-      return parsed;
+    try {
+      const saved = localStorage.getItem(ALL_FILTERS_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Hydrate the saved data: ensure all views have a filter object and parse date strings back to Date objects.
+        Object.keys(defaultAllFilters).forEach((view) => {
+          parsed[view] = { ...initialFilters, ...parsed[view] };
+          if (parsed[view].startDate) parsed[view].startDate = new Date(parsed[view].startDate);
+          if (parsed[view].endDate) parsed[view].endDate = new Date(parsed[view].endDate);
+        });
+        return parsed;
+      }
+    } catch (error) {
+      console.error("Failed to parse filters from localStorage:", error);
     }
+
     return defaultAllFilters;
   });
 
-  // Persist allFilters to localStorage whenever they change
+  // Persist allFilters to localStorage whenever they change.
   useEffect(() => {
-    localStorage.setItem("allEventFilters", JSON.stringify(allFilters));
+    localStorage.setItem(ALL_FILTERS_KEY, JSON.stringify(allFilters));
   }, [allFilters]);
 
-  const filtersForCurrentView = allFilters[currentView as keyof typeof allFilters] || initialFilters;
+  const filtersForCurrentView = allFilters[currentView] || initialFilters;
 
-  // Set filters for the current view
-  const setFiltersForCurrentView: SetFilters = (update) => {
-    setAllFilters((prev: Record<string, FilterState>) => {
-      const currentFilters = prev[currentView as keyof typeof prev] || initialFilters;
-      const newFilters = typeof update === "function" ? update(currentFilters) : update;
-      return { ...prev, [currentView]: newFilters };
-    });
-  };
+  // Memoize the setter function to provide a stable reference to consumers.
+  const setFiltersForCurrentView: SetFilters = useCallback(
+    (update) => {
+      setAllFilters((prev: Record<string, Filters>) => {
+        const currentFilters: Filters = prev[currentView] || initialFilters;
+        const newFilters: Filters =
+          typeof update === "function"
+            ? (update as (filters: Filters) => Filters)(currentFilters)
+            : (update as Filters);
+        return { ...prev, [currentView]: newFilters };
+      });
+    },
+    [currentView]
+  );
 
-  // Reset filters for the current view to initial state
-  const handleResetFilters = () => {
-    setAllFilters((prev: Record<string, FilterState>) => ({ ...prev, [currentView]: initialFilters }));
-  };
+  // Memoize the reset function for a stable reference.
+  const handleResetFilters = useCallback(() => {
+    setAllFilters((prev: Record<string, Filters>) => ({ ...prev, [currentView]: initialFilters }));
+  }, [currentView]);
 
-  // Memoized computation of filtered events based on current filters
+  // Memoize the filtered events to avoid unnecessary recalculations.
   const filteredEvents = useMemo(() => {
     const { selectedCategories, searchTerm, startDate, endDate, timeRange } = filtersForCurrentView;
-    const isSavedFilterActive = selectedCategories.includes("Saved");
-    const otherSelectedCategories = selectedCategories.filter((c: string) => c !== "Saved");
+    const isSavedFilterActive = selectedCategories.includes(SAVED_EVENTS_CATEGORY);
+    const otherSelectedCategories = selectedCategories.filter((c: string) => c !== SAVED_EVENTS_CATEGORY);
 
+    // Filter events based on the active filters.
     return allEvents.filter((event) => {
-      const isEventSaved = savedEventIds.includes(event.extendedProps.article_url);
+      // Saved events filtering: if the "Saved" category is selected, include only saved events.
+      const passesSavedFilter = !isSavedFilterActive || savedEventIds.includes(event.extendedProps.article_url);
 
-      // Saved events filtering
-      if (isSavedFilterActive && !isEventSaved) return false;
+      // Category filtering: if no categories are selected, all categories pass.
+      const passesCategoryFilter =
+        otherSelectedCategories.length === 0 || otherSelectedCategories.includes(event.extendedProps.category);
 
-      // Category filtering
-      if (otherSelectedCategories.length > 0 && !otherSelectedCategories.includes(event.extendedProps.category))
-        return false;
+      // Search term filtering: case-insensitive substring match on event title.
+      const passesSearchFilter = event.title.toLowerCase().includes(searchTerm.toLowerCase());
 
-      // Search term filtering
-      if (!event.title.toLowerCase().includes(searchTerm.toLowerCase())) return false;
-
-      // Date range filtering
+      // Date range filtering: checks if the event's duration overlaps with the selected filter range.
       const eventStart = new Date(event.start!);
       const eventEnd = new Date(event.end!);
-      if (startDate && endDate && (eventStart >= endDate || eventEnd <= startDate)) return false;
-      if (startDate && !endDate && eventEnd < startDate) return false;
-      if (!startDate && endDate && eventStart > endDate) return false;
+      const passesDateFilter = !((startDate && eventEnd < startDate) || (endDate && eventStart > endDate));
 
-      // Time range filtering
-      if (timeRange[0] > 0 || timeRange[1] < 24) {
-        const [startHour, endHour] = timeRange;
-        const eventStartHour = eventStart.getHours();
-        const eventDuration = (eventEnd.getTime() - eventStart.getTime()) / (1000 * 60 * 60);
-        if (eventDuration < 24 && (eventStartHour < startHour || eventStartHour >= endHour)) return false;
-      }
+      // Time range filtering: applies only to events that are not all-day events.
+      const [startHour, endHour] = timeRange;
+      const eventDurationHours = (eventEnd.getTime() - eventStart.getTime()) / (1000 * 60 * 60);
+      const isAllDayEvent = eventDurationHours >= 24;
+      const eventStartHour = eventStart.getHours();
 
-      return true;
+      const passesTimeFilter = isAllDayEvent || (eventStartHour >= startHour && eventStartHour < endHour);
+
+      // The event is included only if it passes all active filter conditions.
+      return passesSavedFilter && passesCategoryFilter && passesSearchFilter && passesDateFilter && passesTimeFilter;
     });
   }, [allEvents, allFilters, currentView, savedEventIds]);
 

@@ -3,28 +3,44 @@ import { fetchEvents } from "../services/eventService";
 import type { CalendarEvent } from "../types/events";
 
 /**
- * Custom hook to fetch and manage event data.
+ * Custom hook to fetch and manage calendar event data with loading and error states.
  *
- * @returns An object containing all events and loading state.
+ * @returns A custom hook to fetch and manage calendar event data with loading and error states.
  */
 export function useEventData() {
   const [allEvents, setAllEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Fetch events on component mount
   useEffect(() => {
+    let isMounted = true;
+
+    // Async function to fetch event data.
     const getEvents = async () => {
       try {
         const eventData = await fetchEvents();
-        setAllEvents(eventData);
-      } catch (error) {
-        console.error("Error fetching events:", error);
+        // Only update state if the component is still mounted.
+        if (isMounted) {
+          setAllEvents(eventData);
+        }
+      } catch (err) {
+        console.error("Error fetching events:", err);
+        if (isMounted) {
+          setError("Failed to load event data. Please try again later.");
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
+
     getEvents();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  return { allEvents, loading };
+  return { allEvents, loading, error };
 }

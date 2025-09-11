@@ -1,7 +1,9 @@
-import { Box, Chip, Divider, Popover, Typography, useTheme } from "@mui/material"; // Ensure Chip is imported
-import { format, intervalToDuration, isFuture, isPast, isSameDay, isWithinInterval } from "date-fns";
+import { Box, Chip, Divider, Popover, Typography, useTheme } from "@mui/material";
+import { intervalToDuration, isFuture, isPast, isSameDay, isWithinInterval } from "date-fns";
+import { useMemo } from "react";
 import type { CalendarEvent } from "../../types/events";
 import { getColorForCategory } from "../../utils/colorUtils";
+import { formatDateLine, formatDurationFromInterval } from "../../utils/dateUtils";
 
 interface EventHoverDetailsProps {
   open: boolean;
@@ -12,64 +14,61 @@ interface EventHoverDetailsProps {
 }
 
 /**
- * EventHoverDetails component to display event details on hover.
+ * Displays a popover with detailed information about a calendar event when hovered over.
  *
- * @param param0 Props containing hover state and event data.
- * @returns The rendered EventHoverDetails component.
+ * @param param0 Props for the EventHoverDetails component.
+ * @returns A popover displaying detailed information about a calendar event.
  */
 function EventHoverDetails({ open, id, mousePosition, event, onClose }: EventHoverDetailsProps) {
   const theme = useTheme();
 
+  const { startDate, endDate } = useMemo(() => {
+    const start = event?.start ? new Date(event.start) : null;
+    const end = event?.end ? new Date(event.end) : null;
+    return { startDate: start, endDate: end };
+  }, [event?.start, event?.end]);
+
+  const categoryColor = useMemo(() => {
+    if (!event?.extendedProps.category) return "default";
+    return getColorForCategory(event.extendedProps.category, theme.palette.mode);
+  }, [event?.extendedProps.category, theme.palette.mode]);
+
+  const eventStatus = useMemo(() => {
+    const now = new Date();
+    if (startDate && endDate) {
+      if (isWithinInterval(now, { start: startDate, end: endDate })) return "Active";
+      if (isPast(endDate)) return "Finished";
+      if (isFuture(startDate)) return "Upcoming";
+    } else if (startDate && isPast(startDate)) {
+      return "Finished";
+    }
+    return "Upcoming";
+  }, [startDate, endDate]);
+
+  const timeText = useMemo(() => {
+    const now = new Date();
+    if (eventStatus === "Upcoming" && startDate) {
+      const duration = intervalToDuration({ start: now, end: startDate });
+      const formatted = formatDurationFromInterval(duration);
+      return formatted ? `Starts in ${formatted}` : "Starts soon";
+    }
+    if (eventStatus === "Finished" && endDate) {
+      const duration = intervalToDuration({ start: endDate, end: now });
+      const formatted = formatDurationFromInterval(duration);
+      return formatted ? `Ended ${formatted} ago` : "Ended recently";
+    }
+    if (eventStatus === "Active") {
+      return "Currently active";
+    }
+    return "";
+  }, [eventStatus, startDate, endDate]);
+
+  // If there is no event data, render nothing.
   if (!event) {
     return null;
   }
 
-  const categoryColor = getColorForCategory(event.extendedProps.category, theme.palette.mode);
-  const startDate = event.start ? new Date(event.start) : null;
-  const endDate = event.end ? new Date(event.end) : null;
-  const now = new Date();
-
-  let eventStatus: "Upcoming" | "Active" | "Finished" = "Upcoming";
-  if (startDate && endDate) {
-    if (isWithinInterval(now, { start: startDate, end: endDate })) {
-      eventStatus = "Active";
-    } else if (isPast(endDate)) {
-      eventStatus = "Finished";
-    } else if (isFuture(startDate)) {
-      eventStatus = "Upcoming";
-    }
-  } else if (startDate && isPast(startDate)) {
-    eventStatus = "Finished";
-  }
-
-  let timeText = "";
-  if (eventStatus === "Upcoming" && startDate) {
-    const duration = intervalToDuration({ start: now, end: startDate });
-    const parts = [];
-    if (duration.years && duration.years > 0) parts.push(`${duration.years}y`);
-    if (duration.months && duration.months > 0) parts.push(`${duration.months}m`);
-    if (duration.days && duration.days > 0) parts.push(`${duration.days}d`);
-    if (duration.hours && duration.hours > 0) parts.push(`${duration.hours}h`);
-    if (duration.minutes && duration.minutes > 0) parts.push(`${duration.minutes}min`);
-    timeText = parts.length > 0 ? `Starts in ${parts.join(" ")}` : "Starts soon";
-  } else if (eventStatus === "Finished" && endDate) {
-    const duration = intervalToDuration({ start: endDate, end: now });
-    const parts = [];
-    if (duration.years && duration.years > 0) parts.push(`${duration.years}y`);
-    if (duration.months && duration.months > 0) parts.push(`${duration.months}m`);
-    if (duration.days && duration.days > 0) parts.push(`${duration.days}d`);
-    if (duration.hours && duration.hours > 0) parts.push(`${duration.hours}h`);
-    if (duration.minutes && duration.minutes > 0) parts.push(`${duration.minutes}min`);
-    timeText = parts.length > 0 ? `Ended ${parts.join(" ")} ago` : "Ended recently";
-  } else if (eventStatus === "Active") {
-    timeText = "Currently active";
-  }
-
-  const formatDateLine = (date: Date | null, showTime: boolean = true) => {
-    if (!date) return null;
-    return showTime ? format(date, "MMM d, yyyy h:mm a") : format(date, "MMM d, yyyy");
-  };
-
+  // Render the popover with event details.
   return (
     <Popover
       id={id}
@@ -105,28 +104,16 @@ function EventHoverDetails({ open, id, mousePosition, event, onClose }: EventHov
         },
       }}
     >
-      <Box
-        sx={{
-          px: 2,
-          pt: 2,
-          pb: 2,
-          display: "flex",
-          flexDirection: "column",
-          gap: 1,
-        }}
-      >
-        <Typography
-          variant="h6"
-          component="h3"
-          sx={{
-            fontWeight: "bold",
-            color: theme.palette.text.primary,
-            lineHeight: 1.3,
-          }}
-        >
+      <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 1 }}>
+        {/* Event Title */}
+        <Typography variant="h6" component="h3" sx={{ fontWeight: "bold", lineHeight: 1.3 }}>
           {event.title}
         </Typography>
+
+        {/* Divider */}
         <Divider sx={{ my: 0.5 }} />
+
+        {/* Category Chip */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <Typography variant="body2" color="text.secondary" sx={{ fontWeight: "bold" }}>
             Category:
@@ -142,7 +129,7 @@ function EventHoverDetails({ open, id, mousePosition, event, onClose }: EventHov
           />
         </Box>
 
-        {/* Status */}
+        {/* Status and Relative Time */}
         <Typography variant="body2" color="text.secondary">
           <Box component="span" sx={{ fontWeight: "bold" }}>
             Status:
@@ -155,10 +142,11 @@ function EventHoverDetails({ open, id, mousePosition, event, onClose }: EventHov
           )}
         </Typography>
 
-        {/* Dates */}
+        {/* Date and Time Information */}
         {startDate && (
           <Box sx={{ lineHeight: 1.4 }}>
             {isSameDay(startDate, endDate || startDate) ? (
+              // Case for single-day events
               <Typography variant="body2" color="text.secondary">
                 <Box component="span" sx={{ fontWeight: "bold" }}>
                   Date:
@@ -166,6 +154,7 @@ function EventHoverDetails({ open, id, mousePosition, event, onClose }: EventHov
                 {formatDateLine(startDate)}
               </Typography>
             ) : (
+              // Case for multi-day events
               <>
                 <Typography variant="body2" color="text.secondary">
                   <Box component="span" sx={{ fontWeight: "bold" }}>

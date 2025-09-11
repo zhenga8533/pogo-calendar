@@ -25,6 +25,7 @@ export function downloadIcsFile(event: CalendarEvent) {
     calName: "Pokémon GO Event Calendar",
   };
 
+  // Generate the .ics file content
   createEvent(eventAttributes, (error, value) => {
     if (error) {
       console.error(error);
@@ -64,6 +65,7 @@ export function downloadIcsForEvents(events: CalendarEvent[]) {
     };
   });
 
+  // Generate the .ics file content
   createEvents(eventAttributesList, (error, value) => {
     if (error) {
       console.error(error);

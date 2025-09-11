@@ -22,7 +22,7 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useEventStatus } from "../../hooks/useEventStatus";
 import type { CalendarEvent } from "../../types/events";
 import { downloadIcsFile } from "../../utils/calendarUtils";
@@ -37,11 +37,25 @@ interface EventDetailDialogProps {
   onEditEvent: (event: CalendarEvent) => void;
 }
 
+const DATE_OPTIONS: Intl.DateTimeFormatOptions = {
+  month: "long",
+  day: "numeric",
+  year: "numeric",
+};
+
+const TIME_OPTIONS: Intl.DateTimeFormatOptions = {
+  hour: "numeric",
+  minute: "2-digit",
+  timeZoneName: "short",
+};
+
+const COMBINED_DATE_TIME_OPTIONS: Intl.DateTimeFormatOptions = { ...DATE_OPTIONS, ...TIME_OPTIONS };
+
 /**
- * DetailItem component to display an icon and text in a row.
+ * Renders a single detail item with an icon and text.
  *
- * @param {object} props Props containing icon and text for the detail item.
- * @returns {React.ReactElement} The rendered DetailItem component.
+ * @param param0 Props for the DetailItem component.
+ * @returns A single detail item with an icon and text.
  */
 function DetailItem({ icon, text }: { icon: React.ReactNode; text: string }) {
   return (
@@ -53,10 +67,45 @@ function DetailItem({ icon, text }: { icon: React.ReactNode; text: string }) {
 }
 
 /**
- * EventDetailDialog component to display detailed information about a calendar event.
+ * Renders a confirmation dialog for deleting an event.
  *
- * @param {EventDetailDialogProps} props Props containing the event data and various event handlers.
- * @returns {React.ReactElement | null} The rendered EventDetailDialog component or null if no event is provided.
+ * @param param0 Props for the DeleteConfirmationDialog component.
+ * @returns A confirmation dialog for deleting an event.
+ */
+function DeleteConfirmationDialog({
+  open,
+  onClose,
+  onConfirm,
+  eventName,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  eventName: string;
+}) {
+  return (
+    <Dialog open={open} onClose={onClose} disableRestoreFocus>
+      <DialogTitle>Confirm Deletion</DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+          Are you sure you want to delete the event "{eventName}"? This action cannot be undone.
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={onConfirm} color="error" variant="contained">
+          Delete
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
+/**
+ * A dialog component that displays detailed information about a calendar event.
+ *
+ * @param param0 Props for the EventDetailDialog component.
+ * @returns A dialog displaying detailed information about a calendar event.
  */
 function EventDetailDialog({
   event,
@@ -69,79 +118,125 @@ function EventDetailDialog({
   const theme = useTheme();
   const [confirmOpen, setConfirmOpen] = useState(false);
 
+  const eventDetails = useMemo(() => {
+    if (!event) return null;
+
+    const eventId = event.extendedProps.article_url;
+    const startDate = new Date(event.start!);
+    const endDate = new Date(event.end!);
+
+    return {
+      id: eventId,
+      title: event.title,
+      category: event.extendedProps.category,
+      bannerUrl: event.extendedProps.banner_url,
+      startDate,
+      endDate,
+      isCustomEvent: event.extendedProps.category === "Custom Event",
+      isSaved: savedEventIds.includes(eventId),
+      isSingleDay: startDate.toDateString() === endDate.toDateString(),
+    };
+  }, [event, savedEventIds]);
+
   const { status, displayTime } = useEventStatus(event?.start ?? null, event?.end ?? null);
 
-  if (!event) {
+  const statusInfo = useMemo(
+    () => ({
+      active: { label: "Active Now", color: theme.palette.success.main },
+      upcoming: { label: "Upcoming", color: theme.palette.warning.main },
+      finished: { label: "Finished", color: theme.palette.text.secondary },
+      loading: { label: "Loading...", color: theme.palette.action.disabledBackground },
+    }),
+    [theme]
+  );
+
+  const categoryColor = useMemo(
+    () => (eventDetails ? getColorForCategory(eventDetails.category, theme.palette.mode) : "default"),
+    [eventDetails, theme.palette.mode]
+  );
+
+  const dateTimeDetails = useMemo(() => {
+    if (!eventDetails) return null;
+    const { startDate, endDate, isSingleDay } = eventDetails;
+
+    if (isSingleDay) {
+      return (
+        <>
+          <DetailItem
+            icon={<CalendarTodayIcon color="action" />}
+            text={startDate.toLocaleDateString("en-US", DATE_OPTIONS)}
+          />
+          <DetailItem
+            icon={<AccessTimeIcon color="action" />}
+            text={`${startDate.toLocaleTimeString("en-US", TIME_OPTIONS)} — ${endDate.toLocaleTimeString(
+              "en-US",
+              TIME_OPTIONS
+            )}`}
+          />
+        </>
+      );
+    }
+
+    return (
+      <>
+        <DetailItem
+          icon={<CalendarTodayIcon color="action" />}
+          text={`Starts: ${startDate.toLocaleString("en-US", COMBINED_DATE_TIME_OPTIONS)}`}
+        />
+        <DetailItem
+          icon={<CalendarTodayIcon color="action" />}
+          text={`Ends: ${endDate.toLocaleString("en-US", COMBINED_DATE_TIME_OPTIONS)}`}
+        />
+      </>
+    );
+  }, [eventDetails]);
+
+  // Callback to handle event deletion after confirmation.
+  const handleDelete = useCallback(() => {
+    if (!eventDetails) return;
+    onDeleteEvent(eventDetails.id);
+    setConfirmOpen(false);
+    onClose();
+  }, [eventDetails, onDeleteEvent, onClose]);
+
+  // Render nothing if there is no event.
+  if (!event || !eventDetails) {
     return null;
   }
 
-  // Handle deletion confirmation
-  const handleDelete = () => {
-    onDeleteEvent(event.extendedProps.article_url);
-    setConfirmOpen(false);
-    onClose();
-  };
-
-  const isCustomEvent = event.extendedProps.category === "Custom Event";
-  const isSaved = savedEventIds.includes(event.extendedProps.article_url);
-  const startDate = new Date(event.start!);
-  const endDate = new Date(event.end!);
-  const isSingleDay = startDate.toDateString() === endDate.toDateString();
-
-  const dateOptions: Intl.DateTimeFormatOptions = {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  };
-
-  const timeOptions: Intl.DateTimeFormatOptions = {
-    hour: "numeric",
-    minute: "2-digit",
-    timeZoneName: "short",
-  };
-
-  const combinedDateTimeOptions: Intl.DateTimeFormatOptions = { ...dateOptions, ...timeOptions };
-
-  const statusInfo = {
-    active: { label: "Active Now", color: theme.palette.success.main, prefix: "Ends in:" },
-    upcoming: { label: "Upcoming", color: theme.palette.warning.main, prefix: "Starts in:" },
-    finished: { label: "Finished", color: theme.palette.action.disabled, prefix: "Finished:" },
-  };
-
-  // Render the dialog with event details
+  // Render the main event detail dialog.
+  const { id, title, category, bannerUrl, isCustomEvent, isSaved } = eventDetails;
   return (
     <>
       <Dialog open={true} onClose={onClose} maxWidth="sm" fullWidth disableRestoreFocus>
         <DialogContent sx={{ p: 0, position: "relative" }}>
+          {/* Save/Unsave Icon Button */}
           <IconButton
-            onClick={() => onToggleSaveEvent(event.extendedProps.article_url)}
+            aria-label={isSaved ? "Unsave event" : "Save event"}
+            onClick={() => onToggleSaveEvent(id)}
             sx={{
               position: "absolute",
               top: 8,
               right: 8,
               backgroundColor: "rgba(0, 0, 0, 0.4)",
               color: "white",
-              "&:hover": {
-                backgroundColor: "rgba(0, 0, 0, 0.6)",
-              },
+              "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.6)" },
               zIndex: 1,
             }}
           >
             {isSaved ? <StarIcon /> : <StarBorderIcon />}
           </IconButton>
 
+          {/* Event Banner Image */}
           <Box
             component="img"
-            src={event.extendedProps.banner_url}
-            alt={`${event.title} banner`}
-            sx={{
-              width: "100%",
-              aspectRatio: "16 / 9",
-              objectFit: "cover",
-            }}
+            src={bannerUrl}
+            alt={`${title} banner`}
+            sx={{ width: "100%", aspectRatio: "16 / 9", objectFit: "cover" }}
           />
 
           <Box sx={{ p: 3 }}>
+            {/* Category and Status */}
             <Stack
               direction="row"
               justifyContent="space-between"
@@ -149,12 +244,10 @@ function EventDetailDialog({
               sx={{ mb: 2, flexWrap: "wrap", gap: 1 }}
             >
               <Chip
-                label={event.extendedProps.category}
+                label={category}
                 sx={{
-                  backgroundColor: getColorForCategory(event.extendedProps.category, theme.palette.mode),
-                  color: theme.palette.getContrastText(
-                    getColorForCategory(event.extendedProps.category, theme.palette.mode)
-                  ),
+                  backgroundColor: categoryColor,
+                  color: theme.palette.getContrastText(categoryColor),
                   fontWeight: "bold",
                 }}
               />
@@ -167,58 +260,48 @@ function EventDetailDialog({
                   py: 0.5,
                   fontSize: "0.875rem",
                   fontWeight: "bold",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 0.5,
                 }}
               >
                 {statusInfo[status].label}
-                {displayTime && (
-                  <Typography variant="caption" color="inherit" component="span" sx={{ ml: 0.5 }}>
-                    {statusInfo[status].prefix} {displayTime}
-                  </Typography>
-                )}
+                {displayTime && ` (${displayTime})`}
               </Box>
             </Stack>
 
-            <Typography variant="h5" component="div" gutterBottom>
-              {event.title}
+            {/* Event Title */}
+            <Typography variant="h5" component="h2" gutterBottom>
+              {title}
             </Typography>
 
+            {/* Divider */}
             <Divider sx={{ my: 2 }} />
 
-            <Stack spacing={2}>
-              {isSingleDay ? (
-                <>
-                  <DetailItem
-                    icon={<CalendarTodayIcon color="action" />}
-                    text={startDate.toLocaleDateString("en-US", dateOptions)}
-                  />
-                  <DetailItem
-                    icon={<AccessTimeIcon color="action" />}
-                    text={`${startDate.toLocaleTimeString("en-US", timeOptions)} — ${endDate.toLocaleTimeString(
-                      "en-US",
-                      timeOptions
-                    )}`}
-                  />
-                </>
-              ) : (
-                <>
-                  <DetailItem
-                    icon={<CalendarTodayIcon color="action" />}
-                    text={`Starts: ${startDate.toLocaleString("en-US", combinedDateTimeOptions)}`}
-                  />
-                  <DetailItem
-                    icon={<CalendarTodayIcon color="action" />}
-                    text={`Ends: ${endDate.toLocaleString("en-US", combinedDateTimeOptions)}`}
-                  />
-                </>
-              )}
-            </Stack>
+            {/* Date and Time Details */}
+            <Stack spacing={2}>{dateTimeDetails}</Stack>
           </Box>
         </DialogContent>
 
-        <DialogActions sx={{ p: "16px 24px", justifyContent: "space-between" }}>
+        {/* Dialog Actions */}
+        <DialogActions sx={{ p: "16px 24px", justifyContent: "space-between", flexWrap: "wrap", gap: 1 }}>
+          {/* Calendar and Learn More Buttons */}
+          <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+            <Button variant="outlined" startIcon={<AddToCalendarIcon />} onClick={() => downloadIcsFile(event)}>
+              Add to Calendar
+            </Button>
+            {!isCustomEvent && (
+              <Button
+                component={Link}
+                href={id}
+                target="_blank"
+                rel="noopener noreferrer"
+                variant="contained"
+                endIcon={<OpenInNewIcon />}
+              >
+                Learn More
+              </Button>
+            )}
+          </Box>
+
+          {/* Action Buttons */}
           <Box>
             {isCustomEvent && (
               <>
@@ -230,42 +313,18 @@ function EventDetailDialog({
                 </Button>
               </>
             )}
-          </Box>
-          <Box sx={{ display: "flex", gap: 1 }}>
             <Button onClick={onClose}>Close</Button>
-            <Button variant="outlined" startIcon={<AddToCalendarIcon />} onClick={() => downloadIcsFile(event)}>
-              Add to Calendar
-            </Button>
-            {!isCustomEvent && (
-              <Button
-                component={Link}
-                href={event.extendedProps.article_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                variant="contained"
-                endIcon={<OpenInNewIcon />}
-              >
-                Learn More
-              </Button>
-            )}
           </Box>
         </DialogActions>
       </Dialog>
 
-      <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)} disableRestoreFocus>
-        <DialogTitle>Confirm Deletion</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Are you sure you want to delete the event "{event.title}"? This action cannot be undone.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setConfirmOpen(false)}>Cancel</Button>
-          <Button onClick={handleDelete} color="error" variant="contained">
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {/* Extracted Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleDelete}
+        eventName={title}
+      />
     </>
   );
 }

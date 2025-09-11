@@ -1,40 +1,43 @@
+import { format } from "date-fns";
 import { useEffect, useState } from "react";
-
-const GITHUB_API_URL =
-  "https://api.github.com/repos/zhenga8533/leak-duck/commits?sha=data&path=events.json&page=1&per_page=1";
+import { GITHUB_LAST_UPDATED_API_URL } from "../config/api";
 
 /**
- * Custom hook to fetch the last updated time of the events data from GitHub.
+ * Custom hook to fetch and manage the last updated time of a resource from GitHub.
  *
- * @returns Last updated time as a formatted string, loading state, and error state.
+ * @returns A custom hook to fetch and manage the last updated time of a resource from GitHub.
  */
 export function useLastUpdated() {
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch the last updated time from GitHub API on component mount
+  // Effect to fetch the last updated time when the component mounts.
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchLastUpdated = async () => {
       try {
-        const response = await fetch(GITHUB_API_URL);
+        const response = await fetch(GITHUB_LAST_UPDATED_API_URL, { signal: controller.signal });
+
         if (!response.ok) {
-          throw new Error("Failed to fetch update time");
+          throw new Error(`GitHub API responded with status ${response.status}`);
         }
+
         const data = await response.json();
         if (data && data.length > 0) {
           const lastCommitDate = new Date(data[0].commit.committer.date);
-          const formattedDate = lastCommitDate.toLocaleString([], {
-            month: "short",
-            day: "numeric",
-            hour: "numeric",
-            minute: "2-digit",
-          });
+          const formattedDate = format(lastCommitDate, "MMM d, h:mm a");
           setLastUpdated(formattedDate);
         } else {
+          // This case occurs if the file has no commit history.
           setLastUpdated("N/A");
         }
-      } catch (err) {
+      } catch (err: any) {
+        if (err.name === "AbortError") {
+          console.log("Fetch aborted for useLastUpdated.");
+          return;
+        }
         setError("Could not load update time.");
         console.error(err);
       } finally {
@@ -43,6 +46,10 @@ export function useLastUpdated() {
     };
 
     fetchLastUpdated();
+
+    return () => {
+      controller.abort();
+    };
   }, []);
 
   return { lastUpdated, loading, error };

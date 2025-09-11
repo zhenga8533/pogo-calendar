@@ -18,45 +18,88 @@ import {
   Typography,
   useScrollTrigger,
 } from "@mui/material";
+import React, { useCallback } from "react";
 import { useLastUpdated } from "../../hooks/useLastUpdated";
 import type { ThemeSetting } from "../../types/theme";
 
-/**
- * Displays the last updated time with loading and error states.
- *
- * @returns {React.ReactElement} A component that displays the last updated time.
- */
-function LastUpdatedDisplay() {
-  const { lastUpdated, loading, error } = useLastUpdated();
+const themeOptions = [
+  { value: "light", text: "Light", Icon: LightModeIcon },
+  { value: "dark", text: "Dark", Icon: DarkModeIcon },
+  { value: "auto", text: "Auto", Icon: SettingsBrightnessIcon },
+];
 
-  // Render loading, error, or last updated time
-  if (loading) {
-    return (
-      <Typography variant="body2" sx={{ opacity: 0.7 }}>
-        Checking for updates...
-      </Typography>
-    );
-  }
-  if (error) {
-    return (
-      <Typography variant="body2" color="error">
-        {error}
-      </Typography>
-    );
-  }
+const LastUpdatedDisplay = React.memo(
+  /**
+   * A memoized component that displays the last updated time with loading and error states.
+   *
+   * @returns A component that displays the last updated time with loading and error states.
+   */
+  function LastUpdatedDisplay() {
+    const { lastUpdated, loading, error } = useLastUpdated();
 
-  return (
-    <Tooltip title="Last Data Refresh">
-      <Stack direction="row" alignItems="center" spacing={1}>
-        <SyncIcon fontSize="small" />
-        <Typography variant="body2" sx={{ whiteSpace: "nowrap" }}>
-          {lastUpdated}
+    // Render loading, error, or last updated time based on state.
+    if (loading) {
+      return (
+        <Typography variant="body2" sx={{ opacity: 0.7 }}>
+          Checking for updates...
         </Typography>
-      </Stack>
-    </Tooltip>
-  );
-}
+      );
+    }
+    if (error) {
+      return (
+        <Typography variant="body2" color="error">
+          {error}
+        </Typography>
+      );
+    }
 
+    // Render the last updated time with an icon and tooltip.
+    return (
+      <Tooltip title="Last Data Refresh">
+        <Stack direction="row" alignItems="center" spacing={1}>
+          <SyncIcon fontSize="small" />
+          <Typography variant="body2" sx={{ whiteSpace: "nowrap" }}>
+            {lastUpdated}
+          </Typography>
+        </Stack>
+      </Tooltip>
+    );
+  }
+);
+
+const ThemeSelector = React.memo(
+  /**
+   * A memoized component that provides a theme selection dropdown.
+   *
+   * @param param0 Props for the ThemeSelector component.
+   * @returns A selector for choosing the application theme.
+   */
+  function ThemeSelector({ themeSetting, onChange }: { themeSetting: ThemeSetting; onChange: (e: any) => void }) {
+    return (
+      <FormControl variant="standard" sx={{ minWidth: 50 }}>
+        <Select
+          value={themeSetting}
+          onChange={onChange}
+          disableUnderline
+          sx={{
+            color: "inherit",
+            "& .MuiSvgIcon-root": { color: "inherit" },
+            "& .MuiSelect-select": { display: "flex", alignItems: "center" },
+          }}
+        >
+          {themeOptions.map(({ value, text, Icon }) => (
+            <MenuItem key={value} value={value}>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <Icon fontSize="small" />
+                <Typography variant="body2">{text}</Typography>
+              </Stack>
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    );
+  }
+);
 interface HeaderProps {
   themeSetting: ThemeSetting;
   setThemeSetting: (setting: ThemeSetting) => void;
@@ -64,18 +107,22 @@ interface HeaderProps {
 }
 
 /**
- * Header component that displays the app bar with theme selector and info button.
+ * Renders the header component for the application.
  *
- * @param {HeaderProps} props Props including theme setting, handler, and info click handler.
- * @returns {React.ReactElement} A component that renders the app bar with various controls.
+ * @param param0 Props for the Header component.
+ * @returns The header component for the application.
  */
-function Header({ themeSetting, setThemeSetting, onInfoClick }: HeaderProps) {
-  const trigger = useScrollTrigger({
-    disableHysteresis: true,
-    threshold: 0,
-  });
+function HeaderComponent({ themeSetting, setThemeSetting, onInfoClick }: HeaderProps) {
+  const trigger = useScrollTrigger({ disableHysteresis: true, threshold: 0 });
 
-  // Render the app bar with title, last updated display, theme selector, and info button
+  const handleThemeChange = useCallback(
+    (e: React.ChangeEvent<{ value: unknown }>) => {
+      setThemeSetting(e.target.value as ThemeSetting);
+    },
+    [setThemeSetting]
+  );
+
+  // Render the AppBar with dynamic styles based on scroll position.
   return (
     <AppBar
       position="sticky"
@@ -94,56 +141,19 @@ function Header({ themeSetting, setThemeSetting, onInfoClick }: HeaderProps) {
       })}
     >
       <Toolbar>
+        {/* App Icon and Title */}
         <CalendarMonthIcon sx={{ mr: 1.5 }} />
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           PoGo Event Calendar
         </Typography>
 
+        {/* Right Side: Last Updated, Theme Selector, Info Button */}
         <Stack direction="row" alignItems="center" spacing={1.5}>
           <Box sx={{ display: { xs: "none", sm: "block" } }}>
             <LastUpdatedDisplay />
           </Box>
-          <Divider
-            orientation="vertical"
-            flexItem
-            sx={{ borderColor: "inherit", my: 1.5, display: { xs: "none", sm: "block" } }}
-          />
-          <FormControl variant="standard" sx={{ minWidth: 50 }}>
-            <Select
-              value={themeSetting}
-              onChange={(e) => setThemeSetting(e.target.value as ThemeSetting)}
-              disableUnderline
-              sx={{
-                color: "inherit",
-                "& .MuiSvgIcon-root": {
-                  color: "inherit",
-                },
-                "& .MuiSelect-select": {
-                  display: "flex",
-                  alignItems: "center",
-                },
-              }}
-            >
-              <MenuItem value="light">
-                <Stack direction="row" spacing={1} alignItems="center">
-                  <LightModeIcon fontSize="small" />
-                  <Typography variant="body2">Light</Typography>
-                </Stack>
-              </MenuItem>
-              <MenuItem value="dark">
-                <Stack direction="row" spacing={1} alignItems="center">
-                  <DarkModeIcon fontSize="small" />
-                  <Typography variant="body2">Dark</Typography>
-                </Stack>
-              </MenuItem>
-              <MenuItem value="auto">
-                <Stack direction="row" spacing={1} alignItems="center">
-                  <SettingsBrightnessIcon fontSize="small" />
-                  <Typography variant="body2">Auto</Typography>
-                </Stack>
-              </MenuItem>
-            </Select>
-          </FormControl>
+          <Divider orientation="vertical" flexItem sx={{ display: { xs: "none", sm: "block" } }} />
+          <ThemeSelector themeSetting={themeSetting} onChange={handleThemeChange} />
           <IconButton color="inherit" onClick={onInfoClick}>
             <InfoIcon />
           </IconButton>
@@ -153,4 +163,5 @@ function Header({ themeSetting, setThemeSetting, onInfoClick }: HeaderProps) {
   );
 }
 
+const Header = React.memo(HeaderComponent);
 export default Header;

@@ -1,45 +1,59 @@
+import { GITHUB_EVENTS_API_URL } from "../config/api";
 import type { ApiEvent, CalendarEvent } from "../types/events";
 
-const API_URL = "https://raw.githubusercontent.com/zhenga8533/leak-duck/data/events.json";
+type ApiResponse = Record<string, ApiEvent[]>;
 
 /**
- * Fetches event data from the API, transforms it into CalendarEvent format, and returns it.
+ * Parses a time value from the API into a Date object.
  *
- * @returns A promise that resolves to an array of CalendarEvent objects fetched and transformed from the API.
+ * @param time The time value from the API, either a string or a number.
+ * @param isLocal Indicates if the time is in local format (true) or UTC timestamp (false).
+ * @returns A Date object representing the parsed time.
+ */
+function parseApiDate(time: string | number, isLocal: boolean): Date {
+  if (isLocal) {
+    // The time is a pre-formatted local time string (e.g., "2025-09-11T14:00:00").
+    return new Date(time as string);
+  }
+
+  // The time is a UTC timestamp in seconds, so we multiply by 1000 for milliseconds.
+  return new Date((time as number) * 1000);
+}
+
+/**
+ * Transforms the raw API response data into an array of CalendarEvent objects.
+ *
+ * @param data The raw API response data.
+ * @returns An array of CalendarEvent objects.
+ */
+function transformApiData(data: ApiResponse): CalendarEvent[] {
+  return Object.values(data).flatMap((eventsInCategory) =>
+    eventsInCategory.map((event: ApiEvent) => ({
+      title: event.title,
+      start: parseApiDate(event.start_time, event.is_local_time),
+      end: parseApiDate(event.end_time, event.is_local_time),
+      extendedProps: {
+        category: event.category,
+        article_url: event.article_url,
+        banner_url: event.banner_url,
+      },
+    }))
+  );
+}
+
+/**
+ * Fetches events from the GitHub Events API and transforms them into CalendarEvent objects.
+ *
+ * @returns A promise that resolves to an array of CalendarEvent objects fetched from the API.
  */
 export const fetchEvents = async (): Promise<CalendarEvent[]> => {
-  const response = await fetch(API_URL);
+  const response = await fetch(GITHUB_EVENTS_API_URL);
+
   if (!response.ok) {
-    throw new Error("Failed to fetch event data");
+    throw new Error(`API request failed with status ${response.status}`);
   }
-  const data = await response.json();
 
-  // Transform the fetched data into CalendarEvent format
-  const allEvents: CalendarEvent[] = [];
-  for (const category in data) {
-    data[category].forEach((event: ApiEvent) => {
-      let startDate: Date;
-      let endDate: Date;
+  const data: ApiResponse = await response.json();
 
-      if (event.is_local_time) {
-        startDate = new Date(event.start_time as string);
-        endDate = new Date(event.end_time as string);
-      } else {
-        startDate = new Date((event.start_time as number) * 1000);
-        endDate = new Date((event.end_time as number) * 1000);
-      }
-
-      allEvents.push({
-        title: event.title,
-        start: startDate,
-        end: endDate,
-        extendedProps: {
-          category: event.category,
-          article_url: event.article_url,
-          banner_url: event.banner_url,
-        },
-      });
-    });
-  }
-  return allEvents;
+  return transformApiData(data);
 };

@@ -1,26 +1,33 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { SAVED_EVENTS_KEY } from "../config/storage";
 
 /**
- * Custom hook to manage saved events using localStorage.
+ * Custom hook to manage saved event IDs with localStorage persistence.
  *
- * @returns An object containing saved event IDs and a function to toggle saving an event.
+ * @returns A custom hook to manage saved event IDs with localStorage persistence.
  */
 export function useSavedEvents() {
-  // Initialize saved event IDs from localStorage or use an empty array
   const [savedEventIds, setSavedEventIds] = useState<string[]>(() => {
-    const saved = localStorage.getItem("savedEventIds");
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = localStorage.getItem(SAVED_EVENTS_KEY);
+      return saved ? JSON.parse(saved) : [];
+    } catch (error) {
+      console.error("Failed to parse saved event IDs from localStorage:", error);
+      return [];
+    }
   });
 
-  // Persist saved event IDs to localStorage whenever they change
+  // Effect to persist the list of saved IDs to localStorage whenever it changes.
   useEffect(() => {
-    localStorage.setItem("savedEventIds", JSON.stringify(savedEventIds));
+    localStorage.setItem(SAVED_EVENTS_KEY, JSON.stringify(savedEventIds));
   }, [savedEventIds]);
 
-  // Function to toggle saving or unsaving an event by its ID
-  const handleToggleSaveEvent = (eventId: string) => {
-    setSavedEventIds((prev) => (prev.includes(eventId) ? prev.filter((id) => id !== eventId) : [...prev, eventId]));
-  };
+  // Function to toggle the saved state of an event by its ID.
+  const handleToggleSaveEvent = useCallback((eventId: string) => {
+    setSavedEventIds((prevIds) =>
+      prevIds.includes(eventId) ? prevIds.filter((id) => id !== eventId) : [...prevIds, eventId]
+    );
+  }, []);
 
   return { savedEventIds, handleToggleSaveEvent };
 }

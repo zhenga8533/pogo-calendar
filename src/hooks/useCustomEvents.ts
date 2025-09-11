@@ -1,69 +1,76 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import defaultBanner from "../assets/images/default-banner.jpg";
-import type { CalendarEvent } from "../types/events";
+import { CUSTOM_EVENTS_KEY } from "../config/storage";
+import type { CalendarEvent, NewEventData } from "../types/events";
 
-export type NewEventData = {
-  title: string;
-  start: Date;
-  end: Date;
-};
+const CUSTOM_EVENT_CATEGORY = "Custom Event";
 
 /**
- * Custom hook to manage user-created events with local storage persistence.
+ * Custom hook to manage user-created calendar events with localStorage persistence.
  *
- * @returns An object containing custom events and functions to add or delete them.
+ * @returns A custom hook for managing user-created calendar events with localStorage persistence.
  */
 export function useCustomEvents() {
-  // Initialize custom events from local storage
   const [customEvents, setCustomEvents] = useState<CalendarEvent[]>(() => {
-    const saved = localStorage.getItem("customEvents");
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      return parsed.map((event: any) => ({
-        ...event,
-        start: new Date(event.start),
-        end: new Date(event.end),
-      }));
+    try {
+      const saved = localStorage.getItem(CUSTOM_EVENTS_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Ensure start/end are Date objects after parsing from JSON.
+        return parsed.map((event: any) => ({
+          ...event,
+          start: new Date(event.start),
+          end: new Date(event.end),
+        }));
+      }
+    } catch (error) {
+      console.error("Failed to parse custom events from localStorage:", error);
     }
+
     return [];
   });
 
-  // Persist custom events to local storage whenever they change
+  // Persist customEvents to localStorage whenever they change.
   useEffect(() => {
-    localStorage.setItem("customEvents", JSON.stringify(customEvents));
+    localStorage.setItem(CUSTOM_EVENTS_KEY, JSON.stringify(customEvents));
   }, [customEvents]);
 
-  // Function to add a new custom event
-  const addCustomEvent = (eventData: NewEventData) => {
+  // Function to add a new custom event.
+  const addEvent = useCallback((eventData: NewEventData) => {
     const newEvent: CalendarEvent = {
       title: eventData.title,
       start: eventData.start,
       end: eventData.end,
       extendedProps: {
-        category: "Custom Event",
+        category: CUSTOM_EVENT_CATEGORY,
         article_url: uuidv4(),
         banner_url: defaultBanner,
       },
     };
-    setCustomEvents((prev) => [...prev, newEvent]);
-  };
+    setCustomEvents((prevEvents) => [...prevEvents, newEvent]);
+  }, []);
 
-  // Function to update an existing custom event by its unique article_url
-  const updateCustomEvent = (eventId: string, eventData: NewEventData) => {
-    setCustomEvents((prev) =>
-      prev.map((event) =>
+  // Function to update an existing custom event by its ID.
+  const updateEvent = useCallback((eventId: string, eventData: NewEventData) => {
+    setCustomEvents((prevEvents) =>
+      prevEvents.map((event) =>
         event.extendedProps.article_url === eventId
           ? { ...event, title: eventData.title, start: eventData.start, end: eventData.end }
           : event
       )
     );
-  };
+  }, []);
 
-  // Function to delete a custom event by its unique article_url
-  const deleteCustomEvent = (eventId: string) => {
-    setCustomEvents((prev) => prev.filter((event) => event.extendedProps.article_url !== eventId));
-  };
+  // Function to delete a custom event by its ID.
+  const deleteEvent = useCallback((eventId: string) => {
+    setCustomEvents((prevEvents) => prevEvents.filter((event) => event.extendedProps.article_url !== eventId));
+  }, []);
 
-  return { customEvents, addCustomEvent, updateCustomEvent, deleteCustomEvent };
+  return {
+    customEvents,
+    addEvent,
+    updateEvent,
+    deleteEvent,
+  };
 }

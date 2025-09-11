@@ -1,121 +1,81 @@
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
+import { SAVED_EVENTS_CATEGORY } from "../../config/eventFilter";
+import type { EventFilterProps, Filters } from "../../types/filters";
 import { DesktopEventFilter } from "./DesktopEventFilter";
 import { MobileEventFilter } from "./MobileEventFilter";
 
-export interface Filters {
-  searchTerm: string;
-  selectedCategories: string[];
-  startDate: Date | null;
-  endDate: Date | null;
-  timeRange: number[];
-  firstDay: number;
-}
-
-export interface EventFilterProps {
-  filters: Filters;
-  onFilterChange: (newFilters: Filters) => void;
-  onResetFilters: () => void;
-  onNewEventClick: () => void;
-  onOpenExportDialog: () => void;
-  allCategories: string[];
-  isMobile: boolean;
-}
-
-export const marks = [
-  { value: 0, label: "12 AM" },
-  { value: 6, label: "6 AM" },
-  { value: 12, label: "12 PM" },
-  { value: 18, label: "6 PM" },
-  { value: 24, label: "12 AM" },
-];
-
-export const dayOptions = [
-  { value: 0, label: "Sunday" },
-  { value: 1, label: "Monday" },
-  { value: 2, label: "Tuesday" },
-  { value: 3, label: "Wednesday" },
-  { value: 4, label: "Thursday" },
-  { value: 5, label: "Friday" },
-  { value: 6, label: "Saturday" },
-];
-
-export const categoryGroups = {
-  "Major Events": ["Community Day", "Pokémon GO Fest", "Pokémon GO Tour", "Raid Day", "Raid Weekend", "Wild Area"],
-  "Weekly Events": ["Raid Hour", "Pokémon Spotlight Hour", "Max Mondays"],
-};
-
 /**
- * Format hour value to 12-hour time with AM/PM
+ * Responsive EventFilter component that switches between desktop and mobile views.
  *
- * @param value The hour value (0-24)
- * @returns Formatted time string (e.g., "12 AM", "1 PM")
- */
-export function formatTime(value: number) {
-  if (value === 24) return "12 AM";
-  const ampm = value < 12 ? "AM" : "PM";
-  const hour = value % 12 === 0 ? 12 : value % 12;
-  return `${hour} ${ampm}`;
-}
-
-/**
- * EventFilter component to filter events by search term, date range, time range, and categories.
- *
- * @param {EventFilterProps} props Props containing filters, change handlers, categories, and mobile view flag.
- * @returns {React.ReactElement} The rendered EventFilter component.
+ * @param props Props for the EventFilter component.
+ * @returns A responsive event filter component that adapts to desktop and mobile views.
  */
 function EventFilter(props: EventFilterProps) {
+  const { filters, onFilterChange, allCategories, isMobile } = props;
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-  // Handlers for menu open/close
-  const handleMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  // Handler to open the category menu.
+  const handleMenuClick = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
-  };
-  const handleMenuClose = () => {
+  }, []);
+
+  // Handler to close the category menu.
+  const handleMenuClose = useCallback(() => {
     setAnchorEl(null);
-  };
+  }, []);
 
-  // Handler for filter changes
-  const handleFilterChange = (field: keyof Filters, value: any) => {
-    props.onFilterChange({ ...props.filters, [field]: value });
-  };
+  // Handler to update filters.
+  const handleFilterChange = useCallback(
+    (field: keyof Filters, value: any) => {
+      onFilterChange({ ...filters, [field]: value });
+    },
+    [filters, onFilterChange]
+  );
 
-  // Handler for category checkbox changes
-  const handleCategoryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const category = event.target.name;
-    const isChecked = event.target.checked;
-    const newSelectedCategories = isChecked
-      ? [...props.filters.selectedCategories, category]
-      : props.filters.selectedCategories.filter((c) => c !== category);
-    handleFilterChange("selectedCategories", newSelectedCategories);
-  };
+  // Handler to toggle category selection.
+  const handleCategoryChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const { name: category, checked } = event.target;
+      const { selectedCategories } = filters;
 
-  // Handlers for select all and clear all categories
-  const handleSelectAll = () => {
-    const all = ["Saved", ...props.allCategories];
+      const newSelectedCategories = checked
+        ? [...selectedCategories, category]
+        : selectedCategories.filter((c) => c !== category);
+
+      handleFilterChange("selectedCategories", newSelectedCategories);
+    },
+    [filters, handleFilterChange]
+  );
+
+  // Handler to select all categories.
+  const handleSelectAll = useCallback(() => {
+    // Include the special "Saved" category along with all dynamic categories.
+    const all = [SAVED_EVENTS_CATEGORY, ...allCategories];
     handleFilterChange("selectedCategories", all);
-  };
+  }, [allCategories, handleFilterChange]);
 
-  // Clear all selected categories
-  const handleClearAll = () => {
+  // Handler to clear all category selections.
+  const handleClearAll = useCallback(() => {
     handleFilterChange("selectedCategories", []);
-  };
+  }, [handleFilterChange]);
 
   const sharedProps = {
     ...props,
+    anchorEl,
+    handleMenuClick,
+    handleMenuClose,
     handleFilterChange,
     handleCategoryChange,
     handleSelectAll,
     handleClearAll,
-    anchorEl,
-    handleMenuClick,
-    handleMenuClose,
   };
 
+  // Render the appropriate filter component based on the device type.
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      {props.isMobile ? <MobileEventFilter {...sharedProps} /> : <DesktopEventFilter {...sharedProps} />}
+      {isMobile ? <MobileEventFilter {...sharedProps} /> : <DesktopEventFilter {...sharedProps} />}
     </LocalizationProvider>
   );
 }

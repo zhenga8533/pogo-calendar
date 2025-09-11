@@ -12,7 +12,8 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import type { CalendarEvent } from "../../types/events";
 import { getColorForCategory } from "../../utils/colorUtils";
 import EventDetailDialog from "../events/EventDetailDialog";
-import EventHoverPopover from "./EventHoverPopover";
+
+import EventHoverDetails from "./EventHoverDetails";
 
 interface EventCalendarProps {
   events: CalendarEvent[];
@@ -65,7 +66,7 @@ function EventCalendar({
   }, [isMobile]);
 
   // Handle event click to open detail dialog
-  const handleEventClick = (clickInfo: EventClickArg) => {
+  const handleFullCalendarEventClick = (clickInfo: EventClickArg) => {
     const eventId = clickInfo.event.extendedProps.article_url;
     const originalEvent = allOriginalEvents.find((e) => e.extendedProps.article_url === eventId);
     if (originalEvent) {
@@ -209,7 +210,7 @@ function EventCalendar({
           }
           initialView="dayGridMonth"
           events={events}
-          eventClick={handleEventClick}
+          eventClick={handleFullCalendarEventClick}
           eventContent={renderEventContent}
           height={isMobile ? "75vh" : "auto"}
           aspectRatio={isMobile ? 1.2 : 1.75}
@@ -225,11 +226,11 @@ function EventCalendar({
         />
       </Paper>
 
-      <EventHoverPopover
+      <EventHoverDetails
         open={open}
         id={id}
         mousePosition={mousePosition}
-        popoverEvent={popoverEvent}
+        event={popoverEvent}
         onClose={handlePopoverClose}
       />
 

@@ -1,22 +1,8 @@
-import { formatDistanceToNowStrict, intervalToDuration, type Duration } from "date-fns";
+import { formatDistanceToNowStrict, intervalToDuration } from "date-fns";
 import { useEffect, useState } from "react";
+import { formatDurationFromInterval } from "../utils/dateUtils";
 
 type EventStatus = "active" | "upcoming" | "finished" | "loading";
-
-/**
- * Formats a Duration object into a concise, human-readable string.
- *
- * @param duration A Duration object containing days, hours, minutes, and seconds.
- * @returns A formatted string representing the duration in a human-readable format.
- */
-function formatDuration(duration: Duration): string {
-  const parts = [];
-  if (duration.days && duration.days > 0) parts.push(`${duration.days}d`);
-  if (duration.hours && duration.hours > 0) parts.push(`${duration.hours}h`);
-  if (duration.minutes && duration.minutes > 0) parts.push(`${duration.minutes}m`);
-  if (parts.length === 0 && duration.seconds && duration.seconds > 0) parts.push(`${duration.seconds}s`);
-  return parts.join(" ");
-}
 
 /**
  * Custom hook to determine the status of an event based on its start and end dates.
@@ -44,11 +30,11 @@ export function useEventStatus(start: Date | null, end: Date | null) {
       if (now < start) {
         setStatus("upcoming");
         const duration = intervalToDuration({ start: now, end: start });
-        setDisplayTime(formatDuration(duration));
+        setDisplayTime(formatDurationFromInterval(duration));
       } else if (now >= start && now <= end) {
         setStatus("active");
         const duration = intervalToDuration({ start: now, end: end });
-        setDisplayTime(formatDuration(duration));
+        setDisplayTime(formatDurationFromInterval(duration));
       } else {
         setStatus("finished");
         setDisplayTime(formatDistanceToNowStrict(end, { addSuffix: true }));

@@ -25,5 +25,6 @@ export function formatDurationFromInterval(duration: Duration): string {
   if (duration.days && duration.days > 0) parts.push(`${duration.days}d`);
   if (duration.hours && duration.hours > 0) parts.push(`${duration.hours}h`);
   if (duration.minutes && duration.minutes > 0) parts.push(`${duration.minutes}min`);
+  if (duration.seconds && duration.seconds > 0 && parts.length === 0) parts.push(`${duration.seconds}s`);
   return parts.length > 0 ? parts.join(" ") : "0min";
 }

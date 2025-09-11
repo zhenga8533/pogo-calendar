@@ -71,10 +71,6 @@ const CalendarEventContent = React.memo(
           border: "2px solid rgba(0, 0, 0, 0.2)",
           boxSizing: "border-box",
           transition: "box-shadow 0.15s ease-in-out, filter 0.15s ease-in-out",
-          "&:hover": {
-            filter: "brightness(1.2)",
-            boxShadow: theme.shadows[4],
-          },
         }}
         onMouseEnter={(e) => onMouseEnter(e, eventInfo.event as unknown as CalendarEvent)}
         onMouseLeave={onMouseLeave}
@@ -257,6 +253,27 @@ function EventCalendar({
           firstDay={firstDay}
           selectable={true}
           select={handleDateSelect}
+          eventDidMount={(arg) => {
+            arg.el.setAttribute("data-event-id", arg.event.extendedProps.article_url);
+          }}
+          eventMouseEnter={(arg) => {
+            const eventId = arg.event.extendedProps.article_url;
+            const eventElements = document.querySelectorAll<HTMLElement>(`[data-event-id="${eventId}"]`);
+            eventElements.forEach((el) => {
+              el.style.filter = "brightness(1.3)";
+              el.style.boxShadow = "0 0 8px rgba(0, 0, 0, 0.5)";
+              el.style.zIndex = "10";
+            });
+          }}
+          eventMouseLeave={(arg) => {
+            const eventId = arg.event.extendedProps.article_url;
+            const eventElements = document.querySelectorAll<HTMLElement>(`[data-event-id="${eventId}"]`);
+            eventElements.forEach((el) => {
+              el.style.filter = "";
+              el.style.boxShadow = "";
+              el.style.zIndex = "";
+            });
+          }}
         />
       </Paper>
 

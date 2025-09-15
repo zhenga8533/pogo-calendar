@@ -4,6 +4,7 @@ import Footer from "./components/layout/Footer";
 import Header from "./components/layout/Header";
 import InfoDialog from "./components/shared/InfoDialog";
 import { useAppTheme } from "./hooks/useAppTheme";
+import { useSettings } from "./hooks/useSettings";
 import Calendar from "./pages/Calendar";
 import { CalendarDarkStyles } from "./styles/calendarDarkStyles";
 
@@ -15,7 +16,8 @@ import { CalendarDarkStyles } from "./styles/calendarDarkStyles";
 function App() {
   const [infoOpen, setInfoOpen] = useState(false);
 
-  const { theme, themeSetting, setThemeSetting } = useAppTheme();
+  const { settings, handleSettingChange } = useSettings();
+  const { theme } = useAppTheme(settings.theme);
 
   const handleInfoOpen = useCallback(() => setInfoOpen(true), []);
   const handleInfoClose = useCallback(() => setInfoOpen(false), []);
@@ -29,10 +31,10 @@ function App() {
 
       {/* Main layout container */}
       <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-        <Header themeSetting={themeSetting} setThemeSetting={setThemeSetting} onInfoClick={handleInfoOpen} />
+        <Header settings={settings} onSettingChange={handleSettingChange} onInfoClick={handleInfoOpen} />
         <Box component="main" sx={{ flexGrow: 1, p: 3, backgroundColor: "background.default" }}>
           <Container maxWidth="xl">
-            <Calendar />
+            <Calendar settings={settings} />
           </Container>
         </Box>
         <Footer />

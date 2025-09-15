@@ -104,7 +104,7 @@ export function useFilters(allEvents: CalendarEvent[], savedEventIds: string[]) 
       // The event is included only if it passes all active filter conditions.
       return passesSavedFilter && passesCategoryFilter && passesSearchFilter && passesDateFilter && passesTimeFilter;
     });
-  }, [allEvents, allFilters, currentView, savedEventIds]);
+  }, [allEvents, filtersForCurrentView, savedEventIds]);
 
   return {
     filters: filtersForCurrentView,

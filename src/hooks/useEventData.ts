@@ -1,27 +1,25 @@
 import { useEffect, useState } from "react";
 import { fetchEvents } from "../services/eventService";
-import type { CalendarEvent } from "../types/events";
+import type { ApiResponse } from "../types/events";
 
 /**
- * Custom hook to fetch and manage calendar event data with loading and error states.
+ * Custom hook to fetch and manage raw calendar event data with loading and error states.
  *
- * @returns A custom hook to fetch and manage calendar event data with loading and error states.
+ * @returns An object containing the raw event data, loading state, and error state.
  */
 export function useEventData() {
-  const [allEvents, setAllEvents] = useState<CalendarEvent[]>([]);
+  const [rawEvents, setRawEvents] = useState<ApiResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let isMounted = true;
 
-    // Async function to fetch event data.
     const getEvents = async () => {
       try {
         const eventData = await fetchEvents();
-        // Only update state if the component is still mounted.
         if (isMounted) {
-          setAllEvents(eventData);
+          setRawEvents(eventData);
         }
       } catch (err) {
         console.error("Error fetching events:", err);
@@ -42,5 +40,5 @@ export function useEventData() {
     };
   }, []);
 
-  return { allEvents, loading, error };
+  return { rawEvents, loading, error };
 }

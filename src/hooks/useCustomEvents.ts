@@ -46,6 +46,7 @@ export function useCustomEvents() {
         category: CUSTOM_EVENT_CATEGORY,
         article_url: uuidv4(),
         banner_url: defaultBanner,
+        is_local_time: false, // Custom events are always UTC-based
       },
     };
     setCustomEvents((prevEvents) => [...prevEvents, newEvent]);

@@ -6,6 +6,7 @@ export interface CalendarEvent {
     category: string;
     article_url: string;
     banner_url: string;
+    is_local_time: boolean;
   };
 }
 
@@ -18,6 +19,8 @@ export interface ApiEvent {
   article_url: string;
   banner_url: string;
 }
+
+export type ApiResponse = Record<string, ApiEvent[]>;
 
 export type NewEventData = {
   title: string;

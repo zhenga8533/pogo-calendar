@@ -100,8 +100,8 @@ function SettingsMenu({ anchorEl, open, onClose, settings, onSettingChange }: Se
                 onChange={(e) => handleTimeZoneChange("sourceTimeZone", e.target.value as string)}
               >
                 {timeZoneOptions.map((tz) => (
-                  <MenuItem key={tz} value={tz}>
-                    {tz}
+                  <MenuItem key={tz.value} value={tz.value}>
+                    {tz.label}
                   </MenuItem>
                 ))}
               </Select>
@@ -117,8 +117,8 @@ function SettingsMenu({ anchorEl, open, onClose, settings, onSettingChange }: Se
                 onChange={(e) => handleTimeZoneChange("destinationTimeZone", e.target.value as string)}
               >
                 {timeZoneOptions.map((tz) => (
-                  <MenuItem key={tz} value={tz}>
-                    {tz}
+                  <MenuItem key={tz.value} value={tz.value}>
+                    {tz.label}
                   </MenuItem>
                 ))}
               </Select>

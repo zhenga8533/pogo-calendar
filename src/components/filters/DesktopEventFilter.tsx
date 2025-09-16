@@ -10,10 +10,14 @@ import {
   Button,
   Checkbox,
   Divider,
+  FormControl,
   FormControlLabel,
   FormGroup,
+  InputLabel,
   Menu,
+  MenuItem,
   Paper,
+  Select,
   Slider,
   Stack,
   TextField,
@@ -21,7 +25,7 @@ import {
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import React, { useMemo } from "react";
-import { categoryGroups, formatTime, marks, SAVED_EVENTS_CATEGORY } from "../../config/eventFilter";
+import { categoryGroups, dayOptions, formatTime, marks, SAVED_EVENTS_CATEGORY } from "../../config/eventFilter";
 import type { EventFilterProps, Filters } from "../../types/filters";
 import { CategoryCheckbox } from "./CategoryCheckbox";
 
@@ -170,13 +174,30 @@ function DesktopEventFilterComponent({
     <Paper sx={{ p: 2, mb: 3 }}>
       <Stack spacing={2}>
         {/* Row 1: Search and Week Start */}
-        <TextField
-          fullWidth
-          label="Search by Event Title"
-          variant="outlined"
-          value={filters.searchTerm}
-          onChange={(e) => handleFilterChange("searchTerm", e.target.value)}
-        />
+        <Stack direction="row" spacing={2}>
+          <TextField
+            fullWidth
+            label="Search by Event Title"
+            variant="outlined"
+            value={filters.searchTerm}
+            onChange={(e) => handleFilterChange("searchTerm", e.target.value)}
+            sx={{ flexGrow: 3 }}
+          />
+          <FormControl sx={{ flexGrow: 1, minWidth: 180 }}>
+            <InputLabel>Week Starts On</InputLabel>
+            <Select
+              value={filters.firstDay}
+              label="Week Starts On"
+              onChange={(e) => handleFilterChange("firstDay", e.target.value)}
+            >
+              {dayOptions.map((day) => (
+                <MenuItem key={day.value} value={day.value}>
+                  {day.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Stack>
 
         {/* Row 2: Date Pickers */}
         <Stack direction="row" spacing={2}>

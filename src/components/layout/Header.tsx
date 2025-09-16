@@ -1,12 +1,32 @@
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
 import InfoIcon from "@mui/icons-material/Info";
+import LightModeIcon from "@mui/icons-material/LightMode";
+import SettingsBrightnessIcon from "@mui/icons-material/SettingsBrightness";
 import SyncIcon from "@mui/icons-material/Sync";
-import TuneIcon from "@mui/icons-material/Tune";
-import { AppBar, Box, Divider, IconButton, Stack, Toolbar, Tooltip, Typography, useScrollTrigger } from "@mui/material";
-import React, { useCallback, useState } from "react";
+import {
+  AppBar,
+  Box,
+  Divider,
+  FormControl,
+  IconButton,
+  MenuItem,
+  Select,
+  Stack,
+  Toolbar,
+  Tooltip,
+  Typography,
+  useScrollTrigger,
+} from "@mui/material";
+import React, { useCallback } from "react";
 import { useLastUpdated } from "../../hooks/useLastUpdated";
-import type { Settings } from "../../types/settings";
-import SettingsMenu from "./SettingsMenu";
+import type { ThemeSetting } from "../../types/theme";
+
+const themeOptions = [
+  { value: "light", text: "Light", Icon: LightModeIcon },
+  { value: "dark", text: "Dark", Icon: DarkModeIcon },
+  { value: "auto", text: "Auto", Icon: SettingsBrightnessIcon },
+];
 
 const LastUpdatedDisplay = React.memo(
   /**
@@ -46,10 +66,44 @@ const LastUpdatedDisplay = React.memo(
     );
   }
 );
+
+const ThemeSelector = React.memo(
+  /**
+   * A memoized component that provides a theme selection dropdown.
+   *
+   * @param param0 Props for the ThemeSelector component.
+   * @returns A selector for choosing the application theme.
+   */
+  function ThemeSelector({ themeSetting, onChange }: { themeSetting: ThemeSetting; onChange: (e: any) => void }) {
+    return (
+      <FormControl variant="standard" sx={{ minWidth: 50 }}>
+        <Select
+          value={themeSetting}
+          onChange={onChange}
+          disableUnderline
+          sx={{
+            color: "inherit",
+            "& .MuiSvgIcon-root": { color: "inherit" },
+            "& .MuiSelect-select": { display: "flex", alignItems: "center" },
+          }}
+        >
+          {themeOptions.map(({ value, text, Icon }) => (
+            <MenuItem key={value} value={value}>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <Icon fontSize="small" />
+                <Typography variant="body2">{text}</Typography>
+              </Stack>
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    );
+  }
+);
 interface HeaderProps {
+  themeSetting: ThemeSetting;
+  setThemeSetting: (setting: ThemeSetting) => void;
   onInfoClick: () => void;
-  settings: Settings;
-  onSettingChange: (field: keyof Settings, value: any) => void;
 }
 
 /**
@@ -58,17 +112,15 @@ interface HeaderProps {
  * @param param0 Props for the Header component.
  * @returns The header component for the application.
  */
-function HeaderComponent({ onInfoClick, settings, onSettingChange }: HeaderProps) {
+function HeaderComponent({ themeSetting, setThemeSetting, onInfoClick }: HeaderProps) {
   const trigger = useScrollTrigger({ disableHysteresis: true, threshold: 0 });
-  const [settingsAnchorEl, setSettingsAnchorEl] = useState<null | HTMLElement>(null);
 
-  const handleSettingsClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
-    setSettingsAnchorEl(event.currentTarget);
-  }, []);
-
-  const handleSettingsClose = useCallback(() => {
-    setSettingsAnchorEl(null);
-  }, []);
+  const handleThemeChange = useCallback(
+    (e: React.ChangeEvent<{ value: unknown }>) => {
+      setThemeSetting(e.target.value as ThemeSetting);
+    },
+    [setThemeSetting]
+  );
 
   // Render the AppBar with dynamic styles based on scroll position.
   return (
@@ -101,23 +153,12 @@ function HeaderComponent({ onInfoClick, settings, onSettingChange }: HeaderProps
             <LastUpdatedDisplay />
           </Box>
           <Divider orientation="vertical" flexItem sx={{ display: { xs: "none", sm: "block" } }} />
-          <IconButton color="inherit" onClick={handleSettingsClick}>
-            <TuneIcon />
-          </IconButton>
+          <ThemeSelector themeSetting={themeSetting} onChange={handleThemeChange} />
           <IconButton color="inherit" onClick={onInfoClick}>
             <InfoIcon />
           </IconButton>
         </Stack>
       </Toolbar>
-
-      {/* Settings Menu */}
-      <SettingsMenu
-        anchorEl={settingsAnchorEl}
-        open={Boolean(settingsAnchorEl)}
-        onClose={handleSettingsClose}
-        settings={settings}
-        onSettingChange={onSettingChange}
-      />
     </AppBar>
   );
 }

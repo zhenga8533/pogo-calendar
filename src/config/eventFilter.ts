@@ -6,6 +6,7 @@ export const initialFilters = {
   startDate: null as Date | null,
   endDate: null as Date | null,
   timeRange: [0, 24],
+  firstDay: 0,
 };
 
 export const marks = [

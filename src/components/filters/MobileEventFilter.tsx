@@ -12,8 +12,12 @@ import {
   Button,
   Checkbox,
   Divider,
+  FormControl,
   FormControlLabel,
   FormGroup,
+  InputLabel,
+  MenuItem,
+  Select,
   Slider,
   Stack,
   TextField,
@@ -21,7 +25,7 @@ import {
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import React from "react";
-import { formatTime, marks, SAVED_EVENTS_CATEGORY } from "../../config/eventFilter";
+import { dayOptions, formatTime, marks, SAVED_EVENTS_CATEGORY } from "../../config/eventFilter";
 import type { EventFilterProps, Filters } from "../../types/filters";
 import { CategoryCheckbox } from "./CategoryCheckbox";
 
@@ -120,6 +124,20 @@ function MobileEventFilterComponent({
         onChange={(date) => handleFilterChange("startDate", date)}
       />
       <DatePicker label="End Date" value={filters.endDate} onChange={(date) => handleFilterChange("endDate", date)} />
+      <FormControl fullWidth>
+        <InputLabel>Week Starts On</InputLabel>
+        <Select
+          value={filters.firstDay}
+          label="Week Starts On"
+          onChange={(e) => handleFilterChange("firstDay", e.target.value)}
+        >
+          {dayOptions.map((day) => (
+            <MenuItem key={day.value} value={day.value}>
+              {day.label}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
 
       {/* Time of Day Slider */}
       <Box sx={{ px: 1 }}>

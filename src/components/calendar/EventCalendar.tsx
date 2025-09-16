@@ -19,7 +19,6 @@ interface EventCalendarProps {
   isMobile: boolean;
   savedEventIds: string[];
   firstDay: number;
-  timeZone: string;
   filterStartDate: Date | null;
   filterEndDate: Date | null;
   onToggleSaveEvent: (eventId: string) => void;
@@ -108,7 +107,6 @@ function EventCalendar({
   isMobile,
   savedEventIds,
   firstDay,
-  timeZone,
   filterStartDate,
   filterEndDate,
   onToggleSaveEvent,
@@ -253,7 +251,6 @@ function EventCalendar({
           datesSet={(dateInfo) => onViewChange(dateInfo.view.type)}
           titleFormat={isMobile ? { month: "short", year: "numeric" } : { month: "long", year: "numeric" }}
           firstDay={firstDay}
-          timeZone={timeZone}
           selectable={true}
           select={handleDateSelect}
           eventDidMount={(arg) => {
@@ -287,7 +284,6 @@ function EventCalendar({
         mousePosition={popoverState.position}
         event={popoverState.event}
         onClose={handlePopoverClose}
-        timeZone={timeZone}
       />
 
       {/* Event Detail Dialog */}
@@ -298,7 +294,6 @@ function EventCalendar({
         onToggleSaveEvent={onToggleSaveEvent}
         onDeleteEvent={onDeleteEvent}
         onEditEvent={onEditEvent}
-        timeZone={timeZone}
       />
     </>
   );

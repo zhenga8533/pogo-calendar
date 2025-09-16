@@ -16,12 +16,14 @@ export function useEventStatus(start: Date | null, end: Date | null) {
   const [displayTime, setDisplayTime] = useState<string>("");
 
   useEffect(() => {
+    // If either date is missing, we can't determine the status.
     if (!start || !end) {
       setStatus("loading");
       setDisplayTime("");
       return;
     }
 
+    // This interval updates the status and time every second, creating the live countdown.
     const interval = setInterval(() => {
       const now = new Date();
 

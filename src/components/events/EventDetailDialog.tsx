@@ -27,7 +27,6 @@ import { useEventStatus } from "../../hooks/useEventStatus";
 import type { CalendarEvent } from "../../types/events";
 import { downloadIcsFile } from "../../utils/calendarUtils";
 import { getColorForCategory } from "../../utils/colorUtils";
-import { formatDateLine } from "../../utils/dateUtils";
 
 interface EventDetailDialogProps {
   event: CalendarEvent | null;
@@ -36,9 +35,28 @@ interface EventDetailDialogProps {
   onToggleSaveEvent: (eventId: string) => void;
   onDeleteEvent: (eventId: string) => void;
   onEditEvent: (event: CalendarEvent) => void;
-  timeZone: string;
 }
 
+const DATE_OPTIONS: Intl.DateTimeFormatOptions = {
+  month: "long",
+  day: "numeric",
+  year: "numeric",
+};
+
+const TIME_OPTIONS: Intl.DateTimeFormatOptions = {
+  hour: "numeric",
+  minute: "2-digit",
+  timeZoneName: "short",
+};
+
+const COMBINED_DATE_TIME_OPTIONS: Intl.DateTimeFormatOptions = { ...DATE_OPTIONS, ...TIME_OPTIONS };
+
+/**
+ * Renders a single detail item with an icon and text.
+ *
+ * @param param0 Props for the DetailItem component.
+ * @returns A single detail item with an icon and text.
+ */
 function DetailItem({ icon, text }: { icon: React.ReactNode; text: string }) {
   return (
     <Stack direction="row" spacing={1.5} alignItems="center">
@@ -48,6 +66,12 @@ function DetailItem({ icon, text }: { icon: React.ReactNode; text: string }) {
   );
 }
 
+/**
+ * Renders a confirmation dialog for deleting an event.
+ *
+ * @param param0 Props for the DeleteConfirmationDialog component.
+ * @returns A confirmation dialog for deleting an event.
+ */
 function DeleteConfirmationDialog({
   open,
   onClose,
@@ -77,6 +101,12 @@ function DeleteConfirmationDialog({
   );
 }
 
+/**
+ * A dialog component that displays detailed information about a calendar event.
+ *
+ * @param param0 Props for the EventDetailDialog component.
+ * @returns A dialog displaying detailed information about a calendar event.
+ */
 function EventDetailDialog({
   event,
   onClose,
@@ -84,10 +114,30 @@ function EventDetailDialog({
   onToggleSaveEvent,
   onDeleteEvent,
   onEditEvent,
-  timeZone,
 }: EventDetailDialogProps) {
   const theme = useTheme();
   const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const eventDetails = useMemo(() => {
+    if (!event) return null;
+
+    const eventId = event.extendedProps.article_url;
+    const startDate = new Date(event.start!);
+    const endDate = new Date(event.end!);
+
+    return {
+      id: eventId,
+      title: event.title,
+      category: event.extendedProps.category,
+      bannerUrl: event.extendedProps.banner_url,
+      startDate,
+      endDate,
+      isCustomEvent: event.extendedProps.category === "Custom Event",
+      isSaved: savedEventIds.includes(eventId),
+      isSingleDay: startDate.toDateString() === endDate.toDateString(),
+    };
+  }, [event, savedEventIds]);
+
   const { status, displayTime } = useEventStatus(event?.start ?? null, event?.end ?? null);
 
   const statusInfo = useMemo(
@@ -101,67 +151,69 @@ function EventDetailDialog({
   );
 
   const categoryColor = useMemo(
-    () => (event ? getColorForCategory(event.extendedProps.category, theme.palette.mode) : "default"),
-    [event, theme.palette.mode]
+    () => (eventDetails ? getColorForCategory(eventDetails.category, theme.palette.mode) : "default"),
+    [eventDetails, theme.palette.mode]
   );
 
   const dateTimeDetails = useMemo(() => {
-    if (!event) return null;
-
-    const startDate = event.start;
-    const endDate = event.end;
-    const isSingleDay = startDate.toDateString() === endDate.toDateString();
-    const timeZoneToUse = event.extendedProps.is_local_time ? undefined : timeZone;
-
-    const startDateTimeText = formatDateLine(startDate, timeZoneToUse, true);
-    const endDateTimeText = formatDateLine(endDate, timeZoneToUse, true);
+    if (!eventDetails) return null;
+    const { startDate, endDate, isSingleDay } = eventDetails;
 
     if (isSingleDay) {
-      const dateText = formatDateLine(startDate, timeZoneToUse, false);
-      const startTimeText = startDateTimeText?.split(",")[1];
-      const endTimeText = endDateTimeText?.split(",")[1];
-      const timeSuffix = event.extendedProps.is_local_time ? " (Local Time)" : "";
       return (
         <>
-          <DetailItem icon={<CalendarTodayIcon color="action" />} text={dateText || ""} />
+          <DetailItem
+            icon={<CalendarTodayIcon color="action" />}
+            text={startDate.toLocaleDateString("en-US", DATE_OPTIONS)}
+          />
           <DetailItem
             icon={<AccessTimeIcon color="action" />}
-            text={`${startTimeText} — ${endTimeText}${timeSuffix}`}
+            text={`${startDate.toLocaleTimeString("en-US", TIME_OPTIONS)} — ${endDate.toLocaleTimeString(
+              "en-US",
+              TIME_OPTIONS
+            )}`}
           />
         </>
       );
     }
+
     return (
       <>
-        <DetailItem icon={<CalendarTodayIcon color="action" />} text={`Starts: ${startDateTimeText}`} />
-        <DetailItem icon={<CalendarTodayIcon color="action" />} text={`Ends: ${endDateTimeText}`} />
+        <DetailItem
+          icon={<CalendarTodayIcon color="action" />}
+          text={`Starts: ${startDate.toLocaleString("en-US", COMBINED_DATE_TIME_OPTIONS)}`}
+        />
+        <DetailItem
+          icon={<CalendarTodayIcon color="action" />}
+          text={`Ends: ${endDate.toLocaleString("en-US", COMBINED_DATE_TIME_OPTIONS)}`}
+        />
       </>
     );
-  }, [event, timeZone]);
+  }, [eventDetails]);
 
+  // Callback to handle event deletion after confirmation.
   const handleDelete = useCallback(() => {
-    if (!event) return;
-    onDeleteEvent(event.extendedProps.article_url);
+    if (!eventDetails) return;
+    onDeleteEvent(eventDetails.id);
     setConfirmOpen(false);
     onClose();
-  }, [event, onDeleteEvent, onClose]);
+  }, [eventDetails, onDeleteEvent, onClose]);
 
-  if (!event) {
+  // Render nothing if there is no event.
+  if (!event || !eventDetails) {
     return null;
   }
 
-  const { extendedProps, title } = event;
-  const { article_url, banner_url, category } = extendedProps;
-  const isCustomEvent = category === "Custom Event";
-  const isSaved = savedEventIds.includes(article_url);
-
+  // Render the main event detail dialog.
+  const { id, title, category, bannerUrl, isCustomEvent, isSaved } = eventDetails;
   return (
     <>
       <Dialog open={true} onClose={onClose} maxWidth="sm" fullWidth disableRestoreFocus>
         <DialogContent sx={{ p: 0, position: "relative" }}>
+          {/* Save/Unsave Icon Button */}
           <IconButton
             aria-label={isSaved ? "Unsave event" : "Save event"}
-            onClick={() => onToggleSaveEvent(article_url)}
+            onClick={() => onToggleSaveEvent(id)}
             sx={{
               position: "absolute",
               top: 8,
@@ -174,13 +226,17 @@ function EventDetailDialog({
           >
             {isSaved ? <StarIcon /> : <StarBorderIcon />}
           </IconButton>
+
+          {/* Event Banner Image */}
           <Box
             component="img"
-            src={banner_url}
+            src={bannerUrl}
             alt={`${title} banner`}
             sx={{ width: "100%", aspectRatio: "16 / 9", objectFit: "cover" }}
           />
+
           <Box sx={{ p: 3 }}>
+            {/* Category and Status */}
             <Stack
               direction="row"
               justifyContent="space-between"
@@ -210,14 +266,23 @@ function EventDetailDialog({
                 {displayTime && ` (${displayTime})`}
               </Box>
             </Stack>
+
+            {/* Event Title */}
             <Typography variant="h5" component="h2" gutterBottom>
               {title}
             </Typography>
+
+            {/* Divider */}
             <Divider sx={{ my: 2 }} />
+
+            {/* Date and Time Details */}
             <Stack spacing={2}>{dateTimeDetails}</Stack>
           </Box>
         </DialogContent>
+
+        {/* Dialog Actions */}
         <DialogActions sx={{ p: "16px 24px", justifyContent: "space-between", flexWrap: "wrap", gap: 1 }}>
+          {/* Calendar and Learn More Buttons */}
           <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
             <Button variant="outlined" startIcon={<AddToCalendarIcon />} onClick={() => downloadIcsFile(event)}>
               Add to Calendar
@@ -225,7 +290,7 @@ function EventDetailDialog({
             {!isCustomEvent && (
               <Button
                 component={Link}
-                href={article_url}
+                href={id}
                 target="_blank"
                 rel="noopener noreferrer"
                 variant="contained"
@@ -235,6 +300,8 @@ function EventDetailDialog({
               </Button>
             )}
           </Box>
+
+          {/* Action Buttons */}
           <Box>
             {isCustomEvent && (
               <>
@@ -250,6 +317,8 @@ function EventDetailDialog({
           </Box>
         </DialogActions>
       </Dialog>
+
+      {/* Extracted Confirmation Dialog */}
       <DeleteConfirmationDialog
         open={confirmOpen}
         onClose={() => setConfirmOpen(false)}

@@ -11,15 +11,22 @@ interface EventHoverDetailsProps {
   mousePosition: { top: number; left: number } | null;
   event: CalendarEvent | null;
   onClose: () => void;
-  timeZone: string;
 }
 
-function EventHoverDetails({ open, id, mousePosition, event, onClose, timeZone }: EventHoverDetailsProps) {
+/**
+ * Displays a popover with detailed information about a calendar event when hovered over.
+ *
+ * @param param0 Props for the EventHoverDetails component.
+ * @returns A popover displaying detailed information about a calendar event.
+ */
+function EventHoverDetails({ open, id, mousePosition, event, onClose }: EventHoverDetailsProps) {
   const theme = useTheme();
 
   const { startDate, endDate } = useMemo(() => {
-    return { startDate: event?.start, endDate: event?.end };
-  }, [event]);
+    const start = event?.start ? new Date(event.start) : null;
+    const end = event?.end ? new Date(event.end) : null;
+    return { startDate: start, endDate: end };
+  }, [event?.start, event?.end]);
 
   const categoryColor = useMemo(() => {
     if (!event?.extendedProps.category) return "default";
@@ -51,19 +58,19 @@ function EventHoverDetails({ open, id, mousePosition, event, onClose, timeZone }
       return formatted ? `${formatted} ago` : "Ended recently";
     }
     if (eventStatus === "Active") {
-      const duration = intervalToDuration({ start: now, end: endDate! });
+      const duration = intervalToDuration({ start: startDate!, end: now });
       const formatted = formatDurationFromInterval(duration);
       return formatted ? `${formatted} left` : "Ongoing";
     }
     return "";
   }, [eventStatus, startDate, endDate]);
 
+  // If there is no event data, render nothing.
   if (!event) {
     return null;
   }
 
-  const timeZoneToUse = event.extendedProps.is_local_time ? undefined : timeZone;
-
+  // Render the popover with event details.
   return (
     <Popover
       id={id}
@@ -71,9 +78,17 @@ function EventHoverDetails({ open, id, mousePosition, event, onClose, timeZone }
       anchorReference="anchorPosition"
       anchorPosition={mousePosition ? { top: mousePosition.top - 10, left: mousePosition.left } : undefined}
       onClose={onClose}
-      sx={{ pointerEvents: "none" }}
-      anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      transformOrigin={{ vertical: "bottom", horizontal: "center" }}
+      sx={{
+        pointerEvents: "none",
+      }}
+      anchorOrigin={{
+        vertical: "top",
+        horizontal: "center",
+      }}
+      transformOrigin={{
+        vertical: "bottom",
+        horizontal: "center",
+      }}
       disableRestoreFocus
       disableScrollLock
       container={document.body}
@@ -92,10 +107,15 @@ function EventHoverDetails({ open, id, mousePosition, event, onClose, timeZone }
       }}
     >
       <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 1 }}>
+        {/* Event Title */}
         <Typography variant="h6" component="h3" sx={{ fontWeight: "bold", lineHeight: 1.3 }}>
           {event.title}
         </Typography>
+
+        {/* Divider */}
         <Divider sx={{ my: 0.5 }} />
+
+        {/* Category Chip */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <Typography variant="body2" color="text.secondary" sx={{ fontWeight: "bold" }}>
             Category:
@@ -110,6 +130,8 @@ function EventHoverDetails({ open, id, mousePosition, event, onClose, timeZone }
             }}
           />
         </Box>
+
+        {/* Status and Relative Time */}
         <Typography variant="body2" color="text.secondary">
           <Box component="span" sx={{ fontWeight: "bold" }}>
             Status:
@@ -121,33 +143,38 @@ function EventHoverDetails({ open, id, mousePosition, event, onClose, timeZone }
             </Box>
           )}
         </Typography>
-        {startDate && endDate && (
+
+        {/* Date and Time Information */}
+        {startDate && (
           <Box sx={{ lineHeight: 1.4 }}>
-            {isSameDay(startDate, endDate) ? (
+            {isSameDay(startDate, endDate || startDate) ? (
+              // Case for single-day events
               <Typography variant="body2" color="text.secondary">
                 <Box component="span" sx={{ fontWeight: "bold" }}>
                   Date:
                 </Box>{" "}
-                {formatDateLine(startDate, timeZoneToUse)}
+                {formatDateLine(startDate)}
               </Typography>
             ) : (
+              // Case for multi-day events
               <>
                 <Typography variant="body2" color="text.secondary">
                   <Box component="span" sx={{ fontWeight: "bold" }}>
                     From:
                   </Box>{" "}
-                  {formatDateLine(startDate, timeZoneToUse)}
+                  {formatDateLine(startDate)}
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  <Box component="span" sx={{ fontWeight: "bold" }}>
-                    To:
-                  </Box>{" "}
-                  {formatDateLine(
-                    endDate,
-                    timeZoneToUse,
-                    endDate.getHours() !== 0 || endDate.getMinutes() !== 0 || endDate.getSeconds() !== 0
-                  )}
-                </Typography>
+                {endDate && (
+                  <Typography variant="body2" color="text.secondary">
+                    <Box component="span" sx={{ fontWeight: "bold" }}>
+                      To:
+                    </Box>{" "}
+                    {formatDateLine(
+                      endDate,
+                      endDate.getHours() !== 0 || endDate.getMinutes() !== 0 || endDate.getSeconds() !== 0
+                    )}
+                  </Typography>
+                )}
               </>
             )}
           </Box>

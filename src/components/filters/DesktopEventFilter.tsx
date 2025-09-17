@@ -16,6 +16,7 @@ import {
   Paper,
   Slider,
   Stack,
+  Switch,
   TextField,
   Typography,
 } from "@mui/material";
@@ -213,12 +214,23 @@ function DesktopEventFilterComponent({
         <Divider />
 
         {/* Row 4: Action Buttons */}
-        <Stack direction="row" spacing={2} justifyContent="space-between">
-          <Badge badgeContent={filters.selectedCategories.length} color="primary">
-            <Button variant="outlined" startIcon={<FilterListIcon />} onClick={handleMenuClick}>
-              Categories
-            </Button>
-          </Badge>
+        <Stack direction="row" spacing={2} justifyContent="space-between" alignItems="center">
+          <Stack direction="row" spacing={2} alignItems="center">
+            <Badge badgeContent={filters.selectedCategories.length} color="primary">
+              <Button variant="outlined" startIcon={<FilterListIcon />} onClick={handleMenuClick}>
+                Categories
+              </Button>
+            </Badge>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={filters.showActiveOnly}
+                  onChange={(e) => handleFilterChange("showActiveOnly", e.target.checked)}
+                />
+              }
+              label="Active Only"
+            />
+          </Stack>
           <Stack direction="row" spacing={2}>
             <Button variant="outlined" onClick={onOpenExportDialog} startIcon={<FileDownloadIcon />}>
               Export

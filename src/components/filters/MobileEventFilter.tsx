@@ -16,6 +16,7 @@ import {
   FormGroup,
   Slider,
   Stack,
+  Switch,
   TextField,
   Typography,
 } from "@mui/material";
@@ -143,6 +144,21 @@ function MobileEventFilterComponent({
         selectedCategories={filters.selectedCategories}
         allCategories={allCategories}
         onCategoryChange={handleCategoryChange}
+      />
+
+      <Divider />
+
+      {/* Active Only Switch */}
+      <FormControlLabel
+        control={
+          <Switch
+            checked={filters.showActiveOnly}
+            onChange={(e) => handleFilterChange("showActiveOnly", e.target.checked)}
+          />
+        }
+        label="Show Active Events Only"
+        labelPlacement="start"
+        sx={{ justifyContent: "space-between", ml: 0 }}
       />
 
       {/* Action Buttons */}

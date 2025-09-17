@@ -72,9 +72,10 @@ export function useFilters(allEvents: CalendarEvent[], savedEventIds: string[]) 
 
   // Memoize the filtered events to avoid unnecessary recalculations.
   const filteredEvents = useMemo(() => {
-    const { selectedCategories, searchTerm, startDate, endDate, timeRange } = filtersForCurrentView;
+    const { selectedCategories, searchTerm, startDate, endDate, timeRange, showActiveOnly } = filtersForCurrentView;
     const isSavedFilterActive = selectedCategories.includes(SAVED_EVENTS_CATEGORY);
     const otherSelectedCategories = selectedCategories.filter((c: string) => c !== SAVED_EVENTS_CATEGORY);
+    const now = new Date();
 
     // Filter events based on the active filters.
     return allEvents.filter((event) => {
@@ -101,8 +102,18 @@ export function useFilters(allEvents: CalendarEvent[], savedEventIds: string[]) 
 
       const passesTimeFilter = isAllDayEvent || (eventStartHour >= startHour && eventStartHour < endHour);
 
+      // "Currently Active" filter: checks if the current time is between the event's start and end.
+      const passesActiveOnlyFilter = !showActiveOnly || (now >= eventStart && now <= eventEnd);
+
       // The event is included only if it passes all active filter conditions.
-      return passesSavedFilter && passesCategoryFilter && passesSearchFilter && passesDateFilter && passesTimeFilter;
+      return (
+        passesSavedFilter &&
+        passesCategoryFilter &&
+        passesSearchFilter &&
+        passesDateFilter &&
+        passesTimeFilter &&
+        passesActiveOnlyFilter
+      );
     });
   }, [allEvents, allFilters, currentView, savedEventIds]);
 

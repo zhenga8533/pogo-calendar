@@ -1,20 +1,26 @@
-// Your EventHoverDetails.tsx component
 import { Box, Chip, Divider, Popover, Typography, useTheme } from "@mui/material";
 import { useMemo } from "react";
 import type { CalendarEvent } from "../../types/events";
 import { getColorForCategory } from "../../utils/colorUtils";
+import { formatDateLine } from "../../utils/dateUtils";
 
 interface EventHoverDetailsProps {
   open: boolean;
   id: string | undefined;
   mousePosition: { top: number; left: number } | null;
   event: CalendarEvent | null;
+  hour12: boolean;
   onClose: () => void;
 }
 
-function EventHoverDetails({ open, id, mousePosition, event, onClose }: EventHoverDetailsProps) {
+function EventHoverDetails({ open, id, mousePosition, event, hour12, onClose }: EventHoverDetailsProps) {
   const theme = useTheme();
 
+  const formattedStart = useMemo(
+    () => (event?.start ? formatDateLine(event.start, hour12) : null),
+    [event?.start, hour12]
+  );
+  const formattedEnd = useMemo(() => (event?.end ? formatDateLine(event.end, hour12) : null), [event?.end, hour12]);
   const categoryColor = useMemo(() => {
     if (!event?.extendedProps.category) return "default";
     return getColorForCategory(event.extendedProps.category, theme.palette.mode);
@@ -86,7 +92,7 @@ function EventHoverDetails({ open, id, mousePosition, event, onClose }: EventHov
             <Box component="span" sx={{ fontWeight: "bold" }}>
               Start:
             </Box>{" "}
-            {event.start}
+            {formattedStart}
           </Typography>
         )}
         {event.end && (
@@ -94,7 +100,7 @@ function EventHoverDetails({ open, id, mousePosition, event, onClose }: EventHov
             <Box component="span" sx={{ fontWeight: "bold" }}>
               End:
             </Box>{" "}
-            {event.end}
+            {formattedEnd}
           </Typography>
         )}
       </Box>

@@ -201,6 +201,7 @@ function Calendar({ settings }: { settings: Settings }) {
         isMobile={isMobile}
         savedEventIds={savedEventIds}
         firstDay={settings.firstDay}
+        hour12={settings.hour12}
         timeZone={settings.timezone}
         filterStartDate={filters.startDate}
         filterEndDate={filters.endDate}

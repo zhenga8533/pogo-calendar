@@ -19,6 +19,7 @@ interface EventCalendarProps {
   isMobile: boolean;
   savedEventIds: string[];
   firstDay: number;
+  hour12: boolean;
   timeZone: string;
   filterStartDate: Date | null;
   filterEndDate: Date | null;
@@ -91,6 +92,7 @@ function EventCalendar({
   isMobile,
   savedEventIds,
   firstDay,
+  hour12,
   timeZone,
   filterStartDate,
   filterEndDate,
@@ -253,6 +255,11 @@ function EventCalendar({
           firstDay={firstDay}
           selectable={true}
           select={handleDateSelect}
+          eventTimeFormat={{
+            hour: hour12 ? "numeric" : "2-digit",
+            minute: "2-digit",
+            meridiem: hour12,
+          }}
           timeZone={timeZone}
           eventDidMount={(arg) => {
             arg.el.setAttribute("data-event-id", arg.event.extendedProps.article_url);
@@ -283,6 +290,7 @@ function EventCalendar({
         id={popoverState.event ? "mouse-over-popover" : undefined}
         mousePosition={popoverState.position}
         event={popoverState.event}
+        hour12={hour12}
         onClose={handlePopoverClose}
       />
 
@@ -290,6 +298,7 @@ function EventCalendar({
         event={selectedEvent}
         onClose={handleCloseDialog}
         savedEventIds={savedEventIds}
+        hour12={hour12}
         onToggleSaveEvent={onToggleSaveEvent}
         onDeleteEvent={onDeleteEvent}
         onEditEvent={onEditEvent}

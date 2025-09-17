@@ -1,8 +1,25 @@
-import { formatDistanceToNowStrict, intervalToDuration } from "date-fns";
+import { formatDistanceToNowStrict, intervalToDuration, type Duration } from "date-fns";
 import { useEffect, useState } from "react";
-import { formatDurationFromInterval, toDate } from "../utils/dateUtils";
+import { toDate } from "../utils/dateUtils";
 
 type EventStatus = "active" | "upcoming" | "finished" | "loading";
+
+/**
+ * Formats a time duration into a compact, readable string.
+ *
+ * @param duration A Duration object from date-fns.
+ * @returns A formatted string like "5y 3m 10d 8h 30min".
+ */
+function formatDurationFromInterval(duration: Duration): string {
+  const parts: string[] = [];
+  if (duration.years && duration.years > 0) parts.push(`${duration.years}y`);
+  if (duration.months && duration.months > 0) parts.push(`${duration.months}m`);
+  if (duration.days && duration.days > 0) parts.push(`${duration.days}d`);
+  if (duration.hours && duration.hours > 0) parts.push(`${duration.hours}h`);
+  if (duration.minutes && duration.minutes > 0) parts.push(`${duration.minutes}min`);
+  if (duration.seconds && duration.seconds > 0 && parts.length === 0) parts.push(`${duration.seconds}s`);
+  return parts.length > 0 ? parts.join(" ") : "0min";
+}
 
 /**
  * Custom hook to determine the status of an event based on its start and end dates.

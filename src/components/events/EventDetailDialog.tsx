@@ -26,6 +26,7 @@ import { useEventStatus } from "../../hooks/useEventStatus";
 import type { CalendarEvent } from "../../types/events";
 import { downloadIcsFile } from "../../utils/calendarUtils";
 import { getColorForCategory } from "../../utils/colorUtils";
+import { formatDateLine } from "../../utils/dateUtils";
 
 interface EventDetailDialogProps {
   event: CalendarEvent | null;
@@ -34,6 +35,7 @@ interface EventDetailDialogProps {
   onToggleSaveEvent: (eventId: string) => void;
   onDeleteEvent: (eventId: string) => void;
   onEditEvent: (event: CalendarEvent) => void;
+  hour12: boolean;
 }
 
 function DetailItem({ icon, text }: { icon: React.ReactNode; text: string | null }) {
@@ -81,6 +83,7 @@ function EventDetailDialog({
   onToggleSaveEvent,
   onDeleteEvent,
   onEditEvent,
+  hour12,
 }: EventDetailDialogProps) {
   const theme = useTheme();
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -97,8 +100,10 @@ function EventDetailDialog({
       bannerUrl: event.extendedProps.banner_url,
       isCustomEvent: event.extendedProps.category === "Custom Event",
       isSaved: savedEventIds.includes(eventId),
+      start: formatDateLine(event.start, hour12),
+      end: formatDateLine(event.end, hour12),
     };
-  }, [event, savedEventIds]);
+  }, [event, savedEventIds, hour12]);
 
   // Pass the string dates to the useEventStatus hook.
   const { status, displayTime } = useEventStatus(event?.start ?? null, event?.end ?? null);
@@ -195,9 +200,10 @@ function EventDetailDialog({
             <Divider sx={{ my: 2 }} />
 
             <Stack spacing={2}>
-              {/* Use the string values directly */}
-              <DetailItem icon={<CalendarTodayIcon color="action" />} text={`Start: ${event.start}`} />
-              {event.end && <DetailItem icon={<CalendarTodayIcon color="action" />} text={`End: ${event.end}`} />}
+              <DetailItem icon={<CalendarTodayIcon color="action" />} text={`Start: ${eventDetails.start}`} />
+              {event.end && (
+                <DetailItem icon={<CalendarTodayIcon color="action" />} text={`End: ${eventDetails.end}`} />
+              )}
             </Stack>
           </Box>
         </DialogContent>

@@ -8,6 +8,7 @@ const initialSettings: Settings = {
   theme: "auto",
   firstDay: 0,
   timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  hour12: true,
 };
 
 /**

@@ -30,7 +30,7 @@ interface EventCalendarProps {
   eventNotes: Record<string, string>;
   onEditEvent: (event: CalendarEvent) => void;
   onDateSelect: (selection: { start: Date | null; end: Date | null }) => void;
-  setToast: (toast: { open: boolean; message: string; severity: string }) => void;
+  setToast: (toast: { open: boolean; message: string; severity: "success" | "error" | "info" | "warning" }) => void;
 }
 
 interface CalendarEventContentProps {

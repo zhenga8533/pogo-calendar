@@ -63,7 +63,7 @@ function Calendar({
   settings: Settings;
   setRefetchEvents: (refetch: () => Promise<void>) => void;
   toast: { open: boolean; message: string; severity: "success" | "error" | "info" | "warning" };
-  setToast: (toast: { open: boolean; message: string; severity: string }) => void;
+  setToast: (toast: { open: boolean; message: string; severity: "success" | "error" | "info" | "warning" }) => void;
 }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));

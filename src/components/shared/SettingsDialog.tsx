@@ -46,25 +46,34 @@ interface SettingsDialogProps {
  */
 function SettingsDialogComponent({ open, onClose, settings, onSettingsChange }: SettingsDialogProps) {
   const theme = useTheme();
-  const [timezones, setTimezones] = useState<Timezone[]>([]);
+  // Initialize state with the current timezone to prevent MUI warning
+  const [timezones, setTimezones] = useState<Timezone[]>([{ text: settings.timezone, value: settings.timezone }]);
   const [loadingTimezones, setLoadingTimezones] = useState(true);
 
   useEffect(() => {
     if (open) {
       const getTimezones = async () => {
+        setLoadingTimezones(true);
         try {
-          setLoadingTimezones(true);
           const tzData = await fetchTimezones();
-          setTimezones(tzData);
+          const userTimezone = settings.timezone;
+          const userTimezoneInList = tzData.some((tz) => tz.value === userTimezone);
+
+          if (!userTimezoneInList) {
+            setTimezones([{ text: userTimezone, value: userTimezone }, ...tzData]);
+          } else {
+            setTimezones(tzData);
+          }
         } catch (error) {
           console.error("Failed to fetch timezones:", error);
+          // If fetch fails, the list already contains the user's current timezone
         } finally {
           setLoadingTimezones(false);
         }
       };
       getTimezones();
     }
-  }, [open]);
+  }, [open, settings.timezone]);
 
   const handleSettingChange = (field: keyof Settings, value: string | number | boolean) => {
     onSettingsChange({ [field]: value });
@@ -175,25 +184,24 @@ function SettingsDialogComponent({ open, onClose, settings, onSettingsChange }: 
                   return <Typography noWrap>{selectedTimezone ? selectedTimezone.text : selectedValue}</Typography>;
                 }}
               >
-                {loadingTimezones ? (
+                {loadingTimezones && timezones.length === 1 && (
                   <MenuItem disabled>
                     <Stack direction="row" spacing={1.5} alignItems="center">
                       <CircularProgress size={20} />
                       <Typography>Loading timezones...</Typography>
                     </Stack>
                   </MenuItem>
-                ) : (
-                  timezones.map((tz) => (
-                    <MenuItem key={tz.value} value={tz.value}>
-                      <Stack direction="row" spacing={1.5} alignItems="center" sx={{ overflow: "hidden" }}>
-                        <PublicIcon fontSize="small" sx={{ opacity: 0.6, flexShrink: 0 }} />
-                        <Typography noWrap sx={{ flex: 1 }}>
-                          {tz.text}
-                        </Typography>
-                      </Stack>
-                    </MenuItem>
-                  ))
                 )}
+                {timezones.map((tz, index) => (
+                  <MenuItem key={`${tz.value}-${index}`} value={tz.value}>
+                    <Stack direction="row" spacing={1.5} alignItems="center" sx={{ overflow: "hidden" }}>
+                      <PublicIcon fontSize="small" sx={{ opacity: 0.6, flexShrink: 0 }} />
+                      <Typography noWrap sx={{ flex: 1 }}>
+                        {tz.text}
+                      </Typography>
+                    </Stack>
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
             <FormControl fullWidth>

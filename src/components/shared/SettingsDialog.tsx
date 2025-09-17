@@ -66,7 +66,7 @@ function SettingsDialogComponent({ open, onClose, settings, onSettingsChange }: 
     }
   }, [open]);
 
-  const handleSettingChange = (field: keyof Settings, value: string | number) => {
+  const handleSettingChange = (field: keyof Settings, value: string | number | boolean) => {
     onSettingsChange({ [field]: value });
   };
 
@@ -170,6 +170,10 @@ function SettingsDialogComponent({ open, onClose, settings, onSettingsChange }: 
                     },
                   },
                 }}
+                renderValue={(selectedValue) => {
+                  const selectedTimezone = timezones.find((tz) => tz.value === selectedValue);
+                  return <Typography noWrap>{selectedTimezone ? selectedTimezone.text : selectedValue}</Typography>;
+                }}
               >
                 {loadingTimezones ? (
                   <MenuItem disabled>
@@ -181,9 +185,11 @@ function SettingsDialogComponent({ open, onClose, settings, onSettingsChange }: 
                 ) : (
                   timezones.map((tz) => (
                     <MenuItem key={tz.value} value={tz.value}>
-                      <Stack direction="row" spacing={1.5} alignItems="center">
-                        <PublicIcon fontSize="small" sx={{ opacity: 0.6 }} />
-                        <Typography>{tz.text}</Typography>
+                      <Stack direction="row" spacing={1.5} alignItems="center" sx={{ overflow: "hidden" }}>
+                        <PublicIcon fontSize="small" sx={{ opacity: 0.6, flexShrink: 0 }} />
+                        <Typography noWrap sx={{ flex: 1 }}>
+                          {tz.text}
+                        </Typography>
                       </Stack>
                     </MenuItem>
                   ))

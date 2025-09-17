@@ -1,5 +1,6 @@
 import { Alert, Box, Container, CssBaseline, Snackbar, ThemeProvider } from "@mui/material";
 import { useCallback, useRef, useState } from "react";
+import { Route, Routes } from "react-router-dom";
 import Footer from "./components/layout/Footer";
 import Header from "./components/layout/Header";
 import { SettingsDialog } from "./components/shared/SettingsDialog";
@@ -22,7 +23,6 @@ function App() {
     message: string;
     severity: "success" | "error" | "info" | "warning";
   }>({ open: false, message: "", severity: "success" });
-  const [view, setView] = useState<"calendar" | "faq">("calendar");
 
   const refetchEventsRef = useRef<() => Promise<void>>(() => Promise.resolve());
   const refetchLastUpdatedRef = useRef<() => Promise<void>>(() => Promise.resolve());
@@ -58,10 +58,6 @@ function App() {
     setToast((prev) => ({ ...prev, open: false }));
   }, []);
 
-  const handleNavigate = useCallback((newView: "calendar" | "faq") => {
-    setView(newView);
-  }, []);
-
   // Render the application with theming and layout.
   return (
     <ThemeProvider theme={theme}>
@@ -75,17 +71,19 @@ function App() {
           onSettingsClick={handleSettingsOpen}
           onRefresh={handleRefresh}
           setRefetchLastUpdated={setRefetchLastUpdated}
-          onNavigateHome={() => handleNavigate("calendar")}
-          onNavigate={handleNavigate}
         />
         <Box component="main" sx={{ flexGrow: 1, p: 3, backgroundColor: "background.default" }}>
-          {view === "calendar" ? (
-            <Container maxWidth="xl">
-              <Calendar settings={settings} setRefetchEvents={setRefetchEvents} toast={toast} setToast={setToast} />
-            </Container>
-          ) : (
-            <FaqPage onNavigate={handleNavigate} />
-          )}
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <Container maxWidth="xl">
+                  <Calendar settings={settings} setRefetchEvents={setRefetchEvents} toast={toast} setToast={setToast} />
+                </Container>
+              }
+            />
+            <Route path="/faq" element={<FaqPage />} />
+          </Routes>
         </Box>
         <Footer />
       </Box>

@@ -12,10 +12,7 @@ import {
   Typography,
 } from "@mui/material";
 import React from "react";
-
-interface FaqPageProps {
-  onNavigate: (view: "calendar" | "faq") => void;
-}
+import { Link as RouterLink } from "react-router-dom";
 
 const faqData = [
   {
@@ -75,7 +72,7 @@ const FaqItem = React.memo(({ question, answer }: { question: string; answer: st
   );
 });
 
-function FaqPage({ onNavigate }: FaqPageProps) {
+function FaqPage() {
   return (
     <Container maxWidth="md">
       <Stack spacing={4}>
@@ -94,7 +91,7 @@ function FaqPage({ onNavigate }: FaqPageProps) {
           ))}
         </Stack>
         <Box sx={{ textAlign: "center", pt: 2 }}>
-          <Button variant="contained" startIcon={<ArrowBackIcon />} onClick={() => onNavigate("calendar")}>
+          <Button component={RouterLink} to="/" variant="contained" startIcon={<ArrowBackIcon />}>
             Back to Calendar
           </Button>
         </Box>

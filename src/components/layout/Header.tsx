@@ -14,6 +14,7 @@ import {
   useScrollTrigger,
 } from "@mui/material";
 import React, { useEffect } from "react";
+import { Link as RouterLink } from "react-router-dom";
 import { useLastUpdated } from "../../hooks/useLastUpdated";
 
 const LastUpdatedDisplay = React.memo(
@@ -69,8 +70,6 @@ interface HeaderProps {
   onSettingsClick: () => void;
   onRefresh: () => void;
   setRefetchLastUpdated: (refetch: () => Promise<void>) => void;
-  onNavigateHome: () => void;
-  onNavigate: (view: "calendar" | "faq") => void;
 }
 
 /**
@@ -79,13 +78,7 @@ interface HeaderProps {
  * @param param0 Props for the Header component.
  * @returns The header component for the application.
  */
-function HeaderComponent({
-  onSettingsClick,
-  onRefresh,
-  setRefetchLastUpdated,
-  onNavigateHome,
-  onNavigate,
-}: HeaderProps) {
+function HeaderComponent({ onSettingsClick, onRefresh, setRefetchLastUpdated }: HeaderProps) {
   const trigger = useScrollTrigger({ disableHysteresis: true, threshold: 0 });
 
   // Render the AppBar with dynamic styles based on scroll position.
@@ -108,7 +101,13 @@ function HeaderComponent({
     >
       <Toolbar>
         {/* App Icon and Title (Clickable) */}
-        <Stack direction="row" alignItems="center" onClick={onNavigateHome} sx={{ cursor: "pointer", flexGrow: 1 }}>
+        <Stack
+          component={RouterLink}
+          to="/"
+          direction="row"
+          alignItems="center"
+          sx={{ cursor: "pointer", flexGrow: 1, textDecoration: "none", color: "inherit" }}
+        >
           <CalendarMonthIcon sx={{ mr: 1.5 }} />
           <Typography variant="h6" component="div">
             PoGo Event Calendar
@@ -121,7 +120,7 @@ function HeaderComponent({
             <LastUpdatedDisplay onRefresh={onRefresh} setRefetchLastUpdated={setRefetchLastUpdated} />
           </Box>
           <Divider orientation="vertical" flexItem sx={{ display: { xs: "none", sm: "block" } }} />
-          <Button color="inherit" onClick={() => onNavigate("faq")}>
+          <Button component={RouterLink} to="/faq" color="inherit">
             FAQ
           </Button>
           <Tooltip title="Settings">

@@ -2,7 +2,7 @@ import { formatDistanceToNowStrict, intervalToDuration, type Duration } from "da
 import { useEffect, useState } from "react";
 import { toDate } from "../utils/dateUtils";
 
-type EventStatus = "active" | "upcoming" | "finished" | "loading";
+type EventStatus = "active" | "upcoming" | "finished";
 
 /**
  * Formats a time duration into a compact, readable string.
@@ -29,40 +29,44 @@ function formatDurationFromInterval(duration: Duration): string {
  * @returns An object containing the event status and the display time.
  */
 export function useEventStatus(startInput: Date | string | null, endInput: Date | string | null) {
-  const [status, setStatus] = useState<EventStatus>("loading");
-  const [displayTime, setDisplayTime] = useState<string>("");
+  const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
-    const start = toDate(startInput);
-    const end = toDate(endInput);
-
-    // If either date is missing or invalid, we can't determine the status.
-    if (!start || !end) {
-      setStatus("loading");
-      setDisplayTime("");
-      return;
-    }
-
-    // This interval updates the status and time every second, creating the live countdown.
-    const interval = setInterval(() => {
-      const now = new Date();
-
-      if (now < start) {
-        setStatus("upcoming");
-        const duration = intervalToDuration({ start: now, end: start });
-        setDisplayTime(formatDurationFromInterval(duration));
-      } else if (now >= start && now <= end) {
-        setStatus("active");
-        const duration = intervalToDuration({ start: now, end: end });
-        setDisplayTime(formatDurationFromInterval(duration));
-      } else {
-        setStatus("finished");
-        setDisplayTime(formatDistanceToNowStrict(end, { addSuffix: true }));
-      }
+    // This timer updates the 'now' state every second, which forces a re-render
+    // and recalculation of the event status, creating a live countdown.
+    const timer = setInterval(() => {
+      setNow(new Date());
     }, 1000);
 
-    return () => clearInterval(interval);
-  }, [startInput, endInput]);
+    return () => {
+      clearInterval(timer);
+    };
+  }, []);
 
-  return { status, displayTime };
+  const start = toDate(startInput);
+  const end = toDate(endInput);
+
+  if (!start || !end) {
+    return { status: null, displayTime: "" };
+  }
+
+  // Calculate status based on the 'now' state
+  if (now < start) {
+    const duration = intervalToDuration({ start: now, end: start });
+    return {
+      status: "upcoming" as EventStatus,
+      displayTime: formatDurationFromInterval(duration),
+    };
+  } else if (now >= start && now <= end) {
+    const duration = intervalToDuration({ start: now, end: end });
+    return {
+      status: "active" as EventStatus,
+      displayTime: formatDurationFromInterval(duration),
+    };
+  } else {
+    return {
+      status: "finished" as EventStatus,
+      displayTime: formatDistanceToNowStrict(end, { addSuffix: true }),
+    };
+  }
 }

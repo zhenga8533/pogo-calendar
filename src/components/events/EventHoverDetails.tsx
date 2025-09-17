@@ -1,8 +1,9 @@
-import { Box, Chip, Divider, Popover, Typography, useTheme } from "@mui/material";
+import { Box, Divider, Popover, Typography } from "@mui/material";
 import { useMemo } from "react";
 import type { CalendarEvent } from "../../types/events";
-import { getColorForCategory } from "../../utils/colorUtils";
 import { formatDateLine } from "../../utils/dateUtils";
+import { CategoryTag } from "../shared/CategoryTag";
+import { EventStatusTag } from "../shared/EventStatusTag";
 
 interface EventHoverDetailsProps {
   open: boolean;
@@ -14,17 +15,11 @@ interface EventHoverDetailsProps {
 }
 
 function EventHoverDetails({ open, id, mousePosition, event, hour12, onClose }: EventHoverDetailsProps) {
-  const theme = useTheme();
-
   const formattedStart = useMemo(
     () => (event?.start ? formatDateLine(event.start, hour12) : null),
     [event?.start, hour12]
   );
   const formattedEnd = useMemo(() => (event?.end ? formatDateLine(event.end, hour12) : null), [event?.end, hour12]);
-  const categoryColor = useMemo(() => {
-    if (!event?.extendedProps.category) return "default";
-    return getColorForCategory(event.extendedProps.category, theme.palette.mode);
-  }, [event?.extendedProps.category, theme.palette.mode]);
 
   if (!event) {
     return null;
@@ -53,7 +48,7 @@ function EventHoverDetails({ open, id, mousePosition, event, hour12, onClose }: 
       container={document.body}
       slotProps={{
         paper: {
-          sx: {
+          sx: (theme) => ({
             backgroundColor: theme.palette.background.paper,
             boxShadow: theme.shadows[8],
             borderRadius: 2,
@@ -61,7 +56,7 @@ function EventHoverDetails({ open, id, mousePosition, event, hour12, onClose }: 
             p: 0,
             overflow: "hidden",
             border: `1px solid ${theme.palette.divider}`,
-          },
+          }),
         },
       }}
     >
@@ -72,19 +67,9 @@ function EventHoverDetails({ open, id, mousePosition, event, hour12, onClose }: 
 
         <Divider sx={{ my: 0.5 }} />
 
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Typography variant="body2" color="text.secondary" sx={{ fontWeight: "bold" }}>
-            Category:
-          </Typography>
-          <Chip
-            label={event.extendedProps.category}
-            size="small"
-            sx={{
-              backgroundColor: categoryColor,
-              color: theme.palette.getContrastText(categoryColor),
-              fontWeight: "bold",
-            }}
-          />
+        <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 1 }}>
+          <CategoryTag category={event.extendedProps.category} />
+          <EventStatusTag start={event.start} end={event.end} />
         </Box>
 
         {event.start && (

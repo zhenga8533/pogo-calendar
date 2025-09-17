@@ -8,7 +8,6 @@ import StarBorderIcon from "@mui/icons-material/StarBorder";
 import {
   Box,
   Button,
-  Chip,
   Dialog,
   DialogActions,
   DialogContent,
@@ -19,14 +18,13 @@ import {
   Link,
   Stack,
   Typography,
-  useTheme,
 } from "@mui/material";
 import React, { useCallback, useMemo, useState } from "react";
-import { useEventStatus } from "../../hooks/useEventStatus";
 import type { CalendarEvent } from "../../types/events";
 import { downloadIcsFile } from "../../utils/calendarUtils";
-import { getColorForCategory } from "../../utils/colorUtils";
 import { formatDateLine } from "../../utils/dateUtils";
+import { CategoryTag } from "../shared/CategoryTag";
+import { EventStatusTag } from "../shared/EventStatusTag";
 
 interface EventDetailDialogProps {
   event: CalendarEvent | null;
@@ -85,10 +83,8 @@ function EventDetailDialog({
   onEditEvent,
   hour12,
 }: EventDetailDialogProps) {
-  const theme = useTheme();
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  // The event object is now your original event with string dates
   const eventDetails = useMemo(() => {
     if (!event) return null;
 
@@ -105,24 +101,6 @@ function EventDetailDialog({
     };
   }, [event, savedEventIds, hour12]);
 
-  // Pass the string dates to the useEventStatus hook.
-  const { status, displayTime } = useEventStatus(event?.start ?? null, event?.end ?? null);
-
-  const statusInfo = useMemo(
-    () => ({
-      active: { label: "Active Now", color: theme.palette.success.main },
-      upcoming: { label: "Upcoming", color: theme.palette.warning.main },
-      finished: { label: "Finished", color: theme.palette.text.secondary },
-      loading: { label: "Loading...", color: theme.palette.action.disabledBackground },
-    }),
-    [theme]
-  );
-
-  const categoryColor = useMemo(
-    () => (eventDetails ? getColorForCategory(eventDetails.category, theme.palette.mode) : "default"),
-    [eventDetails, theme.palette.mode]
-  );
-
   const handleDelete = useCallback(() => {
     if (!eventDetails) return;
     onDeleteEvent(eventDetails.id);
@@ -134,7 +112,7 @@ function EventDetailDialog({
     return null;
   }
 
-  const { id, title, category, bannerUrl, isCustomEvent, isSaved } = eventDetails;
+  const { id, title, bannerUrl, isCustomEvent, isSaved } = eventDetails;
   return (
     <>
       <Dialog open={true} onClose={onClose} maxWidth="sm" fullWidth disableRestoreFocus>
@@ -169,28 +147,8 @@ function EventDetailDialog({
               alignItems="center"
               sx={{ mb: 2, flexWrap: "wrap", gap: 1 }}
             >
-              <Chip
-                label={category}
-                sx={{
-                  backgroundColor: categoryColor,
-                  color: theme.palette.getContrastText(categoryColor),
-                  fontWeight: "bold",
-                }}
-              />
-              <Box
-                sx={{
-                  backgroundColor: statusInfo[status].color,
-                  color: theme.palette.getContrastText(statusInfo[status].color),
-                  borderRadius: "4px",
-                  px: 1.5,
-                  py: 0.5,
-                  fontSize: "0.875rem",
-                  fontWeight: "bold",
-                }}
-              >
-                {statusInfo[status].label}
-                {displayTime && ` (${displayTime})`}
-              </Box>
+              <CategoryTag category={eventDetails.category} />
+              <EventStatusTag start={event.start} end={event.end} />
             </Stack>
 
             <Typography variant="h5" component="h2" gutterBottom>

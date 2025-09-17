@@ -1,5 +1,6 @@
-import { GITHUB_EVENTS_API_URL } from "../config/api";
+import { GITHUB_EVENTS_API_URL, TIMEZONES_API_URL } from "../config/api";
 import type { ApiEvent, CalendarEvent } from "../types/events";
+import type { Timezone } from "../types/settings";
 
 type ApiResponse = Record<string, ApiEvent[]>;
 
@@ -56,4 +57,17 @@ export const fetchEvents = async (): Promise<CalendarEvent[]> => {
   const data: ApiResponse = await response.json();
 
   return transformApiData(data);
+};
+
+/**
+ * Fetches a list of IANA time zones.
+ *
+ * @returns A promise that resolves to an array of Timezone objects.
+ */
+export const fetchTimezones = async (): Promise<Timezone[]> => {
+  const response = await fetch(TIMEZONES_API_URL);
+  if (!response.ok) {
+    throw new Error(`Timezone API request failed with status ${response.status}`);
+  }
+  return response.json();
 };

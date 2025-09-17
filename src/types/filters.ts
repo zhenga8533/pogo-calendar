@@ -14,5 +14,4 @@ export interface Filters {
   startDate: Date | null;
   endDate: Date | null;
   timeRange: number[];
-  firstDay: number;
 }

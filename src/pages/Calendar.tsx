@@ -11,6 +11,7 @@ import { useEventData } from "../hooks/useEventData";
 import { useFilters } from "../hooks/useFilters";
 import { useSavedEvents } from "../hooks/useSavedEvents";
 import type { CalendarEvent, NewEventData } from "../types/events";
+import type { Settings } from "../types/settings";
 import { downloadIcsForEvents } from "../utils/calendarUtils";
 
 const CalendarOverlays = React.memo(
@@ -67,7 +68,7 @@ const CalendarOverlays = React.memo(
 
 // --- Main Calendar Page Component ---
 
-function Calendar() {
+function Calendar({ settings }: { settings: Settings }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
@@ -199,7 +200,7 @@ function Calendar() {
         events={filteredEvents}
         isMobile={isMobile}
         savedEventIds={savedEventIds}
-        firstDay={filters.firstDay}
+        firstDay={settings.firstDay}
         filterStartDate={filters.startDate}
         filterEndDate={filters.endDate}
         onToggleSaveEvent={handleToggleSaveEvent}

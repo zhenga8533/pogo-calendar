@@ -1,0 +1,205 @@
+import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
+import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
+import PublicIcon from "@mui/icons-material/Public";
+import SettingsBrightnessOutlinedIcon from "@mui/icons-material/SettingsBrightnessOutlined";
+import {
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  type SelectChangeEvent,
+  Stack,
+  ToggleButton,
+  ToggleButtonGroup,
+  Typography,
+  useTheme,
+} from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { dayOptions } from "../../config/eventFilter";
+import { fetchTimezones } from "../../services/eventService";
+import type { Settings, ThemeSetting, Timezone } from "../../types/settings";
+
+const themeOptions: { value: ThemeSetting; text: string; Icon: React.ElementType }[] = [
+  { value: "light", text: "Light", Icon: LightModeOutlinedIcon },
+  { value: "dark", text: "Dark", Icon: DarkModeOutlinedIcon },
+  { value: "auto", text: "Auto", Icon: SettingsBrightnessOutlinedIcon },
+];
+
+interface SettingsDialogProps {
+  open: boolean;
+  onClose: () => void;
+  settings: Settings;
+  onSettingsChange: (newSettings: Partial<Settings>) => void;
+}
+
+/**
+ * Renders a dialog for managing user settings with a modern UI.
+ *
+ * @param param0 Props for the SettingsDialog component.
+ * @returns A dialog for managing user settings.
+ */
+function SettingsDialogComponent({ open, onClose, settings, onSettingsChange }: SettingsDialogProps) {
+  const theme = useTheme();
+  const [timezones, setTimezones] = useState<Timezone[]>([]);
+  const [loadingTimezones, setLoadingTimezones] = useState(true);
+
+  useEffect(() => {
+    if (open) {
+      const getTimezones = async () => {
+        try {
+          setLoadingTimezones(true);
+          const tzData = await fetchTimezones();
+          setTimezones(tzData);
+        } catch (error) {
+          console.error("Failed to fetch timezones:", error);
+        } finally {
+          setLoadingTimezones(false);
+        }
+      };
+      getTimezones();
+    }
+  }, [open]);
+
+  const handleSettingChange = (field: keyof Settings, value: string | number) => {
+    onSettingsChange({ [field]: value });
+  };
+
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose}
+      fullWidth
+      maxWidth="xs"
+      PaperProps={{
+        sx: {
+          borderRadius: 4,
+          boxShadow: "none",
+        },
+      }}
+    >
+      <DialogTitle>
+        <Typography variant="h6" component="div" fontWeight={600}>
+          Settings
+        </Typography>
+      </DialogTitle>
+      <DialogContent dividers>
+        <Stack spacing={4} sx={{ pt: 1 }}>
+          {/* Theme Section */}
+          <Stack spacing={1.5}>
+            <Typography variant="subtitle1" fontWeight={500}>
+              Appearance
+            </Typography>
+            <ToggleButtonGroup
+              value={settings.theme}
+              exclusive
+              onChange={(_, value) => value && handleSettingChange("theme", value)}
+              fullWidth
+            >
+              {themeOptions.map(({ value, text, Icon }) => (
+                <ToggleButton
+                  key={value}
+                  value={value}
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 0.5,
+                    textTransform: "none",
+                    borderRadius: 2,
+                    border: `1px solid ${theme.palette.divider}`,
+                    "&.Mui-selected": {
+                      bgcolor: "action.selected",
+                      "&:hover": {
+                        bgcolor: "action.selected",
+                      },
+                    },
+                  }}
+                >
+                  <Icon fontSize="medium" />
+                  {text}
+                </ToggleButton>
+              ))}
+            </ToggleButtonGroup>
+          </Stack>
+
+          {/* Calendar Section */}
+          <Stack spacing={1.5}>
+            <Typography variant="subtitle1" fontWeight={500}>
+              Calendar Display
+            </Typography>
+            <FormControl fullWidth>
+              <InputLabel id="first-day-select-label">Week Starts On</InputLabel>
+              <Select
+                labelId="first-day-select-label"
+                value={settings.firstDay}
+                label="Week Starts On"
+                onChange={(e: SelectChangeEvent<number>) => handleSettingChange("firstDay", e.target.value)}
+                sx={{ borderRadius: 2 }}
+              >
+                {dayOptions.map((day) => (
+                  <MenuItem key={day.value} value={day.value}>
+                    {day.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Stack>
+
+          {/* Time Zone Section */}
+          <Stack spacing={1.5}>
+            <Typography variant="subtitle1" fontWeight={500}>
+              Time & Date
+            </Typography>
+            <FormControl fullWidth>
+              <InputLabel id="timezone-select-label">Time Zone</InputLabel>
+              <Select
+                labelId="timezone-select-label"
+                value={settings.timezone}
+                label="Time Zone"
+                onChange={(e: SelectChangeEvent<string>) => handleSettingChange("timezone", e.target.value)}
+                sx={{ borderRadius: 2 }}
+                MenuProps={{
+                  PaperProps: {
+                    style: {
+                      maxHeight: 300,
+                    },
+                  },
+                }}
+              >
+                {loadingTimezones ? (
+                  <MenuItem disabled>
+                    <Stack direction="row" spacing={1.5} alignItems="center">
+                      <CircularProgress size={20} />
+                      <Typography>Loading timezones...</Typography>
+                    </Stack>
+                  </MenuItem>
+                ) : (
+                  timezones.map((tz) => (
+                    <MenuItem key={tz.value} value={tz.value}>
+                      <Stack direction="row" spacing={1.5} alignItems="center">
+                        <PublicIcon fontSize="small" sx={{ opacity: 0.6 }} />
+                        <Typography>{tz.text}</Typography>
+                      </Stack>
+                    </MenuItem>
+                  ))
+                )}
+              </Select>
+            </FormControl>
+          </Stack>
+        </Stack>
+      </DialogContent>
+      <DialogActions sx={{ p: 2 }}>
+        <Button onClick={onClose} variant="contained" sx={{ borderRadius: 2 }}>
+          Done
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
+export const SettingsDialog = React.memo(SettingsDialogComponent);

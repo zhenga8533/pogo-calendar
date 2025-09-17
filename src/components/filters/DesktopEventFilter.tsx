@@ -10,14 +10,10 @@ import {
   Button,
   Checkbox,
   Divider,
-  FormControl,
   FormControlLabel,
   FormGroup,
-  InputLabel,
   Menu,
-  MenuItem,
   Paper,
-  Select,
   Slider,
   Stack,
   TextField,
@@ -25,7 +21,7 @@ import {
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import React, { useMemo } from "react";
-import { categoryGroups, dayOptions, formatTime, marks, SAVED_EVENTS_CATEGORY } from "../../config/eventFilter";
+import { categoryGroups, formatTime, marks, SAVED_EVENTS_CATEGORY } from "../../config/eventFilter";
 import type { EventFilterProps, Filters } from "../../types/filters";
 import { CategoryCheckbox } from "./CategoryCheckbox";
 
@@ -173,31 +169,14 @@ function DesktopEventFilterComponent({
   return (
     <Paper sx={{ p: 2, mb: 3 }}>
       <Stack spacing={2}>
-        {/* Row 1: Search and Week Start */}
-        <Stack direction="row" spacing={2}>
-          <TextField
-            fullWidth
-            label="Search by Event Title"
-            variant="outlined"
-            value={filters.searchTerm}
-            onChange={(e) => handleFilterChange("searchTerm", e.target.value)}
-            sx={{ flexGrow: 3 }}
-          />
-          <FormControl sx={{ flexGrow: 1, minWidth: 180 }}>
-            <InputLabel>Week Starts On</InputLabel>
-            <Select
-              value={filters.firstDay}
-              label="Week Starts On"
-              onChange={(e) => handleFilterChange("firstDay", e.target.value)}
-            >
-              {dayOptions.map((day) => (
-                <MenuItem key={day.value} value={day.value}>
-                  {day.label}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Stack>
+        {/* Row 1: Search */}
+        <TextField
+          fullWidth
+          label="Search by Event Title"
+          variant="outlined"
+          value={filters.searchTerm}
+          onChange={(e) => handleFilterChange("searchTerm", e.target.value)}
+        />
 
         {/* Row 2: Date Pickers */}
         <Stack direction="row" spacing={2}>
@@ -269,9 +248,4 @@ function DesktopEventFilterComponent({
   );
 }
 
-/**
- * NOTE: For React.memo to be effective here, the handler functions passed as props
- * (e.g., `onNewEventClick`, `handleFilterChange`) should be memoized with `useCallback`
- * in the parent component where they are defined.
- */
 export const DesktopEventFilter = React.memo(DesktopEventFilterComponent);

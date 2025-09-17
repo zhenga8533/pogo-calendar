@@ -144,18 +144,18 @@ function EventCalendar({
       const { start, end } = selectionInfo;
       const inclusiveEnd = new Date(end.getTime() - 1);
 
-      const isSingleDay = start.toDateString() === inclusiveEnd.toDateString();
-      const isDeselecting =
-        isSingleDay &&
-        filterStartDate?.toDateString() === start.toDateString() &&
-        filterEndDate?.toDateString() === inclusiveEnd.toDateString();
-
-      if (isDeselecting) {
+      if (
+        filterStartDate &&
+        filterEndDate &&
+        start.toDateString() === filterStartDate.toDateString() &&
+        inclusiveEnd.toDateString() === filterEndDate.toDateString()
+      ) {
         onDateSelect({ start: null, end: null });
         calendarRef.current?.getApi().unselect();
-      } else {
-        onDateSelect({ start, end: inclusiveEnd });
+        return;
       }
+
+      onDateSelect({ start, end: inclusiveEnd });
     },
     [filterStartDate, filterEndDate, onDateSelect]
   );
@@ -252,6 +252,7 @@ function EventCalendar({
           firstDay={firstDay}
           selectable={true}
           select={handleDateSelect}
+          unselectAuto={false}
           eventTimeFormat={{
             hour: hour12 ? "numeric" : "2-digit",
             minute: "2-digit",

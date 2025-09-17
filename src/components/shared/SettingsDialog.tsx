@@ -156,25 +156,6 @@ function SettingsDialogComponent({ open, onClose, settings, onSettingsChange }: 
               Time & Date
             </Typography>
             <FormControl fullWidth>
-              <ToggleButtonGroup
-                value={settings.hour12}
-                exclusive
-                onChange={(_, value) => {
-                  if (value !== null) {
-                    handleSettingChange("hour12", value);
-                  }
-                }}
-                fullWidth
-              >
-                <ToggleButton value={true} sx={{ textTransform: "none" }}>
-                  12-hour
-                </ToggleButton>
-                <ToggleButton value={false} sx={{ textTransform: "none" }}>
-                  24-hour
-                </ToggleButton>
-              </ToggleButtonGroup>
-            </FormControl>
-            <FormControl fullWidth>
               <InputLabel id="timezone-select-label">Time Zone</InputLabel>
               <Select
                 labelId="timezone-select-label"
@@ -208,6 +189,25 @@ function SettingsDialogComponent({ open, onClose, settings, onSettingsChange }: 
                   ))
                 )}
               </Select>
+            </FormControl>
+            <FormControl fullWidth>
+              <ToggleButtonGroup
+                value={settings.hour12}
+                exclusive
+                onChange={(_, value) => {
+                  if (value !== null) {
+                    handleSettingChange("hour12", value);
+                  }
+                }}
+                fullWidth
+              >
+                <ToggleButton value={true} sx={{ textTransform: "none" }}>
+                  12-hour
+                </ToggleButton>
+                <ToggleButton value={false} sx={{ textTransform: "none" }}>
+                  24-hour
+                </ToggleButton>
+              </ToggleButtonGroup>
             </FormControl>
           </Stack>
         </Stack>

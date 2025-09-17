@@ -3,7 +3,7 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import SyncIcon from "@mui/icons-material/Sync";
 import TuneIcon from "@mui/icons-material/Tune";
 import { AppBar, Box, Divider, IconButton, Stack, Toolbar, Tooltip, Typography, useScrollTrigger } from "@mui/material";
-import React from "react";
+import React, { useEffect } from "react";
 import { useLastUpdated } from "../../hooks/useLastUpdated";
 
 const LastUpdatedDisplay = React.memo(
@@ -12,8 +12,18 @@ const LastUpdatedDisplay = React.memo(
    *
    * @returns A component that displays the last updated time with loading and error states.
    */
-  function LastUpdatedDisplay() {
-    const { lastUpdated, loading, error } = useLastUpdated();
+  function LastUpdatedDisplay({
+    onRefresh,
+    setRefetchLastUpdated,
+  }: {
+    onRefresh: () => void;
+    setRefetchLastUpdated: (refetch: () => Promise<void>) => void;
+  }) {
+    const { lastUpdated, loading, error, refetch } = useLastUpdated();
+
+    useEffect(() => {
+      setRefetchLastUpdated(refetch);
+    }, [refetch, setRefetchLastUpdated]);
 
     // Render loading, error, or last updated time based on state.
     if (loading) {
@@ -33,8 +43,8 @@ const LastUpdatedDisplay = React.memo(
 
     // Render the last updated time with an icon and tooltip.
     return (
-      <Tooltip title="Last Data Refresh">
-        <Stack direction="row" alignItems="center" spacing={1}>
+      <Tooltip title="Click to refresh data">
+        <Stack direction="row" alignItems="center" spacing={1} onClick={onRefresh} sx={{ cursor: "pointer" }}>
           <SyncIcon fontSize="small" />
           <Typography variant="body2" sx={{ whiteSpace: "nowrap" }}>
             {lastUpdated}
@@ -48,6 +58,8 @@ const LastUpdatedDisplay = React.memo(
 interface HeaderProps {
   onInfoClick: () => void;
   onSettingsClick: () => void;
+  onRefresh: () => void;
+  setRefetchLastUpdated: (refetch: () => Promise<void>) => void;
 }
 
 /**
@@ -56,7 +68,7 @@ interface HeaderProps {
  * @param param0 Props for the Header component.
  * @returns The header component for the application.
  */
-function HeaderComponent({ onInfoClick, onSettingsClick }: HeaderProps) {
+function HeaderComponent({ onInfoClick, onSettingsClick, onRefresh, setRefetchLastUpdated }: HeaderProps) {
   const trigger = useScrollTrigger({ disableHysteresis: true, threshold: 0 });
 
   // Render the AppBar with dynamic styles based on scroll position.
@@ -87,7 +99,7 @@ function HeaderComponent({ onInfoClick, onSettingsClick }: HeaderProps) {
         {/* Right Side: Last Updated, Settings, Info Button */}
         <Stack direction="row" alignItems="center" spacing={1.5}>
           <Box sx={{ display: { xs: "none", sm: "block" } }}>
-            <LastUpdatedDisplay />
+            <LastUpdatedDisplay onRefresh={onRefresh} setRefetchLastUpdated={setRefetchLastUpdated} />
           </Box>
           <Divider orientation="vertical" flexItem sx={{ display: { xs: "none", sm: "block" } }} />
           <Tooltip title="Settings">

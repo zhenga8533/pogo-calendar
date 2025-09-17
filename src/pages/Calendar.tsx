@@ -54,15 +54,24 @@ const CalendarOverlays = React.memo(function CalendarOverlays({
   );
 });
 
-function Calendar({ settings }: { settings: Settings }) {
+function Calendar({
+  settings,
+  setRefetchEvents,
+  toast,
+  setToast,
+}: {
+  settings: Settings;
+  setRefetchEvents: (refetch: () => Promise<void>) => void;
+  toast: { open: boolean; message: string; severity: "success" | "error" | "info" | "warning" };
+  setToast: (toast: { open: boolean; message: string; severity: string }) => void;
+}) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [eventToEdit, setEventToEdit] = useState<CalendarEvent | null>(null);
-  const [toast, setToast] = useState({ open: false, message: "", severity: "success" });
-  const { allEvents: apiEvents, loading } = useEventData(settings.timezone);
+  const { allEvents: apiEvents, loading, refetch } = useEventData(settings.timezone);
   const { savedEventIds, handleToggleSaveEvent } = useSavedEvents();
   const { customEvents, addEvent, updateEvent, deleteEvent } = useCustomEvents();
   const { eventNotes, updateNote } = useEventNotes();
@@ -75,6 +84,10 @@ function Calendar({ settings }: { settings: Settings }) {
     () => Array.from(new Set(combinedEvents.map((event) => event.extendedProps.category))).sort(),
     [combinedEvents]
   );
+
+  useEffect(() => {
+    setRefetchEvents(refetch);
+  }, [refetch, setRefetchEvents]);
 
   useEffect(() => {
     if (!allCategories.includes("Custom Event") && filters.selectedCategories.includes("Custom Event")) {
@@ -112,7 +125,7 @@ function Calendar({ settings }: { settings: Settings }) {
       }
       handleCloseCreateDialog();
     },
-    [addEvent, updateEvent, filters.selectedCategories, setFilters, handleCloseCreateDialog]
+    [addEvent, updateEvent, filters.selectedCategories, setFilters, handleCloseCreateDialog, setToast]
   );
 
   const handleDeleteEvent = useCallback(
@@ -120,13 +133,16 @@ function Calendar({ settings }: { settings: Settings }) {
       deleteEvent(eventId);
       setToast({ open: true, message: "Event deleted successfully", severity: "success" });
     },
-    [deleteEvent]
+    [deleteEvent, setToast]
   );
 
-  const handleExport = useCallback((eventsToExport: CalendarEvent[]) => {
-    downloadIcsForEvents(eventsToExport);
-    setToast({ open: true, message: `Exported ${eventsToExport.length} events!`, severity: "success" });
-  }, []);
+  const handleExport = useCallback(
+    (eventsToExport: CalendarEvent[]) => {
+      downloadIcsForEvents(eventsToExport);
+      setToast({ open: true, message: `Exported ${eventsToExport.length} events!`, severity: "success" });
+    },
+    [setToast]
+  );
 
   const handleCalendarDateSelect = useCallback(
     (selection: { start: Date | null; end: Date | null }) => {
@@ -136,8 +152,8 @@ function Calendar({ settings }: { settings: Settings }) {
   );
 
   const handleCloseToast = useCallback(() => {
-    setToast((prev) => ({ ...prev, open: false }));
-  }, []);
+    setToast({ ...toast, open: false });
+  }, [setToast, toast]);
 
   const filterComponent = (
     <EventFilter

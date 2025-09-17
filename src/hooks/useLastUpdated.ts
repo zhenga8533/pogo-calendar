@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { GITHUB_LAST_UPDATED_API_URL } from "../config/api";
 
 /**
@@ -12,45 +12,34 @@ export function useLastUpdated() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Effect to fetch the last updated time when the component mounts.
-  useEffect(() => {
-    const controller = new AbortController();
-
-    const fetchLastUpdated = async () => {
-      try {
-        const response = await fetch(GITHUB_LAST_UPDATED_API_URL, { signal: controller.signal });
-
-        if (!response.ok) {
-          throw new Error(`GitHub API responded with status ${response.status}`);
-        }
-
-        const data = await response.json();
-        if (data && data.length > 0) {
-          const lastCommitDate = new Date(data[0].commit.committer.date);
-          const formattedDate = format(lastCommitDate, "MMM d, h:mm a");
-          setLastUpdated(formattedDate);
-        } else {
-          // This case occurs if the file has no commit history.
-          setLastUpdated("N/A");
-        }
-      } catch (err: any) {
-        if (err.name === "AbortError") {
-          console.log("Fetch aborted for useLastUpdated.");
-          return;
-        }
-        setError("Could not load update time.");
-        console.error(err);
-      } finally {
-        setLoading(false);
+  const refetch = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(GITHUB_LAST_UPDATED_API_URL, { cache: "no-store" });
+      if (!response.ok) {
+        throw new Error(`GitHub API responded with status ${response.status}`);
       }
-    };
-
-    fetchLastUpdated();
-
-    return () => {
-      controller.abort();
-    };
+      const data = await response.json();
+      if (data && data.length > 0) {
+        const lastCommitDate = new Date(data[0].commit.committer.date);
+        const formattedDate = format(lastCommitDate, "MMM d, h:mm a");
+        setLastUpdated(formattedDate);
+      } else {
+        setLastUpdated("N/A");
+      }
+    } catch (err: any) {
+      setError("Could not load update time.");
+      console.error(err);
+      throw err; // Re-throw error for the caller to handle
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  return { lastUpdated, loading, error };
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
+
+  return { lastUpdated, loading, error, refetch };
 }

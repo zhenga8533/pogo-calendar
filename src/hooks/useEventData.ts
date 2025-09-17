@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { fetchEvents } from "../services/eventService";
 import type { CalendarEvent } from "../types/events";
 
@@ -12,35 +12,24 @@ export function useEventData(timezone: string) {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let isMounted = true;
-
-    // Async function to fetch event data.
-    const getEvents = async () => {
-      try {
-        const eventData = await fetchEvents(timezone);
-        // Only update state if the component is still mounted.
-        if (isMounted) {
-          setAllEvents(eventData);
-        }
-      } catch (err) {
-        console.error("Error fetching events:", err);
-        if (isMounted) {
-          setError("Failed to load event data. Please try again later.");
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    getEvents();
-
-    return () => {
-      isMounted = false;
-    };
+  const refetch = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const eventData = await fetchEvents(timezone);
+      setAllEvents(eventData);
+    } catch (err) {
+      console.error("Error fetching events:", err);
+      setError("Failed to load event data. Please try again later.");
+      throw err; // Re-throw error for the caller to handle
+    } finally {
+      setLoading(false);
+    }
   }, [timezone]);
 
-  return { allEvents, loading, error };
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
+
+  return { allEvents, loading, error, refetch };
 }

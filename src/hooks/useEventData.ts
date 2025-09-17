@@ -40,7 +40,7 @@ export function useEventData(timezone: string) {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [timezone]);
 
   return { allEvents, loading, error };
 }

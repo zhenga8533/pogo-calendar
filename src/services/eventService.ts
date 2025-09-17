@@ -7,32 +7,33 @@ type ApiResponse = Record<string, ApiEvent[]>;
 function parseApiTime(time: string | number, isLocal: boolean, timezone: string): string {
   let date: Date;
 
-  if (isLocal) {
-    date = new Date(time);
+  if (isLocal && typeof time === "string") {
+    return time;
+  } else if (typeof time === "number") {
+    date = new Date(time * 1000);
   } else {
-    date = new Date((time as number) * 1000);
+    throw new Error("Invalid time format. Expected UNIX timestamp for UTC time.");
   }
 
-  // Handle timezone override for UTC offset strings
-  const timezoneMatch = timezone.match(/\(UTC([+-]\d{2}):(\d{2})\)/);
-  if (timezoneMatch) {
-    const sign = timezoneMatch[1][0] === "+" ? 1 : -1;
-    const hours = parseInt(timezoneMatch[1].substring(1), 10);
-    const minutes = parseInt(timezoneMatch[2], 10);
-    const offsetInMinutes = sign * (hours * 60 + minutes);
-
-    const systemOffsetInMinutes = date.getTimezoneOffset();
-    const adjustmentInMinutes = offsetInMinutes + systemOffsetInMinutes;
-    date.setMinutes(date.getMinutes() + adjustmentInMinutes);
-  }
-
-  // Manually format the date to ensure a consistent output
-  const year = date.getFullYear();
-  const month = (date.getMonth() + 1).toString().padStart(2, "0");
-  const day = date.getDate().toString().padStart(2, "0");
-  const hour = date.getHours().toString().padStart(2, "0");
-  const minute = date.getMinutes().toString().padStart(2, "0");
-  const second = date.getSeconds().toString().padStart(2, "0");
+  // Transform to the specified timezone
+  const options: Intl.DateTimeFormatOptions = {
+    timeZone: timezone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  };
+  const formatter = new Intl.DateTimeFormat("en-US", options);
+  const parts = formatter.formatToParts(date);
+  const year = parts.find((p) => p.type === "year")?.value;
+  const month = parts.find((p) => p.type === "month")?.value;
+  const day = parts.find((p) => p.type === "day")?.value;
+  const hour = parts.find((p) => p.type === "hour")?.value;
+  const minute = parts.find((p) => p.type === "minute")?.value;
+  const second = parts.find((p) => p.type === "second")?.value;
 
   return `${year}-${month}-${day}T${hour}:${minute}:${second}`;
 }

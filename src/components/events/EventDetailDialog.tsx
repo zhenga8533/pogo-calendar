@@ -26,6 +26,7 @@ import { downloadIcsFile } from "../../utils/calendarUtils";
 import { formatDateLine } from "../../utils/dateUtils";
 import { CategoryTag } from "../shared/CategoryTag";
 import { EventStatusTag } from "../shared/EventStatusTag";
+import { UnsavedChangesDialog } from "../shared/UnsavedChangesDialog";
 
 interface EventDetailDialogProps {
   event: CalendarEvent | null;
@@ -37,6 +38,7 @@ interface EventDetailDialogProps {
   eventNotes: Record<string, string>;
   onEditEvent: (event: CalendarEvent) => void;
   hour12: boolean;
+  setToast: (toast: { open: boolean; message: string; severity: "success" | "error" | "info" | "warning" }) => void;
 }
 
 function DetailItem({ icon, text }: { icon: React.ReactNode; text: string | null }) {
@@ -87,9 +89,12 @@ function EventDetailDialog({
   onUpdateNote,
   eventNotes,
   hour12,
+  setToast,
 }: EventDetailDialogProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [noteText, setNoteText] = useState("");
+  const [isDirty, setIsDirty] = useState(false);
+  const [isUnsavedChangesDialogOpen, setUnsavedChangesDialogOpen] = useState(false);
 
   const eventDetails = useMemo(() => {
     if (!event) return null;
@@ -109,6 +114,7 @@ function EventDetailDialog({
   useEffect(() => {
     if (eventDetails) {
       setNoteText(eventNotes[eventDetails.id] || "");
+      setIsDirty(false);
     }
   }, [eventDetails, eventNotes]);
 
@@ -122,7 +128,22 @@ function EventDetailDialog({
   const handleSave = useCallback(() => {
     if (!eventDetails) return;
     onUpdateNote(eventDetails.id, noteText);
-  }, [eventDetails, noteText, onUpdateNote]);
+    setIsDirty(false);
+    setToast({ open: true, message: "Note saved successfully!", severity: "success" });
+  }, [eventDetails, noteText, onUpdateNote, setToast]);
+
+  const handleClose = () => {
+    if (isDirty) {
+      setUnsavedChangesDialogOpen(true);
+    } else {
+      onClose();
+    }
+  };
+
+  const handleConfirmClose = () => {
+    setUnsavedChangesDialogOpen(false);
+    onClose();
+  };
 
   if (!event || !eventDetails) {
     return null;
@@ -134,7 +155,7 @@ function EventDetailDialog({
     <>
       <Dialog
         open={true}
-        onClose={onClose}
+        onClose={handleClose}
         maxWidth="sm"
         fullWidth
         disableRestoreFocus
@@ -203,7 +224,10 @@ function EventDetailDialog({
                   variant="outlined"
                   placeholder="Add your personal notes here..."
                   value={noteText}
-                  onChange={(e) => setNoteText(e.target.value)}
+                  onChange={(e) => {
+                    setNoteText(e.target.value);
+                    setIsDirty(true);
+                  }}
                 />
               </Stack>
             </Stack>
@@ -270,7 +294,7 @@ function EventDetailDialog({
             <Button variant="contained" onClick={handleSave} sx={{ whiteSpace: "nowrap" }}>
               Save
             </Button>
-            <Button onClick={onClose}>Close</Button>
+            <Button onClick={handleClose}>Close</Button>
           </Stack>
         </DialogActions>
       </Dialog>
@@ -279,6 +303,11 @@ function EventDetailDialog({
         onClose={() => setConfirmOpen(false)}
         onConfirm={handleDelete}
         eventName={title}
+      />
+      <UnsavedChangesDialog
+        open={isUnsavedChangesDialogOpen}
+        onClose={() => setUnsavedChangesDialogOpen(false)}
+        onConfirm={handleConfirmClose}
       />
     </>
   );

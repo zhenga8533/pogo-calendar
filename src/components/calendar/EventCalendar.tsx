@@ -30,6 +30,7 @@ interface EventCalendarProps {
   eventNotes: Record<string, string>;
   onEditEvent: (event: CalendarEvent) => void;
   onDateSelect: (selection: { start: Date | null; end: Date | null }) => void;
+  setToast: (toast: { open: boolean; message: string; severity: string }) => void;
 }
 
 interface CalendarEventContentProps {
@@ -105,6 +106,7 @@ function EventCalendar({
   eventNotes,
   onEditEvent,
   onDateSelect,
+  setToast,
 }: EventCalendarProps) {
   const calendarRef = useRef<FullCalendar>(null);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
@@ -118,7 +120,6 @@ function EventCalendar({
     calendarRef.current?.getApi().changeView(isMobile ? "listWeek" : "dayGridMonth");
   }, [isMobile]);
 
-  // Find the original event from the `events` prop using a unique ID
   const findOriginalEvent = useCallback(
     (fcEvent: any) => {
       const articleUrl = fcEvent.extendedProps.article_url;
@@ -127,7 +128,6 @@ function EventCalendar({
     [events]
   );
 
-  // Handle event click to set the selected event
   const handleEventClick = useCallback(
     (clickInfo: EventClickArg) => {
       setSelectedEvent(findOriginalEvent(clickInfo.event));
@@ -135,12 +135,10 @@ function EventCalendar({
     [findOriginalEvent]
   );
 
-  // Close the event detail dialog
   const handleCloseDialog = useCallback(() => {
     setSelectedEvent(null);
   }, []);
 
-  // Handle date selection for filtering
   const handleDateSelect = useCallback(
     (selectionInfo: DateSelectArg) => {
       const { start, end } = selectionInfo;
@@ -162,7 +160,6 @@ function EventCalendar({
     [filterStartDate, filterEndDate, onDateSelect]
   );
 
-  // Handle popover open on event hover
   const handlePopoverOpen = useCallback(
     (event: React.MouseEvent<HTMLElement>, calendarEvent: CalendarEvent) => {
       const originalEvent = findOriginalEvent(calendarEvent);
@@ -174,12 +171,10 @@ function EventCalendar({
     [findOriginalEvent]
   );
 
-  // Handle popover close on mouse leave
   const handlePopoverClose = useCallback(() => {
     setPopoverState({ event: null, position: null });
   }, []);
 
-  // Update popover position on mouse move
   const handleMouseMove = useCallback(
     (event: React.MouseEvent) => {
       if (popoverState.event) {
@@ -192,7 +187,6 @@ function EventCalendar({
     [popoverState.event]
   );
 
-  // Render event content with save icon and hover handlers
   const renderEventContent = useCallback(
     (eventInfo: EventContentArg) => {
       const article_url = eventInfo.event.extendedProps.article_url;
@@ -211,7 +205,6 @@ function EventCalendar({
     [savedEventIds, onToggleSaveEvent, handlePopoverOpen, handlePopoverClose]
   );
 
-  // No Events Fallback
   if (events.length === 0) {
     return (
       <Paper
@@ -308,6 +301,7 @@ function EventCalendar({
         onToggleSaveEvent={onToggleSaveEvent}
         onDeleteEvent={onDeleteEvent}
         onEditEvent={onEditEvent}
+        setToast={setToast}
       />
     </>
   );

@@ -15,79 +15,57 @@ import type { CalendarEvent, NewEventData } from "../types/events";
 import type { Settings } from "../types/settings";
 import { downloadIcsForEvents } from "../utils/calendarUtils";
 
-const CalendarOverlays = React.memo(
-  /**
-   * Renders overlays for the calendar page, including dialogs and toasts.
-   *
-   * @param param0 Props for the CalendarOverlays component.
-   * @returns Overlays for the calendar page, including dialogs and toasts.
-   */
-  function CalendarOverlays({
-    createDialogOpen,
-    exportDialogOpen,
-    toast,
-    eventToEdit,
-    combinedEvents,
-    filteredEvents,
-    savedEventIds,
-    onCloseCreateDialog,
-    onCloseExportDialog,
-    onSaveEvent,
-    onExport,
-    onCloseToast,
-  }: any) {
-    return (
-      <>
-        {/* Dialog for creating events */}
-        <CreateEventDialog
-          open={createDialogOpen}
-          onClose={onCloseCreateDialog}
-          onSave={onSaveEvent}
-          eventToEdit={eventToEdit}
-        />
-
-        {/* Dialog for exporting events */}
-        <ExportEventDialog
-          open={exportDialogOpen}
-          onClose={onCloseExportDialog}
-          onExport={onExport}
-          allEvents={combinedEvents}
-          filteredEvents={filteredEvents}
-          savedEventIds={savedEventIds}
-        />
-
-        {/* Toast notifications */}
-        <Snackbar open={toast.open} autoHideDuration={6000} onClose={onCloseToast}>
-          <Alert onClose={onCloseToast} severity={toast.severity} sx={{ width: "100%" }}>
-            {toast.message}
-          </Alert>
-        </Snackbar>
-      </>
-    );
-  }
-);
-
-// --- Main Calendar Page Component ---
+const CalendarOverlays = React.memo(function CalendarOverlays({
+  createDialogOpen,
+  exportDialogOpen,
+  toast,
+  eventToEdit,
+  combinedEvents,
+  filteredEvents,
+  savedEventIds,
+  onCloseCreateDialog,
+  onCloseExportDialog,
+  onSaveEvent,
+  onExport,
+  onCloseToast,
+}: any) {
+  return (
+    <>
+      <CreateEventDialog
+        open={createDialogOpen}
+        onClose={onCloseCreateDialog}
+        onSave={onSaveEvent}
+        eventToEdit={eventToEdit}
+      />
+      <ExportEventDialog
+        open={exportDialogOpen}
+        onClose={onCloseExportDialog}
+        onExport={onExport}
+        allEvents={combinedEvents}
+        filteredEvents={filteredEvents}
+        savedEventIds={savedEventIds}
+      />
+      <Snackbar open={toast.open} autoHideDuration={6000} onClose={onCloseToast}>
+        <Alert onClose={onCloseToast} severity={toast.severity} sx={{ width: "100%" }}>
+          {toast.message}
+        </Alert>
+      </Snackbar>
+    </>
+  );
+});
 
 function Calendar({ settings }: { settings: Settings }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-
-  // --- State Management ---
-  // UI State for dialogs, drawers, and toasts
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [eventToEdit, setEventToEdit] = useState<CalendarEvent | null>(null);
-  const [toast, setToast] = useState({ open: false, message: "", severity: "success" as const });
-
-  // Custom hooks for application state and logic
+  const [toast, setToast] = useState({ open: false, message: "", severity: "success" });
   const { allEvents: apiEvents, loading } = useEventData(settings.timezone);
   const { savedEventIds, handleToggleSaveEvent } = useSavedEvents();
   const { customEvents, addEvent, updateEvent, deleteEvent } = useCustomEvents();
   const { eventNotes, updateNote } = useEventNotes();
-
-  // Combine API and custom events for filtering
   const combinedEvents = useMemo(() => [...apiEvents, ...customEvents], [apiEvents, customEvents]);
   const { filters, setFilters, handleResetFilters, setCurrentView, filteredEvents } = useFilters(
     combinedEvents,
@@ -98,19 +76,14 @@ function Calendar({ settings }: { settings: Settings }) {
     [combinedEvents]
   );
 
-  // --- Effects ---
-  // Effect to deselect the "Custom Event" category if no custom events exist.
   useEffect(() => {
     if (!allCategories.includes("Custom Event") && filters.selectedCategories.includes("Custom Event")) {
-      // Use the functional update form of setFilters to avoid dependency array issues.
       setFilters((prev) => ({
         ...prev,
         selectedCategories: prev.selectedCategories.filter((c) => c !== "Custom Event"),
       }));
     }
   }, [allCategories, filters.selectedCategories, setFilters]);
-
-  // --- Handlers (memoized with useCallback) ---
 
   const handleOpenEditDialog = useCallback((event: CalendarEvent) => {
     setEventToEdit(event);
@@ -129,7 +102,6 @@ function Calendar({ settings }: { settings: Settings }) {
         setToast({ open: true, message: "Event updated successfully!", severity: "success" });
       } else {
         addEvent(eventData);
-        // Automatically select the "Custom Event" category when a new one is made.
         if (filters.selectedCategories.length > 0) {
           setFilters((prev) => ({
             ...prev,
@@ -167,7 +139,6 @@ function Calendar({ settings }: { settings: Settings }) {
     setToast((prev) => ({ ...prev, open: false }));
   }, []);
 
-  // --- Render Logic ---
   const filterComponent = (
     <EventFilter
       filters={filters}
@@ -214,6 +185,7 @@ function Calendar({ settings }: { settings: Settings }) {
         onDeleteEvent={handleDeleteEvent}
         onEditEvent={handleOpenEditDialog}
         onDateSelect={handleCalendarDateSelect}
+        setToast={setToast}
       />
       <CalendarOverlays
         createDialogOpen={createDialogOpen}

@@ -2,10 +2,10 @@ import { Alert, Box, Container, CssBaseline, Snackbar, ThemeProvider } from "@mu
 import { useCallback, useRef, useState } from "react";
 import Footer from "./components/layout/Footer";
 import Header from "./components/layout/Header";
-import InfoDialog from "./components/shared/InfoDialog";
 import { SettingsDialog } from "./components/shared/SettingsDialog";
 import { useSettings } from "./hooks/useSettings";
 import Calendar from "./pages/Calendar";
+import FaqPage from "./pages/Faq";
 import { CalendarDarkStyles } from "./styles/calendarDarkStyles";
 import type { Settings } from "./types/settings";
 
@@ -15,19 +15,18 @@ import type { Settings } from "./types/settings";
  * @returns The main application component.
  */
 function App() {
-  const [infoOpen, setInfoOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const { theme, settings, setSettings } = useSettings();
-  const [toast, setToast] = useState({
-    open: false,
-    message: "",
-    severity: "success" as "success" | "error" | "info" | "warning",
-  });
+  const [toast, setToast] = useState<{
+    open: boolean;
+    message: string;
+    severity: "success" | "error" | "info" | "warning";
+  }>({ open: false, message: "", severity: "success" });
+  const [view, setView] = useState<"calendar" | "faq">("calendar");
+
   const refetchEventsRef = useRef<() => Promise<void>>(() => Promise.resolve());
   const refetchLastUpdatedRef = useRef<() => Promise<void>>(() => Promise.resolve());
 
-  const handleInfoOpen = useCallback(() => setInfoOpen(true), []);
-  const handleInfoClose = useCallback(() => setInfoOpen(false), []);
   const handleSettingsOpen = useCallback(() => setSettingsOpen(true), []);
   const handleSettingsClose = useCallback(() => setSettingsOpen(false), []);
 
@@ -59,6 +58,10 @@ function App() {
     setToast((prev) => ({ ...prev, open: false }));
   }, []);
 
+  const handleNavigate = useCallback((newView: "calendar" | "faq") => {
+    setView(newView);
+  }, []);
+
   // Render the application with theming and layout.
   return (
     <ThemeProvider theme={theme}>
@@ -69,21 +72,25 @@ function App() {
       {/* Main layout container */}
       <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
         <Header
-          onInfoClick={handleInfoOpen}
           onSettingsClick={handleSettingsOpen}
           onRefresh={handleRefresh}
           setRefetchLastUpdated={setRefetchLastUpdated}
+          onNavigateHome={() => handleNavigate("calendar")}
+          onNavigate={handleNavigate}
         />
         <Box component="main" sx={{ flexGrow: 1, p: 3, backgroundColor: "background.default" }}>
-          <Container maxWidth="xl">
-            <Calendar settings={settings} setRefetchEvents={setRefetchEvents} toast={toast} setToast={setToast} />
-          </Container>
+          {view === "calendar" ? (
+            <Container maxWidth="xl">
+              <Calendar settings={settings} setRefetchEvents={setRefetchEvents} toast={toast} setToast={setToast} />
+            </Container>
+          ) : (
+            <FaqPage onNavigate={handleNavigate} />
+          )}
         </Box>
         <Footer />
       </Box>
 
       {/* Info and Settings dialogs */}
-      <InfoDialog open={infoOpen} onClose={handleInfoClose} />
       <SettingsDialog
         open={settingsOpen}
         onClose={handleSettingsClose}

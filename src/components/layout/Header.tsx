@@ -1,8 +1,18 @@
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import SyncIcon from "@mui/icons-material/Sync";
 import TuneIcon from "@mui/icons-material/Tune";
-import { AppBar, Box, Divider, IconButton, Stack, Toolbar, Tooltip, Typography, useScrollTrigger } from "@mui/material";
+import {
+  AppBar,
+  Box,
+  Button,
+  Divider,
+  IconButton,
+  Stack,
+  Toolbar,
+  Tooltip,
+  Typography,
+  useScrollTrigger,
+} from "@mui/material";
 import React, { useEffect } from "react";
 import { useLastUpdated } from "../../hooks/useLastUpdated";
 
@@ -56,10 +66,11 @@ const LastUpdatedDisplay = React.memo(
 );
 
 interface HeaderProps {
-  onInfoClick: () => void;
   onSettingsClick: () => void;
   onRefresh: () => void;
   setRefetchLastUpdated: (refetch: () => Promise<void>) => void;
+  onNavigateHome: () => void;
+  onNavigate: (view: "calendar" | "faq") => void;
 }
 
 /**
@@ -68,7 +79,13 @@ interface HeaderProps {
  * @param param0 Props for the Header component.
  * @returns The header component for the application.
  */
-function HeaderComponent({ onInfoClick, onSettingsClick, onRefresh, setRefetchLastUpdated }: HeaderProps) {
+function HeaderComponent({
+  onSettingsClick,
+  onRefresh,
+  setRefetchLastUpdated,
+  onNavigateHome,
+  onNavigate,
+}: HeaderProps) {
   const trigger = useScrollTrigger({ disableHysteresis: true, threshold: 0 });
 
   // Render the AppBar with dynamic styles based on scroll position.
@@ -90,11 +107,13 @@ function HeaderComponent({ onInfoClick, onSettingsClick, onRefresh, setRefetchLa
       })}
     >
       <Toolbar>
-        {/* App Icon and Title */}
-        <CalendarMonthIcon sx={{ mr: 1.5 }} />
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          PoGo Event Calendar
-        </Typography>
+        {/* App Icon and Title (Clickable) */}
+        <Stack direction="row" alignItems="center" onClick={onNavigateHome} sx={{ cursor: "pointer", flexGrow: 1 }}>
+          <CalendarMonthIcon sx={{ mr: 1.5 }} />
+          <Typography variant="h6" component="div">
+            PoGo Event Calendar
+          </Typography>
+        </Stack>
 
         {/* Right Side: Last Updated, Settings, Info Button */}
         <Stack direction="row" alignItems="center" spacing={1.5}>
@@ -102,14 +121,12 @@ function HeaderComponent({ onInfoClick, onSettingsClick, onRefresh, setRefetchLa
             <LastUpdatedDisplay onRefresh={onRefresh} setRefetchLastUpdated={setRefetchLastUpdated} />
           </Box>
           <Divider orientation="vertical" flexItem sx={{ display: { xs: "none", sm: "block" } }} />
+          <Button color="inherit" onClick={() => onNavigate("faq")}>
+            FAQ
+          </Button>
           <Tooltip title="Settings">
             <IconButton color="inherit" onClick={onSettingsClick}>
               <TuneIcon />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="About">
-            <IconButton color="inherit" onClick={onInfoClick}>
-              <InfoOutlinedIcon />
             </IconButton>
           </Tooltip>
         </Stack>

@@ -1,4 +1,3 @@
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
@@ -27,24 +26,16 @@ import { useEventStatus } from "../../hooks/useEventStatus";
 import type { CalendarEvent } from "../../types/events";
 import { downloadIcsFile } from "../../utils/calendarUtils";
 import { getColorForCategory } from "../../utils/colorUtils";
-import { formatDateLine, toDate } from "../../utils/dateUtils";
 
 interface EventDetailDialogProps {
   event: CalendarEvent | null;
   onClose: () => void;
   savedEventIds: string[];
-  timeZone: string;
   onToggleSaveEvent: (eventId: string) => void;
   onDeleteEvent: (eventId: string) => void;
   onEditEvent: (event: CalendarEvent) => void;
 }
 
-/**
- * Renders a single detail item with an icon and text.
- *
- * @param param0 Props for the DetailItem component.
- * @returns A single detail item with an icon and text.
- */
 function DetailItem({ icon, text }: { icon: React.ReactNode; text: string | null }) {
   return (
     <Stack direction="row" spacing={1.5} alignItems="center">
@@ -54,12 +45,6 @@ function DetailItem({ icon, text }: { icon: React.ReactNode; text: string | null
   );
 }
 
-/**
- * Renders a confirmation dialog for deleting an event.
- *
- * @param param0 Props for the DeleteConfirmationDialog component.
- * @returns A confirmation dialog for deleting an event.
- */
 function DeleteConfirmationDialog({
   open,
   onClose,
@@ -89,17 +74,10 @@ function DeleteConfirmationDialog({
   );
 }
 
-/**
- * A dialog component that displays detailed information about a calendar event.
- *
- * @param param0 Props for the EventDetailDialog component.
- * @returns A dialog displaying detailed information about a calendar event.
- */
 function EventDetailDialog({
   event,
   onClose,
   savedEventIds,
-  timeZone,
   onToggleSaveEvent,
   onDeleteEvent,
   onEditEvent,
@@ -107,30 +85,22 @@ function EventDetailDialog({
   const theme = useTheme();
   const [confirmOpen, setConfirmOpen] = useState(false);
 
+  // The event object is now your original event with string dates
   const eventDetails = useMemo(() => {
     if (!event) return null;
 
-    const startDate = toDate(event.start);
-    const endDate = toDate(event.end);
-
-    // If dates are invalid, we cannot render details
-    if (!startDate || !endDate) return null;
-
     const eventId = event.extendedProps.article_url;
-
     return {
       id: eventId,
       title: event.title,
       category: event.extendedProps.category,
       bannerUrl: event.extendedProps.banner_url,
-      startDate,
-      endDate,
       isCustomEvent: event.extendedProps.category === "Custom Event",
       isSaved: savedEventIds.includes(eventId),
-      isSingleDay: startDate.toDateString() === endDate.toDateString(),
     };
   }, [event, savedEventIds]);
 
+  // Pass the string dates to the useEventStatus hook.
   const { status, displayTime } = useEventStatus(event?.start ?? null, event?.end ?? null);
 
   const statusInfo = useMemo(
@@ -148,41 +118,6 @@ function EventDetailDialog({
     [eventDetails, theme.palette.mode]
   );
 
-  const dateTimeDetails = useMemo(() => {
-    if (!eventDetails) return null;
-    const { startDate, endDate, isSingleDay } = eventDetails;
-
-    if (isSingleDay) {
-      return (
-        <>
-          <DetailItem icon={<CalendarTodayIcon color="action" />} text={formatDateLine(startDate, false, timeZone)} />
-          <DetailItem
-            icon={<AccessTimeIcon color="action" />}
-            text={`${formatDateLine(startDate, true, timeZone)?.split(" ")[3]} ${
-              formatDateLine(startDate, true, timeZone)?.split(" ")[4]
-            } — ${formatDateLine(endDate, true, timeZone)?.split(" ")[3]} ${
-              formatDateLine(endDate, true, timeZone)?.split(" ")[4]
-            }`}
-          />
-        </>
-      );
-    }
-
-    return (
-      <>
-        <DetailItem
-          icon={<CalendarTodayIcon color="action" />}
-          text={`Starts: ${formatDateLine(startDate, true, timeZone)}`}
-        />
-        <DetailItem
-          icon={<CalendarTodayIcon color="action" />}
-          text={`Ends: ${formatDateLine(endDate, true, timeZone)}`}
-        />
-      </>
-    );
-  }, [eventDetails, timeZone]);
-
-  // Callback to handle event deletion after confirmation.
   const handleDelete = useCallback(() => {
     if (!eventDetails) return;
     onDeleteEvent(eventDetails.id);
@@ -190,18 +125,15 @@ function EventDetailDialog({
     onClose();
   }, [eventDetails, onDeleteEvent, onClose]);
 
-  // Render nothing if there is no event.
   if (!event || !eventDetails) {
     return null;
   }
 
-  // Render the main event detail dialog.
   const { id, title, category, bannerUrl, isCustomEvent, isSaved } = eventDetails;
   return (
     <>
       <Dialog open={true} onClose={onClose} maxWidth="sm" fullWidth disableRestoreFocus>
         <DialogContent sx={{ p: 0, position: "relative" }}>
-          {/* Save/Unsave Icon Button */}
           <IconButton
             aria-label={isSaved ? "Unsave event" : "Save event"}
             onClick={() => onToggleSaveEvent(id)}
@@ -218,7 +150,6 @@ function EventDetailDialog({
             {isSaved ? <StarIcon /> : <StarBorderIcon />}
           </IconButton>
 
-          {/* Event Banner Image */}
           <Box
             component="img"
             src={bannerUrl}
@@ -227,7 +158,6 @@ function EventDetailDialog({
           />
 
           <Box sx={{ p: 3 }}>
-            {/* Category and Status */}
             <Stack
               direction="row"
               justifyContent="space-between"
@@ -258,22 +188,21 @@ function EventDetailDialog({
               </Box>
             </Stack>
 
-            {/* Event Title */}
             <Typography variant="h5" component="h2" gutterBottom>
               {title}
             </Typography>
 
-            {/* Divider */}
             <Divider sx={{ my: 2 }} />
 
-            {/* Date and Time Details */}
-            <Stack spacing={2}>{dateTimeDetails}</Stack>
+            <Stack spacing={2}>
+              {/* Use the string values directly */}
+              <DetailItem icon={<CalendarTodayIcon color="action" />} text={`Start: ${event.start}`} />
+              {event.end && <DetailItem icon={<CalendarTodayIcon color="action" />} text={`End: ${event.end}`} />}
+            </Stack>
           </Box>
         </DialogContent>
 
-        {/* Dialog Actions */}
         <DialogActions sx={{ p: "16px 24px", justifyContent: "space-between", flexWrap: "wrap", gap: 1 }}>
-          {/* Calendar and Learn More Buttons */}
           <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
             <Button variant="outlined" startIcon={<AddToCalendarIcon />} onClick={() => downloadIcsFile(event)}>
               Add to Calendar
@@ -292,7 +221,6 @@ function EventDetailDialog({
             )}
           </Box>
 
-          {/* Action Buttons */}
           <Box>
             {isCustomEvent && (
               <>
@@ -309,7 +237,6 @@ function EventDetailDialog({
         </DialogActions>
       </Dialog>
 
-      {/* Extracted Confirmation Dialog */}
       <DeleteConfirmationDialog
         open={confirmOpen}
         onClose={() => setConfirmOpen(false)}

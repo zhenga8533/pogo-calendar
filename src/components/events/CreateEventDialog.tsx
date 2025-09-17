@@ -19,8 +19,8 @@ interface CreateEventDialogProps {
  */
 const getInitialFormData = () => ({
   title: "",
-  start: new Date(),
-  end: new Date(),
+  start: "",
+  end: "",
 });
 
 /**
@@ -48,8 +48,8 @@ function CreateEventDialog({ open, eventToEdit, onClose, onSave }: CreateEventDi
       if (eventToEdit) {
         setFormData({
           title: eventToEdit.title,
-          start: eventToEdit.start as Date,
-          end: eventToEdit.end as Date,
+          start: eventToEdit.start,
+          end: eventToEdit.end,
         });
       } else {
         setFormData(getInitialFormData());
@@ -124,12 +124,12 @@ function CreateEventDialog({ open, eventToEdit, onClose, onSave }: CreateEventDi
             {/* Start and End Time Pickers */}
             <DateTimePicker
               label="Start Time"
-              value={formData.start}
+              value={(formData.start && new Date(formData.start)) || null}
               onChange={(newValue) => handleChange("start", newValue)}
             />
             <DateTimePicker
               label="End Time"
-              value={formData.end}
+              value={(formData.end && new Date(formData.end)) || null}
               onChange={(newValue) => handleChange("end", newValue)}
               slotProps={{
                 textField: {

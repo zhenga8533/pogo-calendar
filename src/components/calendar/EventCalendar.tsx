@@ -12,7 +12,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import type { CalendarEvent } from "../../types/events";
 import { getColorForCategory } from "../../utils/colorUtils";
 import EventDetailDialog from "../events/EventDetailDialog";
-import EventHoverDetails from "./EventHoverDetails";
+import EventHoverDetails from "../events/EventHoverDetails";
 
 interface EventCalendarProps {
   events: CalendarEvent[];
@@ -37,72 +37,55 @@ interface CalendarEventContentProps {
   onMouseLeave: () => void;
 }
 
-const CalendarEventContent = React.memo(
-  /**
-   * Renders the content of a calendar event.
-   *
-   * @param param0 An object containing event information and handlers.
-   * @returns A JSX element representing the event content.
-   */
-  function CalendarEventContent({
-    eventInfo,
-    isSaved,
-    onToggleSave,
-    onMouseEnter,
-    onMouseLeave,
-  }: CalendarEventContentProps) {
-    const theme = useTheme();
-    const { category, article_url } = eventInfo.event.extendedProps;
-    const backgroundColor = getColorForCategory(category, theme.palette.mode);
+const CalendarEventContent = React.memo(function CalendarEventContent({
+  eventInfo,
+  isSaved,
+  onToggleSave,
+  onMouseEnter,
+  onMouseLeave,
+}: CalendarEventContentProps) {
+  const theme = useTheme();
+  const { category, article_url } = eventInfo.event.extendedProps;
+  const backgroundColor = getColorForCategory(category, theme.palette.mode);
 
-    // Render the event content with title, time, and save icon.
-    return (
-      <Box
-        sx={{
-          backgroundColor,
-          color: theme.palette.getContrastText(backgroundColor),
-          borderRadius: "4px",
-          overflow: "hidden",
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          cursor: "pointer",
-          border: "2px solid rgba(0, 0, 0, 0.2)",
-          boxSizing: "border-box",
-          transition: "box-shadow 0.15s ease-in-out, filter 0.15s ease-in-out",
-        }}
-        onMouseEnter={(e) => onMouseEnter(e, eventInfo.event as unknown as CalendarEvent)}
-        onMouseLeave={onMouseLeave}
-      >
-        {/* Event Title and Time */}
-        <Box sx={{ p: "2px 8px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-          <b>{eventInfo.timeText}</b> <i>{eventInfo.event.title}</i>
-        </Box>
-
-        {/* Save Icon */}
-        <IconButton
-          size="small"
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggleSave(article_url);
-          }}
-          sx={{ color: "inherit" }}
-        >
-          {isSaved ? <StarIcon fontSize="inherit" /> : <StarBorderIcon fontSize="inherit" />}
-        </IconButton>
+  return (
+    <Box
+      sx={{
+        backgroundColor,
+        color: theme.palette.getContrastText(backgroundColor),
+        borderRadius: "4px",
+        overflow: "hidden",
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        cursor: "pointer",
+        border: "2px solid rgba(0, 0, 0, 0.2)",
+        boxSizing: "border-box",
+        transition: "box-shadow 0.15s ease-in-out, filter 0.15s ease-in-out",
+      }}
+      onMouseEnter={(e) => onMouseEnter(e, eventInfo.event as unknown as CalendarEvent)}
+      onMouseLeave={onMouseLeave}
+    >
+      <Box sx={{ p: "2px 8px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+        <b>{eventInfo.timeText}</b> <i>{eventInfo.event.title}</i>
       </Box>
-    );
-  }
-);
 
-/**
- * EventCalendar renders a calendar interface for managing events.
- *
- * @param param0 An object containing props for the EventCalendar component.
- * @returns A JSX element representing the EventCalendar.
- */
+      <IconButton
+        size="small"
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggleSave(article_url);
+        }}
+        sx={{ color: "inherit" }}
+      >
+        {isSaved ? <StarIcon fontSize="inherit" /> : <StarBorderIcon fontSize="inherit" />}
+      </IconButton>
+    </Box>
+  );
+});
+
 function EventCalendar({
   events,
   isMobile,
@@ -129,10 +112,22 @@ function EventCalendar({
     calendarRef.current?.getApi().changeView(isMobile ? "listWeek" : "dayGridMonth");
   }, [isMobile]);
 
+  // Find the original event from the `events` prop using a unique ID
+  const findOriginalEvent = useCallback(
+    (fcEvent: any) => {
+      const articleUrl = fcEvent.extendedProps.article_url;
+      return events.find((e) => e.extendedProps.article_url === articleUrl) || null;
+    },
+    [events]
+  );
+
   // Handle event click to set the selected event
-  const handleEventClick = useCallback((clickInfo: EventClickArg) => {
-    setSelectedEvent(clickInfo.event as unknown as CalendarEvent);
-  }, []);
+  const handleEventClick = useCallback(
+    (clickInfo: EventClickArg) => {
+      setSelectedEvent(findOriginalEvent(clickInfo.event));
+    },
+    [findOriginalEvent]
+  );
 
   // Close the event detail dialog
   const handleCloseDialog = useCallback(() => {
@@ -162,12 +157,16 @@ function EventCalendar({
   );
 
   // Handle popover open on event hover
-  const handlePopoverOpen = useCallback((event: React.MouseEvent<HTMLElement>, calendarEvent: CalendarEvent) => {
-    setPopoverState({
-      event: calendarEvent,
-      position: { top: event.clientY, left: event.clientX },
-    });
-  }, []);
+  const handlePopoverOpen = useCallback(
+    (event: React.MouseEvent<HTMLElement>, calendarEvent: CalendarEvent) => {
+      const originalEvent = findOriginalEvent(calendarEvent);
+      setPopoverState({
+        event: originalEvent,
+        position: { top: event.clientY, left: event.clientX },
+      });
+    },
+    [findOriginalEvent]
+  );
 
   // Handle popover close on mouse leave
   const handlePopoverClose = useCallback(() => {
@@ -229,13 +228,11 @@ function EventCalendar({
     );
   }
 
-  // Main Calendar Render
   return (
     <>
-      {/* Calendar Container */}
       <Paper elevation={3} sx={{ p: { xs: 1, md: 2 } }} onMouseMove={handleMouseMove}>
         <FullCalendar
-          key={timeZone} // Force re-render when timezone changes
+          key={timeZone}
           ref={calendarRef}
           plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
           headerToolbar={
@@ -281,17 +278,14 @@ function EventCalendar({
         />
       </Paper>
 
-      {/* Event Hover Popover */}
       <EventHoverDetails
         open={Boolean(popoverState.event)}
         id={popoverState.event ? "mouse-over-popover" : undefined}
         mousePosition={popoverState.position}
         event={popoverState.event}
         onClose={handlePopoverClose}
-        timeZone={timeZone}
       />
 
-      {/* Event Detail Dialog */}
       <EventDetailDialog
         event={selectedEvent}
         onClose={handleCloseDialog}
@@ -299,7 +293,6 @@ function EventCalendar({
         onToggleSaveEvent={onToggleSaveEvent}
         onDeleteEvent={onDeleteEvent}
         onEditEvent={onEditEvent}
-        timeZone={timeZone}
       />
     </>
   );

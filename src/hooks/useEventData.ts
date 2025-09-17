@@ -7,7 +7,7 @@ import type { CalendarEvent } from "../types/events";
  *
  * @returns A custom hook to fetch and manage calendar event data with loading and error states.
  */
-export function useEventData() {
+export function useEventData(timezone: string) {
   const [allEvents, setAllEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -18,7 +18,7 @@ export function useEventData() {
     // Async function to fetch event data.
     const getEvents = async () => {
       try {
-        const eventData = await fetchEvents();
+        const eventData = await fetchEvents(timezone);
         // Only update state if the component is still mounted.
         if (isMounted) {
           setAllEvents(eventData);

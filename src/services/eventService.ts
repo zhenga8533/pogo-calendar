@@ -4,24 +4,37 @@ import type { Timezone } from "../types/settings";
 
 type ApiResponse = Record<string, ApiEvent[]>;
 
-/**
- * Parses a time value from the API into a format FullCalendar can use.
- *
- * @param time The time value from the API, either a string or a number.
- * @param isLocal Indicates if the time is in local format (true) or UTC timestamp (false).
- * @returns A Date object for UTC times, or an ISO-like string for local times.
- */
-function parseApiTime(time: string | number, isLocal: boolean): Date | string {
+function parseApiTime(time: string | number, isLocal: boolean, timezone: string): string {
+  let date: Date;
+
   if (isLocal) {
-    // For local times, return the string as is. FullCalendar will interpret it
-    // as a "floating" time and render it in the calendar's specified timezone.
-    return time as string;
+    date = new Date(time);
+  } else {
+    date = new Date((time as number) * 1000);
   }
 
-  // For UTC timestamps, convert from seconds to milliseconds and create a Date object.
-  // This represents a specific moment in time, which FullCalendar will correctly
-  // convert to the display timezone.
-  return new Date((time as number) * 1000);
+  // Handle timezone override for UTC offset strings
+  const timezoneMatch = timezone.match(/\(UTC([+-]\d{2}):(\d{2})\)/);
+  if (timezoneMatch) {
+    const sign = timezoneMatch[1][0] === "+" ? 1 : -1;
+    const hours = parseInt(timezoneMatch[1].substring(1), 10);
+    const minutes = parseInt(timezoneMatch[2], 10);
+    const offsetInMinutes = sign * (hours * 60 + minutes);
+
+    const systemOffsetInMinutes = date.getTimezoneOffset();
+    const adjustmentInMinutes = offsetInMinutes + systemOffsetInMinutes;
+    date.setMinutes(date.getMinutes() + adjustmentInMinutes);
+  }
+
+  // Manually format the date to ensure a consistent output
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const day = date.getDate().toString().padStart(2, "0");
+  const hour = date.getHours().toString().padStart(2, "0");
+  const minute = date.getMinutes().toString().padStart(2, "0");
+  const second = date.getSeconds().toString().padStart(2, "0");
+
+  return `${year}-${month}-${day}T${hour}:${minute}:${second}`;
 }
 
 /**
@@ -30,12 +43,12 @@ function parseApiTime(time: string | number, isLocal: boolean): Date | string {
  * @param data The raw API response data.
  * @returns An array of CalendarEvent objects.
  */
-function transformApiData(data: ApiResponse): CalendarEvent[] {
+function transformApiData(data: ApiResponse, timezone: string): CalendarEvent[] {
   return Object.values(data).flatMap((eventsInCategory) =>
     eventsInCategory.map((event: ApiEvent) => ({
       title: event.title,
-      start: parseApiTime(event.start_time, event.is_local_time),
-      end: parseApiTime(event.end_time, event.is_local_time),
+      start: parseApiTime(event.start_time, event.is_local_time, timezone),
+      end: parseApiTime(event.end_time, event.is_local_time, timezone),
       extendedProps: {
         category: event.category,
         article_url: event.article_url,
@@ -50,7 +63,7 @@ function transformApiData(data: ApiResponse): CalendarEvent[] {
  *
  * @returns A promise that resolves to an array of CalendarEvent objects fetched from the API.
  */
-export const fetchEvents = async (): Promise<CalendarEvent[]> => {
+export const fetchEvents = async (timezone: string): Promise<CalendarEvent[]> => {
   const response = await fetch(GITHUB_EVENTS_API_URL);
 
   if (!response.ok) {
@@ -59,7 +72,7 @@ export const fetchEvents = async (): Promise<CalendarEvent[]> => {
 
   const data: ApiResponse = await response.json();
 
-  return transformApiData(data);
+  return transformApiData(data, timezone);
 };
 
 /**
@@ -72,5 +85,10 @@ export const fetchTimezones = async (): Promise<Timezone[]> => {
   if (!response.ok) {
     throw new Error(`Timezone API request failed with status ${response.status}`);
   }
-  return response.json();
+  const data = await response.json();
+  // Map the fetched data to a format that's easier to use in the Select component
+  return data.map((tz: any) => ({
+    text: tz.text,
+    value: tz.utc[0],
+  }));
 };

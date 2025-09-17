@@ -1,7 +1,7 @@
 export interface CalendarEvent {
   title: string;
-  start: Date | string;
-  end: Date | string;
+  start: string;
+  end: string;
   extendedProps: {
     category: string;
     article_url: string;
@@ -21,6 +21,6 @@ export interface ApiEvent {
 
 export type NewEventData = {
   title: string;
-  start: Date;
-  end: Date;
+  start: string;
+  end: string;
 };

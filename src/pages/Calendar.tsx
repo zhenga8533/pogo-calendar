@@ -81,7 +81,7 @@ function Calendar({ settings }: { settings: Settings }) {
   const [toast, setToast] = useState({ open: false, message: "", severity: "success" as const });
 
   // Custom hooks for application state and logic
-  const { allEvents: apiEvents, loading } = useEventData();
+  const { allEvents: apiEvents, loading } = useEventData(settings.timezone);
   const { savedEventIds, handleToggleSaveEvent } = useSavedEvents();
   const { customEvents, addEvent, updateEvent, deleteEvent } = useCustomEvents();
 

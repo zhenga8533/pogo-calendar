@@ -3,7 +3,7 @@ import { intervalToDuration, isFuture, isPast, isSameDay, isWithinInterval } fro
 import { useMemo } from "react";
 import type { CalendarEvent } from "../../types/events";
 import { getColorForCategory } from "../../utils/colorUtils";
-import { formatDateLine, formatDurationFromInterval } from "../../utils/dateUtils";
+import { formatDateLine, formatDurationFromInterval, toDate } from "../../utils/dateUtils";
 
 interface EventHoverDetailsProps {
   open: boolean;
@@ -11,6 +11,7 @@ interface EventHoverDetailsProps {
   mousePosition: { top: number; left: number } | null;
   event: CalendarEvent | null;
   onClose: () => void;
+  timeZone: string;
 }
 
 /**
@@ -19,13 +20,14 @@ interface EventHoverDetailsProps {
  * @param param0 Props for the EventHoverDetails component.
  * @returns A popover displaying detailed information about a calendar event.
  */
-function EventHoverDetails({ open, id, mousePosition, event, onClose }: EventHoverDetailsProps) {
+function EventHoverDetails({ open, id, mousePosition, event, onClose, timeZone }: EventHoverDetailsProps) {
   const theme = useTheme();
 
   const { startDate, endDate } = useMemo(() => {
-    const start = event?.start ? new Date(event.start) : null;
-    const end = event?.end ? new Date(event.end) : null;
-    return { startDate: start, endDate: end };
+    return {
+      startDate: toDate(event?.start),
+      endDate: toDate(event?.end),
+    };
   }, [event?.start, event?.end]);
 
   const categoryColor = useMemo(() => {
@@ -57,8 +59,8 @@ function EventHoverDetails({ open, id, mousePosition, event, onClose }: EventHov
       const formatted = formatDurationFromInterval(duration);
       return formatted ? `${formatted} ago` : "Ended recently";
     }
-    if (eventStatus === "Active") {
-      const duration = intervalToDuration({ start: startDate!, end: now });
+    if (eventStatus === "Active" && startDate && endDate) {
+      const duration = intervalToDuration({ start: now, end: endDate });
       const formatted = formatDurationFromInterval(duration);
       return formatted ? `${formatted} left` : "Ongoing";
     }
@@ -147,13 +149,13 @@ function EventHoverDetails({ open, id, mousePosition, event, onClose }: EventHov
         {/* Date and Time Information */}
         {startDate && (
           <Box sx={{ lineHeight: 1.4 }}>
-            {isSameDay(startDate, endDate || startDate) ? (
+            {endDate && isSameDay(startDate, endDate) ? (
               // Case for single-day events
               <Typography variant="body2" color="text.secondary">
                 <Box component="span" sx={{ fontWeight: "bold" }}>
                   Date:
                 </Box>{" "}
-                {formatDateLine(startDate)}
+                {formatDateLine(startDate, true, timeZone)}
               </Typography>
             ) : (
               // Case for multi-day events
@@ -162,7 +164,7 @@ function EventHoverDetails({ open, id, mousePosition, event, onClose }: EventHov
                   <Box component="span" sx={{ fontWeight: "bold" }}>
                     From:
                   </Box>{" "}
-                  {formatDateLine(startDate)}
+                  {formatDateLine(startDate, true, timeZone)}
                 </Typography>
                 {endDate && (
                   <Typography variant="body2" color="text.secondary">
@@ -171,7 +173,8 @@ function EventHoverDetails({ open, id, mousePosition, event, onClose }: EventHov
                     </Box>{" "}
                     {formatDateLine(
                       endDate,
-                      endDate.getHours() !== 0 || endDate.getMinutes() !== 0 || endDate.getSeconds() !== 0
+                      endDate.getHours() !== 0 || endDate.getMinutes() !== 0 || endDate.getSeconds() !== 0,
+                      timeZone
                     )}
                   </Typography>
                 )}

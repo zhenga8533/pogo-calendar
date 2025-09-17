@@ -1,22 +1,25 @@
 import { formatDistanceToNowStrict, intervalToDuration } from "date-fns";
 import { useEffect, useState } from "react";
-import { formatDurationFromInterval } from "../utils/dateUtils";
+import { formatDurationFromInterval, toDate } from "../utils/dateUtils";
 
 type EventStatus = "active" | "upcoming" | "finished" | "loading";
 
 /**
  * Custom hook to determine the status of an event based on its start and end dates.
  *
- * @param start The start date of the event.
- * @param end The end date of the event.
+ * @param startInput The start date of the event.
+ * @param endInput The end date of the event.
  * @returns An object containing the event status and the display time.
  */
-export function useEventStatus(start: Date | null, end: Date | null) {
+export function useEventStatus(startInput: Date | string | null, endInput: Date | string | null) {
   const [status, setStatus] = useState<EventStatus>("loading");
   const [displayTime, setDisplayTime] = useState<string>("");
 
   useEffect(() => {
-    // If either date is missing, we can't determine the status.
+    const start = toDate(startInput);
+    const end = toDate(endInput);
+
+    // If either date is missing or invalid, we can't determine the status.
     if (!start || !end) {
       setStatus("loading");
       setDisplayTime("");
@@ -42,7 +45,7 @@ export function useEventStatus(start: Date | null, end: Date | null) {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [start, end]);
+  }, [startInput, endInput]);
 
   return { status, displayTime };
 }

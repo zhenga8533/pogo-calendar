@@ -5,19 +5,22 @@ import type { Timezone } from "../types/settings";
 type ApiResponse = Record<string, ApiEvent[]>;
 
 /**
- * Parses a time value from the API into a Date object.
+ * Parses a time value from the API into a format FullCalendar can use.
  *
  * @param time The time value from the API, either a string or a number.
  * @param isLocal Indicates if the time is in local format (true) or UTC timestamp (false).
- * @returns A Date object representing the parsed time.
+ * @returns A Date object for UTC times, or an ISO-like string for local times.
  */
-function parseApiDate(time: string | number, isLocal: boolean): Date {
+function parseApiTime(time: string | number, isLocal: boolean): Date | string {
   if (isLocal) {
-    // The time is a pre-formatted local time string (e.g., "2025-09-11T14:00:00").
-    return new Date(time as string);
+    // For local times, return the string as is. FullCalendar will interpret it
+    // as a "floating" time and render it in the calendar's specified timezone.
+    return time as string;
   }
 
-  // The time is a UTC timestamp in seconds, so we multiply by 1000 for milliseconds.
+  // For UTC timestamps, convert from seconds to milliseconds and create a Date object.
+  // This represents a specific moment in time, which FullCalendar will correctly
+  // convert to the display timezone.
   return new Date((time as number) * 1000);
 }
 
@@ -31,8 +34,8 @@ function transformApiData(data: ApiResponse): CalendarEvent[] {
   return Object.values(data).flatMap((eventsInCategory) =>
     eventsInCategory.map((event: ApiEvent) => ({
       title: event.title,
-      start: parseApiDate(event.start_time, event.is_local_time),
-      end: parseApiDate(event.end_time, event.is_local_time),
+      start: parseApiTime(event.start_time, event.is_local_time),
+      end: parseApiTime(event.end_time, event.is_local_time),
       extendedProps: {
         category: event.category,
         article_url: event.article_url,

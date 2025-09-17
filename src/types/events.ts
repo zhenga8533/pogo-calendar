@@ -1,7 +1,7 @@
 export interface CalendarEvent {
   title: string;
-  start: Date;
-  end: Date;
+  start: Date | string;
+  end: Date | string;
   extendedProps: {
     category: string;
     article_url: string;

@@ -201,6 +201,7 @@ function Calendar({ settings }: { settings: Settings }) {
         isMobile={isMobile}
         savedEventIds={savedEventIds}
         firstDay={settings.firstDay}
+        timeZone={settings.timezone}
         filterStartDate={filters.startDate}
         filterEndDate={filters.endDate}
         onToggleSaveEvent={handleToggleSaveEvent}

@@ -27,29 +27,17 @@ import { useEventStatus } from "../../hooks/useEventStatus";
 import type { CalendarEvent } from "../../types/events";
 import { downloadIcsFile } from "../../utils/calendarUtils";
 import { getColorForCategory } from "../../utils/colorUtils";
+import { formatDateLine, toDate } from "../../utils/dateUtils";
 
 interface EventDetailDialogProps {
   event: CalendarEvent | null;
   onClose: () => void;
   savedEventIds: string[];
+  timeZone: string;
   onToggleSaveEvent: (eventId: string) => void;
   onDeleteEvent: (eventId: string) => void;
   onEditEvent: (event: CalendarEvent) => void;
 }
-
-const DATE_OPTIONS: Intl.DateTimeFormatOptions = {
-  month: "long",
-  day: "numeric",
-  year: "numeric",
-};
-
-const TIME_OPTIONS: Intl.DateTimeFormatOptions = {
-  hour: "numeric",
-  minute: "2-digit",
-  timeZoneName: "short",
-};
-
-const COMBINED_DATE_TIME_OPTIONS: Intl.DateTimeFormatOptions = { ...DATE_OPTIONS, ...TIME_OPTIONS };
 
 /**
  * Renders a single detail item with an icon and text.
@@ -57,7 +45,7 @@ const COMBINED_DATE_TIME_OPTIONS: Intl.DateTimeFormatOptions = { ...DATE_OPTIONS
  * @param param0 Props for the DetailItem component.
  * @returns A single detail item with an icon and text.
  */
-function DetailItem({ icon, text }: { icon: React.ReactNode; text: string }) {
+function DetailItem({ icon, text }: { icon: React.ReactNode; text: string | null }) {
   return (
     <Stack direction="row" spacing={1.5} alignItems="center">
       {icon}
@@ -111,6 +99,7 @@ function EventDetailDialog({
   event,
   onClose,
   savedEventIds,
+  timeZone,
   onToggleSaveEvent,
   onDeleteEvent,
   onEditEvent,
@@ -121,9 +110,13 @@ function EventDetailDialog({
   const eventDetails = useMemo(() => {
     if (!event) return null;
 
+    const startDate = toDate(event.start);
+    const endDate = toDate(event.end);
+
+    // If dates are invalid, we cannot render details
+    if (!startDate || !endDate) return null;
+
     const eventId = event.extendedProps.article_url;
-    const startDate = new Date(event.start!);
-    const endDate = new Date(event.end!);
 
     return {
       id: eventId,
@@ -162,16 +155,14 @@ function EventDetailDialog({
     if (isSingleDay) {
       return (
         <>
-          <DetailItem
-            icon={<CalendarTodayIcon color="action" />}
-            text={startDate.toLocaleDateString("en-US", DATE_OPTIONS)}
-          />
+          <DetailItem icon={<CalendarTodayIcon color="action" />} text={formatDateLine(startDate, false, timeZone)} />
           <DetailItem
             icon={<AccessTimeIcon color="action" />}
-            text={`${startDate.toLocaleTimeString("en-US", TIME_OPTIONS)} — ${endDate.toLocaleTimeString(
-              "en-US",
-              TIME_OPTIONS
-            )}`}
+            text={`${formatDateLine(startDate, true, timeZone)?.split(" ")[3]} ${
+              formatDateLine(startDate, true, timeZone)?.split(" ")[4]
+            } — ${formatDateLine(endDate, true, timeZone)?.split(" ")[3]} ${
+              formatDateLine(endDate, true, timeZone)?.split(" ")[4]
+            }`}
           />
         </>
       );
@@ -181,15 +172,15 @@ function EventDetailDialog({
       <>
         <DetailItem
           icon={<CalendarTodayIcon color="action" />}
-          text={`Starts: ${startDate.toLocaleString("en-US", COMBINED_DATE_TIME_OPTIONS)}`}
+          text={`Starts: ${formatDateLine(startDate, true, timeZone)}`}
         />
         <DetailItem
           icon={<CalendarTodayIcon color="action" />}
-          text={`Ends: ${endDate.toLocaleString("en-US", COMBINED_DATE_TIME_OPTIONS)}`}
+          text={`Ends: ${formatDateLine(endDate, true, timeZone)}`}
         />
       </>
     );
-  }, [eventDetails]);
+  }, [eventDetails, timeZone]);
 
   // Callback to handle event deletion after confirmation.
   const handleDelete = useCallback(() => {

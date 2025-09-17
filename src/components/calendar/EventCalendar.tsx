@@ -19,6 +19,7 @@ interface EventCalendarProps {
   isMobile: boolean;
   savedEventIds: string[];
   firstDay: number;
+  timeZone: string;
   filterStartDate: Date | null;
   filterEndDate: Date | null;
   onToggleSaveEvent: (eventId: string) => void;
@@ -107,6 +108,7 @@ function EventCalendar({
   isMobile,
   savedEventIds,
   firstDay,
+  timeZone,
   filterStartDate,
   filterEndDate,
   onToggleSaveEvent,
@@ -233,6 +235,7 @@ function EventCalendar({
       {/* Calendar Container */}
       <Paper elevation={3} sx={{ p: { xs: 1, md: 2 } }} onMouseMove={handleMouseMove}>
         <FullCalendar
+          key={timeZone} // Force re-render when timezone changes
           ref={calendarRef}
           plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
           headerToolbar={
@@ -253,6 +256,7 @@ function EventCalendar({
           firstDay={firstDay}
           selectable={true}
           select={handleDateSelect}
+          timeZone={timeZone}
           eventDidMount={(arg) => {
             arg.el.setAttribute("data-event-id", arg.event.extendedProps.article_url);
           }}
@@ -284,6 +288,7 @@ function EventCalendar({
         mousePosition={popoverState.position}
         event={popoverState.event}
         onClose={handlePopoverClose}
+        timeZone={timeZone}
       />
 
       {/* Event Detail Dialog */}
@@ -294,6 +299,7 @@ function EventCalendar({
         onToggleSaveEvent={onToggleSaveEvent}
         onDeleteEvent={onDeleteEvent}
         onEditEvent={onEditEvent}
+        timeZone={timeZone}
       />
     </>
   );

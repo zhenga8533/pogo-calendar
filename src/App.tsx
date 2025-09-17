@@ -17,9 +17,7 @@ import type { Settings } from "./types/settings";
 function App() {
   const [infoOpen, setInfoOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-
   const { theme, settings, setSettings } = useSettings();
-
   const handleInfoOpen = useCallback(() => setInfoOpen(true), []);
   const handleInfoClose = useCallback(() => setInfoOpen(false), []);
   const handleSettingsOpen = useCallback(() => setSettingsOpen(true), []);

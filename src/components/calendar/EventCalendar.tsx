@@ -26,6 +26,8 @@ interface EventCalendarProps {
   onToggleSaveEvent: (eventId: string) => void;
   onViewChange: (viewName: string) => void;
   onDeleteEvent: (eventId: string) => void;
+  onUpdateNote: (eventId: string, noteText: string) => void;
+  eventNotes: Record<string, string>;
   onEditEvent: (event: CalendarEvent) => void;
   onDateSelect: (selection: { start: Date | null; end: Date | null }) => void;
 }
@@ -99,6 +101,8 @@ function EventCalendar({
   onToggleSaveEvent,
   onViewChange,
   onDeleteEvent,
+  onUpdateNote,
+  eventNotes,
   onEditEvent,
   onDateSelect,
 }: EventCalendarProps) {
@@ -295,10 +299,12 @@ function EventCalendar({
       />
 
       <EventDetailDialog
+        hour12={hour12}
+        eventNotes={eventNotes}
+        onUpdateNote={onUpdateNote}
         event={selectedEvent}
         onClose={handleCloseDialog}
         savedEventIds={savedEventIds}
-        hour12={hour12}
         onToggleSaveEvent={onToggleSaveEvent}
         onDeleteEvent={onDeleteEvent}
         onEditEvent={onEditEvent}

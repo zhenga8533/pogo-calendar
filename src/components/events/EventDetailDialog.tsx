@@ -17,9 +17,10 @@ import {
   IconButton,
   Link,
   Stack,
+  TextField,
   Typography,
 } from "@mui/material";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { CalendarEvent } from "../../types/events";
 import { downloadIcsFile } from "../../utils/calendarUtils";
 import { formatDateLine } from "../../utils/dateUtils";
@@ -32,6 +33,8 @@ interface EventDetailDialogProps {
   savedEventIds: string[];
   onToggleSaveEvent: (eventId: string) => void;
   onDeleteEvent: (eventId: string) => void;
+  onUpdateNote: (eventId: string, noteText: string) => void;
+  eventNotes: Record<string, string>;
   onEditEvent: (event: CalendarEvent) => void;
   hour12: boolean;
 }
@@ -81,13 +84,15 @@ function EventDetailDialog({
   onToggleSaveEvent,
   onDeleteEvent,
   onEditEvent,
+  onUpdateNote,
+  eventNotes,
   hour12,
 }: EventDetailDialogProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [noteText, setNoteText] = useState("");
 
   const eventDetails = useMemo(() => {
     if (!event) return null;
-
     const eventId = event.extendedProps.article_url;
     return {
       id: eventId,
@@ -97,9 +102,15 @@ function EventDetailDialog({
       isCustomEvent: event.extendedProps.category === "Custom Event",
       isSaved: savedEventIds.includes(eventId),
       start: formatDateLine(event.start, hour12),
-      end: formatDateLine(event.end, hour12),
+      end: event.end ? formatDateLine(event.end, hour12) : null,
     };
   }, [event, savedEventIds, hour12]);
+
+  useEffect(() => {
+    if (eventDetails) {
+      setNoteText(eventNotes[eventDetails.id] || "");
+    }
+  }, [eventDetails, eventNotes]);
 
   const handleDelete = useCallback(() => {
     if (!eventDetails) return;
@@ -108,14 +119,27 @@ function EventDetailDialog({
     onClose();
   }, [eventDetails, onDeleteEvent, onClose]);
 
+  const handleSave = useCallback(() => {
+    if (!eventDetails) return;
+    onUpdateNote(eventDetails.id, noteText);
+  }, [eventDetails, noteText, onUpdateNote]);
+
   if (!event || !eventDetails) {
     return null;
   }
 
   const { id, title, bannerUrl, isCustomEvent, isSaved } = eventDetails;
+
   return (
     <>
-      <Dialog open={true} onClose={onClose} maxWidth="sm" fullWidth disableRestoreFocus>
+      <Dialog
+        open={true}
+        onClose={onClose}
+        maxWidth="sm"
+        fullWidth
+        disableRestoreFocus
+        PaperProps={{ sx: { borderRadius: 4 } }}
+      >
         <DialogContent sx={{ p: 0, position: "relative" }}>
           <IconButton
             aria-label={isSaved ? "Unsave event" : "Save event"}
@@ -127,7 +151,7 @@ function EventDetailDialog({
               backgroundColor: "rgba(0, 0, 0, 0.4)",
               color: "white",
               "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.6)" },
-              zIndex: 1,
+              zIndex: 2,
             }}
           >
             {isSaved ? <StarIcon /> : <StarBorderIcon />}
@@ -137,10 +161,14 @@ function EventDetailDialog({
             component="img"
             src={bannerUrl}
             alt={`${title} banner`}
-            sx={{ width: "100%", aspectRatio: "16 / 9", objectFit: "cover" }}
+            sx={{
+              width: "100%",
+              aspectRatio: "16 / 9",
+              objectFit: "cover",
+            }}
           />
 
-          <Box sx={{ p: 3 }}>
+          <Box sx={{ p: 3, position: "relative", zIndex: 1, backgroundColor: "background.paper" }}>
             <Stack
               direction="row"
               justifyContent="space-between"
@@ -151,26 +179,54 @@ function EventDetailDialog({
               <EventStatusTag start={event.start} end={event.end} />
             </Stack>
 
-            <Typography variant="h5" component="h2" gutterBottom>
+            <Typography variant="h5" component="h2" gutterBottom sx={{ fontWeight: "bold" }}>
               {title}
             </Typography>
 
             <Divider sx={{ my: 2 }} />
 
-            <Stack spacing={2}>
-              <DetailItem icon={<CalendarTodayIcon color="action" />} text={`Start: ${eventDetails.start}`} />
-              {event.end && (
-                <DetailItem icon={<CalendarTodayIcon color="action" />} text={`End: ${eventDetails.end}`} />
-              )}
+            <Stack spacing={3}>
+              <Stack spacing={2}>
+                <DetailItem icon={<CalendarTodayIcon color="action" />} text={`Start: ${eventDetails.start}`} />
+                {event.end && (
+                  <DetailItem icon={<CalendarTodayIcon color="action" />} text={`End: ${eventDetails.end}`} />
+                )}
+              </Stack>
+              <Stack spacing={2}>
+                <Typography variant="subtitle1" component="h3" fontWeight="bold">
+                  Notes
+                </Typography>
+                <TextField
+                  fullWidth
+                  multiline
+                  rows={4}
+                  variant="outlined"
+                  placeholder="Add your personal notes here..."
+                  value={noteText}
+                  onChange={(e) => setNoteText(e.target.value)}
+                />
+              </Stack>
             </Stack>
           </Box>
         </DialogContent>
 
-        <DialogActions sx={{ p: "16px 24px", justifyContent: "space-between", flexWrap: "wrap", gap: 1 }}>
-          <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-            <Button variant="outlined" startIcon={<AddToCalendarIcon />} onClick={() => downloadIcsFile(event)}>
-              Add to Calendar
-            </Button>
+        <Divider />
+        <DialogActions
+          sx={{
+            p: 2,
+            flexDirection: { xs: "column-reverse", sm: "row" },
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: 2,
+          }}
+        >
+          <Stack
+            direction="row"
+            gap={1}
+            flexWrap="wrap"
+            justifyContent={{ xs: "center", sm: "flex-start" }}
+            sx={{ width: { xs: "100%", sm: "auto" } }}
+          >
             {!isCustomEvent && (
               <Button
                 component={Link}
@@ -179,13 +235,28 @@ function EventDetailDialog({
                 rel="noopener noreferrer"
                 variant="contained"
                 endIcon={<OpenInNewIcon />}
+                sx={{ whiteSpace: "nowrap" }}
               >
                 Learn More
               </Button>
             )}
-          </Box>
+            <Button
+              variant="outlined"
+              startIcon={<AddToCalendarIcon />}
+              onClick={() => downloadIcsFile(event)}
+              sx={{ whiteSpace: "nowrap" }}
+            >
+              Add to Calendar
+            </Button>
+          </Stack>
 
-          <Box>
+          <Stack
+            direction="row"
+            gap={1}
+            flexWrap="wrap"
+            justifyContent={{ xs: "center", sm: "flex-end" }}
+            sx={{ width: { xs: "100%", sm: "auto" } }}
+          >
             {isCustomEvent && (
               <>
                 <Button onClick={() => onEditEvent(event)} startIcon={<EditIcon />}>
@@ -196,11 +267,13 @@ function EventDetailDialog({
                 </Button>
               </>
             )}
+            <Button variant="contained" onClick={handleSave} sx={{ whiteSpace: "nowrap" }}>
+              Save
+            </Button>
             <Button onClick={onClose}>Close</Button>
-          </Box>
+          </Stack>
         </DialogActions>
       </Dialog>
-
       <DeleteConfirmationDialog
         open={confirmOpen}
         onClose={() => setConfirmOpen(false)}

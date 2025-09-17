@@ -8,6 +8,7 @@ import { ExportEventDialog } from "../components/events/ExportEventDialog";
 import EventFilter from "../components/filters/EventFilter";
 import { useCustomEvents } from "../hooks/useCustomEvents";
 import { useEventData } from "../hooks/useEventData";
+import { useEventNotes } from "../hooks/useEventNotes";
 import { useFilters } from "../hooks/useFilters";
 import { useSavedEvents } from "../hooks/useSavedEvents";
 import type { CalendarEvent, NewEventData } from "../types/events";
@@ -84,6 +85,7 @@ function Calendar({ settings }: { settings: Settings }) {
   const { allEvents: apiEvents, loading } = useEventData(settings.timezone);
   const { savedEventIds, handleToggleSaveEvent } = useSavedEvents();
   const { customEvents, addEvent, updateEvent, deleteEvent } = useCustomEvents();
+  const { eventNotes, updateNote } = useEventNotes();
 
   // Combine API and custom events for filtering
   const combinedEvents = useMemo(() => [...apiEvents, ...customEvents], [apiEvents, customEvents]);
@@ -207,6 +209,8 @@ function Calendar({ settings }: { settings: Settings }) {
         filterEndDate={filters.endDate}
         onToggleSaveEvent={handleToggleSaveEvent}
         onViewChange={setCurrentView}
+        onUpdateNote={updateNote}
+        eventNotes={eventNotes}
         onDeleteEvent={handleDeleteEvent}
         onEditEvent={handleOpenEditDialog}
         onDateSelect={handleCalendarDateSelect}

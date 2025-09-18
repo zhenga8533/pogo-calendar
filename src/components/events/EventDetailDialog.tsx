@@ -109,7 +109,8 @@ function EventDetailDialog({
     onUpdateNote(eventDetails.id, noteText);
     setIsDirty(false);
     setToast({ open: true, message: "Note saved successfully!", severity: "success" });
-  }, [eventDetails, noteText, onUpdateNote, setToast]);
+    onClose(); // Close dialog on save
+  }, [eventDetails, noteText, onUpdateNote, setToast, onClose]);
 
   const handleClose = () => {
     if (isDirty) {
@@ -128,7 +129,7 @@ function EventDetailDialog({
     return null;
   }
 
-  const { id, title, banner_url, isCustomEvent, isSaved } = eventDetails;
+  const { id, title, banner_url: bannerUrl, isCustomEvent, isSaved } = eventDetails;
 
   return (
     <>
@@ -159,7 +160,7 @@ function EventDetailDialog({
 
           <Box
             component="img"
-            src={banner_url}
+            src={bannerUrl}
             alt={`${title} banner`}
             sx={{ width: "100%", aspectRatio: "16 / 9", objectFit: "cover" }}
           />
@@ -296,7 +297,7 @@ function EventDetailDialog({
                 </Button>
               </>
             )}
-            <Button variant="contained" onClick={handleSave}>
+            <Button variant="contained" onClick={handleSave} disabled={!isDirty}>
               Save
             </Button>
             <Button onClick={handleClose}>Close</Button>

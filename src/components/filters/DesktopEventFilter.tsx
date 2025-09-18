@@ -20,7 +20,8 @@ import {
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import React, { useMemo } from "react";
-import { categoryGroups, SAVED_EVENTS_CATEGORY } from "../../config/eventFilter";
+import { SAVED_EVENTS_CATEGORY } from "../../config/constants";
+import { categoryGroups } from "../../config/eventFilter";
 import type { EventFilterProps, Filters } from "../../types/filters";
 import AdvancedFilter from "./AdvancedFilter";
 import { CategoryCheckbox } from "./CategoryCheckbox";

@@ -22,7 +22,8 @@ import {
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import React from "react";
-import { marks, SAVED_EVENTS_CATEGORY } from "../../config/eventFilter";
+import { SAVED_EVENTS_CATEGORY } from "../../config/constants";
+import { marks } from "../../config/eventFilter";
 import type { EventFilterProps, Filters } from "../../types/filters";
 import { formatHour } from "../../utils/dateUtils";
 import AdvancedFilter from "./AdvancedFilter";

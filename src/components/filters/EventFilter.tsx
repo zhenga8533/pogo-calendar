@@ -1,7 +1,7 @@
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import React, { useCallback, useState } from "react";
-import { SAVED_EVENTS_CATEGORY } from "../../config/eventFilter";
+import { SAVED_EVENTS_CATEGORY } from "../../config/constants";
 import type { EventFilterProps, Filters } from "../../types/filters";
 import { DesktopEventFilter } from "./DesktopEventFilter";
 import { MobileEventFilter } from "./MobileEventFilter";

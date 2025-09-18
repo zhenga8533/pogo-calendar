@@ -193,6 +193,8 @@ function App() {
                     }
                     onViewChange={setCurrentView}
                     setToast={setToast}
+                    filterStartDate={filters.startDate}
+                    filterEndDate={filters.endDate}
                   />
                 </Container>
               }

@@ -1,5 +1,3 @@
-// src/pages/Calendar.tsx
-
 import { Box } from "@mui/material";
 import { CalendarSkeleton } from "../components/calendar/CalendarSkeleton";
 import EventCalendar from "../components/calendar/EventCalendar";
@@ -21,6 +19,8 @@ interface CalendarPageProps {
   onDateSelect: (selection: { start: Date | null; end: Date | null }) => void;
   onViewChange: (viewName: string) => void;
   setToast: (toast: { open: boolean; message: string; severity: "success" | "error" | "info" | "warning" }) => void;
+  filterStartDate: Date | null;
+  filterEndDate: Date | null;
 }
 
 function CalendarPage(props: CalendarPageProps) {
@@ -39,6 +39,8 @@ function CalendarPage(props: CalendarPageProps) {
     onDateSelect,
     onViewChange,
     setToast,
+    filterStartDate,
+    filterEndDate,
   } = props;
 
   if (isLoading) {
@@ -54,8 +56,8 @@ function CalendarPage(props: CalendarPageProps) {
         firstDay={settings.firstDay}
         hour12={settings.hour12}
         timeZone={settings.timezone}
-        filterStartDate={null}
-        filterEndDate={null}
+        filterStartDate={filterStartDate}
+        filterEndDate={filterEndDate}
         selectedEvent={selectedEvent}
         onSelectEvent={onSelectEvent}
         onToggleSaveEvent={onToggleSaveEvent}

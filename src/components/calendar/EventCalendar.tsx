@@ -23,6 +23,8 @@ interface EventCalendarProps {
   timeZone: string;
   filterStartDate: Date | null;
   filterEndDate: Date | null;
+  selectedEvent: CalendarEvent | null;
+  onSelectEvent: (event: CalendarEvent | null) => void;
   onToggleSaveEvent: (eventId: string) => void;
   onViewChange: (viewName: string) => void;
   onDeleteEvent: (eventId: string) => void;
@@ -68,9 +70,8 @@ const CalendarEventContent = React.memo(function CalendarEventContent({
         border: `1px solid ${theme.palette.divider}`,
         boxSizing: "border-box",
         boxShadow: theme.shadows[1],
-        transition: "transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out",
+        transition: "box-shadow 0.15s ease-in-out",
         "&:hover": {
-          transform: "scale(1.02)",
           boxShadow: theme.shadows[4],
         },
       }}
@@ -104,6 +105,8 @@ function EventCalendar({
   timeZone,
   filterStartDate,
   filterEndDate,
+  selectedEvent,
+  onSelectEvent,
   onToggleSaveEvent,
   onViewChange,
   onDeleteEvent,
@@ -114,8 +117,6 @@ function EventCalendar({
   setToast,
 }: EventCalendarProps) {
   const calendarRef = useRef<FullCalendar>(null);
-  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
-
   const [popoverState, setPopoverState] = useState<{
     event: CalendarEvent | null;
     position: { top: number; left: number } | null;
@@ -135,14 +136,14 @@ function EventCalendar({
 
   const handleEventClick = useCallback(
     (clickInfo: EventClickArg) => {
-      setSelectedEvent(findOriginalEvent(clickInfo.event));
+      onSelectEvent(findOriginalEvent(clickInfo.event));
     },
-    [findOriginalEvent]
+    [findOriginalEvent, onSelectEvent]
   );
 
   const handleCloseDialog = useCallback(() => {
-    setSelectedEvent(null);
-  }, []);
+    onSelectEvent(null);
+  }, [onSelectEvent]);
 
   const handleDateSelect = useCallback(
     (selectionInfo: DateSelectArg) => {

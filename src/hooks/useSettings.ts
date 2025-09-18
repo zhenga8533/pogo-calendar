@@ -9,6 +9,7 @@ const initialSettings: Settings = {
   firstDay: 0,
   timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   hour12: true,
+  showNextEvent: true,
 };
 
 /**

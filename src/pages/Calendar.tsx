@@ -1,3 +1,5 @@
+// src/pages/Calendar.tsx
+
 import { Box } from "@mui/material";
 import { CalendarSkeleton } from "../components/calendar/CalendarSkeleton";
 import EventCalendar from "../components/calendar/EventCalendar";
@@ -10,6 +12,8 @@ interface CalendarPageProps {
   filteredEvents: CalendarEvent[];
   savedEventIds: string[];
   eventNotes: Record<string, string>;
+  selectedEvent: CalendarEvent | null;
+  onSelectEvent: (event: CalendarEvent | null) => void;
   onToggleSaveEvent: (eventId: string) => void;
   onUpdateNote: (eventId: string, noteText: string) => void;
   onDeleteEvent: (eventId: string) => void;
@@ -19,20 +23,24 @@ interface CalendarPageProps {
   setToast: (toast: { open: boolean; message: string; severity: "success" | "error" | "info" | "warning" }) => void;
 }
 
-function CalendarPage({
-  settings,
-  isLoading,
-  filteredEvents,
-  savedEventIds,
-  eventNotes,
-  onToggleSaveEvent,
-  onUpdateNote,
-  onDeleteEvent,
-  onEditEvent,
-  onDateSelect,
-  onViewChange,
-  setToast,
-}: CalendarPageProps) {
+function CalendarPage(props: CalendarPageProps) {
+  const {
+    settings,
+    isLoading,
+    filteredEvents,
+    savedEventIds,
+    eventNotes,
+    selectedEvent,
+    onSelectEvent,
+    onToggleSaveEvent,
+    onUpdateNote,
+    onDeleteEvent,
+    onEditEvent,
+    onDateSelect,
+    onViewChange,
+    setToast,
+  } = props;
+
   if (isLoading) {
     return <CalendarSkeleton isMobile={false} />;
   }
@@ -48,6 +56,8 @@ function CalendarPage({
         timeZone={settings.timezone}
         filterStartDate={null}
         filterEndDate={null}
+        selectedEvent={selectedEvent}
+        onSelectEvent={onSelectEvent}
         onToggleSaveEvent={onToggleSaveEvent}
         onViewChange={onViewChange}
         onUpdateNote={onUpdateNote}

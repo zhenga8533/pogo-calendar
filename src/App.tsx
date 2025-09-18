@@ -10,6 +10,7 @@ import { useCustomEvents } from "./hooks/useCustomEvents";
 import { useEventData } from "./hooks/useEventData";
 import { useEventNotes } from "./hooks/useEventNotes";
 import { useFilters } from "./hooks/useFilters";
+import { useNextUpcomingEvent } from "./hooks/useNextUpcomingEvent";
 import { useSavedEvents } from "./hooks/useSavedEvents";
 import { useSettings } from "./hooks/useSettings";
 import CalendarPage from "./pages/Calendar";
@@ -35,6 +36,7 @@ function App() {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [eventToEdit, setEventToEdit] = useState<CalendarEvent | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
 
   const refetchLastUpdatedRef = useRef<() => Promise<void>>(() => Promise.resolve());
 
@@ -54,6 +56,8 @@ function App() {
     () => Array.from(new Set(combinedEvents.map((event) => event.extendedProps.category))).sort(),
     [combinedEvents]
   );
+
+  const nextUpcomingEvent = useNextUpcomingEvent(filteredEvents);
 
   const handleSettingsOpen = useCallback(() => setSettingsOpen(true), []);
   const handleSettingsClose = useCallback(() => setSettingsOpen(false), []);
@@ -140,6 +144,9 @@ function App() {
           onNewEventClick={() => setCreateDialogOpen(true)}
           onOpenExportDialog={() => setExportDialogOpen(true)}
           allCategories={allCategories}
+          nextUpcomingEvent={nextUpcomingEvent}
+          onSelectEvent={setSelectedEvent}
+          showNextEventTracker={settings.showNextEvent}
         />
         <Box component="main" sx={{ flexGrow: 1, p: 3, backgroundColor: "background.default" }}>
           <Routes>
@@ -153,6 +160,8 @@ function App() {
                     filteredEvents={filteredEvents}
                     savedEventIds={savedEventIds}
                     eventNotes={eventNotes}
+                    selectedEvent={selectedEvent}
+                    onSelectEvent={setSelectedEvent}
                     onToggleSaveEvent={handleToggleSaveEvent}
                     onUpdateNote={updateNote}
                     onDeleteEvent={handleDeleteEvent}

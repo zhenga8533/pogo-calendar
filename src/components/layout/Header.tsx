@@ -21,8 +21,10 @@ import {
 import React, { useEffect, useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { useLastUpdated } from "../../hooks/useLastUpdated";
+import type { CalendarEvent } from "../../types/events";
 import type { EventFilterProps } from "../../types/filters";
 import EventFilter from "../filters/EventFilter";
+import NextEventTracker from "../shared/NextEventTracker";
 
 const LastUpdatedDisplay = React.memo(function LastUpdatedDisplay({
   onRefresh,
@@ -66,10 +68,21 @@ type HeaderProps = Omit<EventFilterProps, "isMobile"> & {
   onSettingsClick: () => void;
   onRefresh: () => void;
   setRefetchLastUpdated: (refetch: () => Promise<void>) => void;
+  nextUpcomingEvent: CalendarEvent | null;
+  onSelectEvent: (event: CalendarEvent) => void;
+  showNextEventTracker: boolean;
 };
 
 function HeaderComponent(props: HeaderProps) {
-  const { onSettingsClick, onRefresh, setRefetchLastUpdated, ...filterProps } = props;
+  const {
+    onSettingsClick,
+    onRefresh,
+    setRefetchLastUpdated,
+    nextUpcomingEvent,
+    onSelectEvent,
+    showNextEventTracker,
+    ...filterProps
+  } = props;
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const trigger = useScrollTrigger({ disableHysteresis: true, threshold: 0 });
@@ -120,13 +133,13 @@ function HeaderComponent(props: HeaderProps) {
           }),
         }}
       >
-        <Toolbar>
+        <Toolbar sx={{ justifyContent: "space-between" }}>
           <Stack
             component={RouterLink}
             to="/"
             direction="row"
             alignItems="center"
-            sx={{ cursor: "pointer", flexGrow: 1, textDecoration: "none", color: "inherit" }}
+            sx={{ cursor: "pointer", textDecoration: "none", color: "inherit", flexShrink: 0 }}
           >
             <CalendarMonthIcon sx={{ mr: 1.5 }} />
             <Typography variant="h6" component="div">
@@ -134,10 +147,25 @@ function HeaderComponent(props: HeaderProps) {
             </Typography>
           </Stack>
 
+          {showNextEventTracker && (
+            <Box sx={{ display: { xs: "none", lg: "block" } }}>
+              <NextEventTracker nextEvent={nextUpcomingEvent} onEventClick={onSelectEvent} />
+            </Box>
+          )}
+
           <Stack direction="row" alignItems="center" spacing={1}>
             <Box sx={{ display: { xs: "none", sm: "block" } }}>
               <LastUpdatedDisplay onRefresh={onRefresh} setRefetchLastUpdated={setRefetchLastUpdated} />
             </Box>
+            <Divider orientation="vertical" flexItem sx={{ display: { xs: "none", sm: "block" }, mx: 1 }} />
+            <Button
+              component={RouterLink}
+              to="/faq"
+              color="inherit"
+              sx={{ "&:hover": { backgroundColor: "action.hover" } }}
+            >
+              FAQ
+            </Button>
             <Divider orientation="vertical" flexItem sx={{ display: { xs: "none", sm: "block" }, mx: 1 }} />
             <Tooltip title="Filters">
               <Badge badgeContent={activeFilterCount} color="primary">
@@ -151,7 +179,7 @@ function HeaderComponent(props: HeaderProps) {
                 </Button>
               </Badge>
             </Tooltip>
-            <Tooltip title="Settings">
+            <Tooltip title="Filters">
               <Badge badgeContent={activeFilterCount} color="primary">
                 <Button
                   color="inherit"
@@ -163,15 +191,6 @@ function HeaderComponent(props: HeaderProps) {
                 </Button>
               </Badge>
             </Tooltip>
-            <Divider orientation="vertical" flexItem sx={{ display: { xs: "none", sm: "block" }, mx: 1 }} />
-            <Button
-              component={RouterLink}
-              to="/faq"
-              color="inherit"
-              sx={{ "&:hover": { backgroundColor: "action.hover" } }}
-            >
-              FAQ
-            </Button>
           </Stack>
         </Toolbar>
       </AppBar>

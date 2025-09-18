@@ -2,6 +2,8 @@ import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import PublicIcon from "@mui/icons-material/Public";
 import SettingsBrightnessOutlinedIcon from "@mui/icons-material/SettingsBrightnessOutlined";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import {
   Button,
   CircularProgress,
@@ -134,6 +136,30 @@ function SettingsDialogComponent({ open, onClose, settings, onSettingsChange }: 
                 </ToggleButton>
               ))}
             </ToggleButtonGroup>
+            <Stack spacing={1}>
+              <Typography variant="body2" color="text.secondary">
+                'Next Event' Tracker in Header
+              </Typography>
+              <ToggleButtonGroup
+                value={settings.showNextEvent}
+                exclusive
+                fullWidth
+                onChange={(_, value) => {
+                  if (value !== null) {
+                    handleSettingChange("showNextEvent", value);
+                  }
+                }}
+              >
+                <ToggleButton value={true} sx={{ textTransform: "none", display: "flex", gap: 1 }}>
+                  <VisibilityIcon />
+                  Show
+                </ToggleButton>
+                <ToggleButton value={false} sx={{ textTransform: "none", display: "flex", gap: 1 }}>
+                  <VisibilityOffIcon />
+                  Hide
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </Stack>
           </Stack>
 
           {/* Calendar Section */}

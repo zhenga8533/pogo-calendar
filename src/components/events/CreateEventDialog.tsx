@@ -4,6 +4,7 @@ import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { useCallback, useEffect, useState } from "react";
 import type { CalendarEvent, NewEventData } from "../../types/events";
+import { formatToLocalTime } from "../../utils/dateUtils";
 import { UnsavedChangesDialog } from "../shared/UnsavedChangesDialog";
 
 interface CreateEventDialogProps {
@@ -13,7 +14,7 @@ interface CreateEventDialogProps {
   onSave: (eventData: NewEventData, eventId?: string) => void;
 }
 
-const getInitialFormData = () => ({
+const getInitialFormData = (): NewEventData => ({
   title: "",
   start: "",
   end: "",
@@ -47,7 +48,7 @@ function CreateEventDialog({ open, eventToEdit, onClose, onSave }: CreateEventDi
   }, [eventToEdit, open]);
 
   const handleChange = useCallback(
-    (field: keyof typeof formData, value: any) => {
+    <K extends keyof NewEventData>(field: K, value: NewEventData[K]) => {
       setFormData((prev) => ({ ...prev, [field]: value }));
       setIsDirty(true);
       if (errors.title && field === "title") {
@@ -120,12 +121,12 @@ function CreateEventDialog({ open, eventToEdit, onClose, onSave }: CreateEventDi
               <DateTimePicker
                 label="Start Time"
                 value={(formData.start && new Date(formData.start)) || null}
-                onChange={(newValue) => handleChange("start", newValue)}
+                onChange={(newValue) => handleChange("start", newValue ? formatToLocalTime(newValue) : "")}
               />
               <DateTimePicker
                 label="End Time"
                 value={(formData.end && new Date(formData.end)) || null}
-                onChange={(newValue) => handleChange("end", newValue)}
+                onChange={(newValue) => handleChange("end", newValue ? formatToLocalTime(newValue) : "")}
                 slotProps={{
                   textField: {
                     error: !!errors.end,

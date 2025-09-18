@@ -6,22 +6,48 @@ export const getTheme = (mode: PaletteMode) =>
       mode,
       ...(mode === "light"
         ? {
+            // Light Mode Palette
             primary: {
-              main: "#1976d2",
+              main: "#7E57C2", // Deep Purple
             },
             background: {
-              default: "#f4f6f8",
-              paper: "#ffffff",
+              default: "#F8F9FA", // Lighter, softer grey
+              paper: "#FFFFFF",
             },
           }
         : {
+            // Dark Mode Palette
             primary: {
-              main: "#90caf9",
+              main: "#B39DDB", // Lighter Purple for contrast
             },
             background: {
-              default: "#121212",
-              paper: "#1e1e1e",
+              default: "#1A1A2E", // Dark Slate Blue
+              paper: "#24243E", // Slightly lighter Slate Blue
             },
           }),
+    },
+    components: {
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            borderRadius: 8,
+            textTransform: "none",
+          },
+        },
+      },
+      MuiPaper: {
+        styleOverrides: {
+          root: {
+            borderRadius: 12,
+          },
+        },
+      },
+      MuiDialog: {
+        styleOverrides: {
+          paper: {
+            borderRadius: 16,
+          },
+        },
+      },
     },
   });

@@ -1,20 +1,14 @@
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import FilterListIcon from "@mui/icons-material/FilterList";
 import ReplayIcon from "@mui/icons-material/Replay";
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import {
-  Badge,
-  Box,
   Button,
   Checkbox,
   Divider,
   FormControlLabel,
   FormGroup,
-  Menu,
-  Paper,
-  Slider,
   Stack,
   Switch,
   TextField,
@@ -22,241 +16,154 @@ import {
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import React, { useMemo } from "react";
-import { categoryGroups, formatTime, marks, SAVED_EVENTS_CATEGORY } from "../../config/eventFilter";
+import { categoryGroups, SAVED_EVENTS_CATEGORY } from "../../config/eventFilter";
 import type { EventFilterProps, Filters } from "../../types/filters";
 import { CategoryCheckbox } from "./CategoryCheckbox";
+import { ColorKeyLabel } from "./ColorKeyLabel";
 
 interface DesktopEventFilterProps extends Omit<EventFilterProps, "isMobile"> {
-  anchorEl: HTMLElement | null;
-  handleMenuClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
-  handleMenuClose: () => void;
   handleFilterChange: (field: keyof Filters, value: any) => void;
   handleCategoryChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleSelectAll: () => void;
   handleClearAll: () => void;
-  onOpenExportDialog: () => void;
 }
 
-const CategoryFilterMenu = React.memo(
-  /**
-   * Renders the menu for selecting event categories.
-   *
-   * @param param0 Props for the CategoryFilterMenu component.
-   * @returns A menu for selecting event categories.
-   */
-  function CategoryFilterMenu({
-    anchorEl,
-    onClose,
-    filters,
-    allCategories,
-    otherCategories,
-    onCategoryChange,
-    onSelectAll,
-    onClearAll,
-  }: {
-    anchorEl: HTMLElement | null;
-    onClose: () => void;
-    filters: Filters;
-    allCategories: string[];
-    otherCategories: string[];
-    onCategoryChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-    onSelectAll: () => void;
-    onClearAll: () => void;
-  }) {
-    // Render the category filter menu.
-    return (
-      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={onClose}>
-        <Box sx={{ p: 2, width: { xs: "280px", md: "550px" } }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
-            <Typography variant="h6" component="div">
-              Categories
-            </Typography>
-
-            {/* Action Buttons */}
-            <Stack direction="row" spacing={1}>
-              <Button size="small" onClick={onSelectAll}>
-                Select All
-              </Button>
-              <Button size="small" onClick={onClearAll}>
-                Clear All
-              </Button>
-            </Stack>
-          </Stack>
-          <Divider sx={{ mb: 2 }} />
-          <Stack direction={{ xs: "column", md: "row" }} spacing={{ xs: 1, md: 4 }}>
-            {/* Group 1: Special & Main Categories */}
-            <FormGroup>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={filters.selectedCategories.includes(SAVED_EVENTS_CATEGORY)}
-                    onChange={onCategoryChange}
-                    name={SAVED_EVENTS_CATEGORY}
-                    icon={<StarBorderIcon />}
-                    checkedIcon={<StarIcon />}
-                  />
-                }
-                label="Saved Events"
-              />
-              <Divider sx={{ my: 1 }} />
-              {Object.entries(categoryGroups).map(([groupName, categories]) => (
-                <React.Fragment key={groupName}>
-                  <Typography variant="overline" color="text.secondary">
-                    {groupName}
-                  </Typography>
-                  {categories
-                    .filter((c) => allCategories.includes(c))
-                    .map((category) => (
-                      <CategoryCheckbox
-                        key={category}
-                        category={category}
-                        isChecked={filters.selectedCategories.includes(category)}
-                        onChange={onCategoryChange}
-                      />
-                    ))}
-                </React.Fragment>
-              ))}
-            </FormGroup>
-
-            {/* Group 2: Other Categories */}
-            {otherCategories.length > 0 && (
-              <FormGroup>
-                <Typography variant="overline" color="text.secondary">
-                  Other
-                </Typography>
-                {otherCategories.map((category) => (
-                  <CategoryCheckbox
-                    key={category}
-                    category={category}
-                    isChecked={filters.selectedCategories.includes(category)}
-                    onChange={onCategoryChange}
-                  />
-                ))}
-              </FormGroup>
-            )}
-          </Stack>
-        </Box>
-      </Menu>
-    );
-  }
+const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
+  <Stack spacing={2}>
+    <Typography variant="overline" color="text.secondary">
+      {title}
+    </Typography>
+    {children}
+  </Stack>
 );
 
-/**
- * Renders the desktop version of the event filter component.
- *
- * @param param0 Props for the DesktopEventFilter component.
- * @returns The desktop version of the event filter component.
- */
-function DesktopEventFilterComponent({
-  filters,
-  onNewEventClick,
-  onResetFilters,
-  onOpenExportDialog,
-  allCategories,
-  anchorEl,
-  handleMenuClick,
-  handleMenuClose,
-  handleFilterChange,
-  handleCategoryChange,
-  handleSelectAll,
-  handleClearAll,
-}: DesktopEventFilterProps) {
+function DesktopEventFilterComponent(props: DesktopEventFilterProps) {
+  const {
+    filters,
+    onNewEventClick,
+    onResetFilters,
+    onOpenExportDialog,
+    allCategories,
+    handleFilterChange,
+    handleCategoryChange,
+    handleSelectAll,
+    handleClearAll,
+  } = props;
+
   const otherCategories = useMemo(
     () => allCategories.filter((cat) => !Object.values(categoryGroups).flat().includes(cat)),
     [allCategories]
   );
 
-  // Render the desktop event filter component.
   return (
-    <Paper sx={{ p: 2, mb: 3 }}>
-      <Stack spacing={2}>
-        {/* Row 1: Search */}
+    <Stack spacing={4} sx={{ p: 3, width: { xs: "280px", md: "550px" } }}>
+      <Section title="Search & Filter">
         <TextField
           fullWidth
           label="Search by Event Title"
-          variant="outlined"
+          variant="filled"
           value={filters.searchTerm}
           onChange={(e) => handleFilterChange("searchTerm", e.target.value)}
         />
-
-        {/* Row 2: Date Pickers */}
         <Stack direction="row" spacing={2}>
           <DatePicker
             label="Start Date"
             value={filters.startDate}
             onChange={(date) => handleFilterChange("startDate", date)}
+            slotProps={{ textField: { variant: "filled" } }}
             sx={{ width: "100%" }}
           />
           <DatePicker
             label="End Date"
             value={filters.endDate}
             onChange={(date) => handleFilterChange("endDate", date)}
+            slotProps={{ textField: { variant: "filled" } }}
             sx={{ width: "100%" }}
           />
         </Stack>
-
-        {/* Row 3: Time Slider */}
-        <Box sx={{ px: 1 }}>
-          <Typography gutterBottom variant="body2" color="text.secondary">
-            Time of Day
-          </Typography>
-          <Slider
-            value={filters.timeRange}
-            onChange={(_, value) => handleFilterChange("timeRange", value as number[])}
-            valueLabelFormat={formatTime}
-            valueLabelDisplay="auto"
-            marks={marks}
-            min={0}
-            max={24}
-            step={1}
-          />
-        </Box>
-        <Divider />
-
-        {/* Row 4: Action Buttons */}
-        <Stack direction="row" spacing={2} justifyContent="space-between" alignItems="center">
-          <Stack direction="row" spacing={2} alignItems="center">
-            <Badge badgeContent={filters.selectedCategories.length} color="primary">
-              <Button variant="outlined" startIcon={<FilterListIcon />} onClick={handleMenuClick}>
-                Categories
-              </Button>
-            </Badge>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={filters.showActiveOnly}
-                  onChange={(e) => handleFilterChange("showActiveOnly", e.target.checked)}
-                />
-              }
-              label="Active Only"
+        <FormControlLabel
+          control={
+            <Switch
+              checked={filters.showActiveOnly}
+              onChange={(e) => handleFilterChange("showActiveOnly", e.target.checked)}
             />
-          </Stack>
-          <Stack direction="row" spacing={2}>
-            <Button variant="outlined" onClick={onOpenExportDialog} startIcon={<FileDownloadIcon />}>
-              Export
+          }
+          label="Show Active Events Only"
+          sx={{ justifyContent: "space-between", ml: 0 }}
+          labelPlacement="start"
+        />
+      </Section>
+      <Divider />
+      <Section title="Categories">
+        <Stack direction="row" justifyContent="space-between" alignItems="center">
+          <Typography variant="body2" color="text.secondary">
+            Select categories to display
+          </Typography>
+          <Stack direction="row" spacing={1}>
+            <Button size="small" onClick={handleSelectAll}>
+              Select All
             </Button>
-            <Button variant="contained" onClick={onNewEventClick} startIcon={<AddCircleOutlineIcon />}>
-              New Event
-            </Button>
-            <Button variant="outlined" onClick={onResetFilters} startIcon={<ReplayIcon />}>
-              Reset
+            <Button size="small" onClick={handleClearAll}>
+              Clear All
             </Button>
           </Stack>
         </Stack>
+        <Stack direction={{ xs: "column", md: "row" }} spacing={{ xs: 1, md: 4 }}>
+          <FormGroup>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={filters.selectedCategories.includes(SAVED_EVENTS_CATEGORY)}
+                  onChange={handleCategoryChange}
+                  name={SAVED_EVENTS_CATEGORY}
+                  icon={<StarBorderIcon />}
+                  checkedIcon={<StarIcon />}
+                />
+              }
+              label={<ColorKeyLabel category={"Saved Events"} />}
+            />
+            {Object.entries(categoryGroups).map(([groupName, categories]) => (
+              <React.Fragment key={groupName}>
+                {categories
+                  .filter((c) => allCategories.includes(c))
+                  .map((category) => (
+                    <CategoryCheckbox
+                      key={category}
+                      category={category}
+                      isChecked={filters.selectedCategories.includes(category)}
+                      onChange={handleCategoryChange}
+                    />
+                  ))}
+              </React.Fragment>
+            ))}
+          </FormGroup>
+          {otherCategories.length > 0 && (
+            <FormGroup>
+              {otherCategories.map((category) => (
+                <CategoryCheckbox
+                  key={category}
+                  category={category}
+                  isChecked={filters.selectedCategories.includes(category)}
+                  onChange={handleCategoryChange}
+                />
+              ))}
+            </FormGroup>
+          )}
+        </Stack>
+      </Section>
+      <Divider />
+      <Stack direction="row" spacing={2} justifyContent="flex-end">
+        <Button variant="outlined" onClick={onOpenExportDialog} startIcon={<FileDownloadIcon />}>
+          Export
+        </Button>
+        <Button variant="contained" onClick={onNewEventClick} startIcon={<AddCircleOutlineIcon />}>
+          New Event
+        </Button>
+        <Button variant="outlined" onClick={onResetFilters} startIcon={<ReplayIcon />}>
+          Reset
+        </Button>
       </Stack>
-
-      {/* Category Filter Menu */}
-      <CategoryFilterMenu
-        anchorEl={anchorEl}
-        onClose={handleMenuClose}
-        filters={filters}
-        allCategories={allCategories}
-        otherCategories={otherCategories}
-        onCategoryChange={handleCategoryChange}
-        onSelectAll={handleSelectAll}
-        onClearAll={handleClearAll}
-      />
-    </Paper>
+    </Stack>
   );
 }
 

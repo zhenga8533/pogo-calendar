@@ -65,9 +65,14 @@ const CalendarEventContent = React.memo(function CalendarEventContent({
         alignItems: "center",
         justifyContent: "space-between",
         cursor: "pointer",
-        border: "2px solid rgba(0, 0, 0, 0.2)",
+        border: `1px solid ${theme.palette.divider}`,
         boxSizing: "border-box",
-        transition: "box-shadow 0.15s ease-in-out, filter 0.15s ease-in-out",
+        boxShadow: theme.shadows[1],
+        transition: "transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out",
+        "&:hover": {
+          transform: "scale(1.02)",
+          boxShadow: theme.shadows[4],
+        },
       }}
       onMouseEnter={(e) => onMouseEnter(e, eventInfo.event as unknown as CalendarEvent)}
       onMouseLeave={onMouseLeave}

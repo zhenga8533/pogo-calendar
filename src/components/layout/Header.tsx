@@ -9,7 +9,6 @@ import {
   Button,
   Divider,
   Drawer,
-  IconButton,
   Popover,
   Stack,
   Toolbar,
@@ -113,8 +112,9 @@ function HeaderComponent(props: HeaderProps) {
             : theme.palette.mode === "dark"
             ? "rgba(18, 18, 18, 0.8)"
             : "rgba(255, 255, 255, 0.8)",
-          backdropFilter: "blur(8px)",
+          backdropFilter: "blur(12px)",
           color: theme.palette.text.primary,
+          borderBottom: `1px solid ${theme.palette.divider}`,
           transition: theme.transitions.create(["background-color", "box-shadow", "color"], {
             duration: theme.transitions.duration.short,
           }),
@@ -134,33 +134,51 @@ function HeaderComponent(props: HeaderProps) {
             </Typography>
           </Stack>
 
-          <Stack direction="row" alignItems="center" spacing={1.5}>
+          <Stack direction="row" alignItems="center" spacing={1}>
             <Box sx={{ display: { xs: "none", sm: "block" } }}>
               <LastUpdatedDisplay onRefresh={onRefresh} setRefetchLastUpdated={setRefetchLastUpdated} />
             </Box>
-            <Divider orientation="vertical" flexItem sx={{ display: { xs: "none", sm: "block" } }} />
+            <Divider orientation="vertical" flexItem sx={{ display: { xs: "none", sm: "block" }, mx: 1 }} />
             <Tooltip title="Filters">
               <Badge badgeContent={activeFilterCount} color="primary">
-                <Button color="inherit" startIcon={<FilterListIcon />} onClick={handleFilterClick}>
+                <Button
+                  color="inherit"
+                  startIcon={<FilterListIcon />}
+                  onClick={handleFilterClick}
+                  sx={{ "&:hover": { backgroundColor: "action.hover" } }}
+                >
                   Filters
                 </Button>
               </Badge>
             </Tooltip>
-            <Button component={RouterLink} to="/faq" color="inherit">
+            <Tooltip title="Settings">
+              <Badge badgeContent={activeFilterCount} color="primary">
+                <Button
+                  color="inherit"
+                  startIcon={<TuneIcon />}
+                  onClick={onSettingsClick}
+                  sx={{ "&:hover": { backgroundColor: "action.hover" } }}
+                >
+                  Settings
+                </Button>
+              </Badge>
+            </Tooltip>
+            <Divider orientation="vertical" flexItem sx={{ display: { xs: "none", sm: "block" }, mx: 1 }} />
+            <Button
+              component={RouterLink}
+              to="/faq"
+              color="inherit"
+              sx={{ "&:hover": { backgroundColor: "action.hover" } }}
+            >
               FAQ
             </Button>
-            <Tooltip title="Settings">
-              <IconButton color="inherit" onClick={onSettingsClick}>
-                <TuneIcon />
-              </IconButton>
-            </Tooltip>
           </Stack>
         </Toolbar>
       </AppBar>
 
       {isMobile ? (
         <Drawer anchor="left" open={drawerOpen} onClose={handleCloseFilter}>
-          <Box sx={{ width: 300, p: 2 }}>{filterContent}</Box>
+          <Box sx={{ width: 300, p: 2, pt: 4 }}>{filterContent}</Box>
         </Drawer>
       ) : (
         <Popover
@@ -169,6 +187,7 @@ function HeaderComponent(props: HeaderProps) {
           onClose={handleCloseFilter}
           anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
           transformOrigin={{ vertical: "top", horizontal: "right" }}
+          slotProps={{ paper: { sx: { backgroundColor: "background.default" } } }}
         >
           {filterContent}
         </Popover>

@@ -32,68 +32,15 @@ interface MobileEventFilterProps extends Omit<EventFilterProps, "isMobile"> {
   onOpenExportDialog: () => void;
 }
 
-const CategoryFilterAccordion = React.memo(
-  /**
-   * Renders the accordion for selecting event categories.
-   *
-   * @param param0 Props for the CategoryFilterAccordion component.
-   * @returns An accordion for selecting event categories.
-   */
-  function CategoryFilterAccordion({
-    selectedCategories,
-    allCategories,
-    onCategoryChange,
-  }: {
-    selectedCategories: string[];
-    allCategories: string[];
-    onCategoryChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  }) {
-    return (
-      <Accordion>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography>Categories ({selectedCategories.length})</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <FormGroup>
-            {/* Special "Saved Events" checkbox */}
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={selectedCategories.includes(SAVED_EVENTS_CATEGORY)}
-                  onChange={onCategoryChange}
-                  name={SAVED_EVENTS_CATEGORY}
-                  icon={<StarBorderIcon />}
-                  checkedIcon={<StarIcon />}
-                />
-              }
-              label="Saved Events"
-            />
-
-            {/* Divider */}
-            <Divider sx={{ my: 1 }} />
-
-            {/* Render all other categories using the reusable component */}
-            {allCategories.map((category) => (
-              <CategoryCheckbox
-                key={category}
-                category={category}
-                isChecked={selectedCategories.includes(category)}
-                onChange={onCategoryChange}
-              />
-            ))}
-          </FormGroup>
-        </AccordionDetails>
-      </Accordion>
-    );
-  }
+const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
+  <Stack spacing={2}>
+    <Typography variant="overline" color="text.secondary">
+      {title}
+    </Typography>
+    {children}
+  </Stack>
 );
 
-/**
- * Renders the mobile version of the event filter component.
- *
- * @param param0 Props for the MobileEventFilter component.
- * @returns The mobile version of the event filter component.
- */
 function MobileEventFilterComponent({
   filters,
   onNewEventClick,
@@ -104,73 +51,102 @@ function MobileEventFilterComponent({
   handleCategoryChange,
 }: MobileEventFilterProps) {
   return (
-    <Stack spacing={3}>
-      {/* Search Field */}
-      <TextField
-        fullWidth
-        label="Search by Event Title"
-        variant="outlined"
-        value={filters.searchTerm}
-        onChange={(e) => handleFilterChange("searchTerm", e.target.value)}
-      />
-
-      {/* Date Pickers */}
-      <DatePicker
-        label="Start Date"
-        value={filters.startDate}
-        onChange={(date) => handleFilterChange("startDate", date)}
-      />
-      <DatePicker label="End Date" value={filters.endDate} onChange={(date) => handleFilterChange("endDate", date)} />
-
-      {/* Time of Day Slider */}
-      <Box sx={{ px: 1 }}>
-        <Typography gutterBottom variant="body2" color="text.secondary">
-          Time of Day
-        </Typography>
-        <Slider
-          value={filters.timeRange}
-          onChange={(_, value) => handleFilterChange("timeRange", value as number[])}
-          valueLabelFormat={formatTime}
-          valueLabelDisplay="auto"
-          marks={marks}
-          min={0}
-          max={24}
-          step={1}
+    <Stack spacing={4}>
+      <Section title="Search & Date">
+        <TextField
+          fullWidth
+          label="Search by Event Title"
+          variant="filled"
+          value={filters.searchTerm}
+          onChange={(e) => handleFilterChange("searchTerm", e.target.value)}
         />
-      </Box>
+        <DatePicker
+          label="Start Date"
+          value={filters.startDate}
+          onChange={(date) => handleFilterChange("startDate", date)}
+          slotProps={{ textField: { variant: "filled" } }}
+        />
+        <DatePicker
+          label="End Date"
+          value={filters.endDate}
+          onChange={(date) => handleFilterChange("endDate", date)}
+          slotProps={{ textField: { variant: "filled" } }}
+        />
+      </Section>
 
-      {/* Category Filter Accordion */}
-      <CategoryFilterAccordion
-        selectedCategories={filters.selectedCategories}
-        allCategories={allCategories}
-        onCategoryChange={handleCategoryChange}
-      />
-
-      <Divider />
-
-      {/* Active Only Switch */}
-      <FormControlLabel
-        control={
-          <Switch
-            checked={filters.showActiveOnly}
-            onChange={(e) => handleFilterChange("showActiveOnly", e.target.checked)}
+      <Section title="Time & Categories">
+        <Box sx={{ px: 1 }}>
+          <Typography gutterBottom variant="body2" color="text.secondary">
+            Time of Day
+          </Typography>
+          <Slider
+            value={filters.timeRange}
+            onChange={(_, value) => handleFilterChange("timeRange", value as number[])}
+            valueLabelFormat={formatTime}
+            valueLabelDisplay="auto"
+            marks={marks}
+            min={0}
+            max={24}
+            step={1}
           />
-        }
-        label="Show Active Events Only"
-        labelPlacement="start"
-        sx={{ justifyContent: "space-between", ml: 0 }}
-      />
+        </Box>
+        <Accordion>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Typography>Categories ({filters.selectedCategories.length})</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <FormGroup>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={filters.selectedCategories.includes(SAVED_EVENTS_CATEGORY)}
+                    onChange={handleCategoryChange}
+                    name={SAVED_EVENTS_CATEGORY}
+                    icon={<StarBorderIcon />}
+                    checkedIcon={<StarIcon />}
+                  />
+                }
+                label="Saved Events"
+              />
+              <Divider sx={{ my: 1 }} />
+              {allCategories.map((category) => (
+                <CategoryCheckbox
+                  key={category}
+                  category={category}
+                  isChecked={filters.selectedCategories.includes(category)}
+                  onChange={handleCategoryChange}
+                />
+              ))}
+            </FormGroup>
+          </AccordionDetails>
+        </Accordion>
+      </Section>
 
-      {/* Action Buttons */}
-      <Button variant="outlined" onClick={onOpenExportDialog} startIcon={<FileDownloadIcon />}>
-        Export
-      </Button>
-      <Button variant="contained" onClick={onNewEventClick} startIcon={<AddCircleOutlineIcon />}>
-        New Event
-      </Button>
-      <Button variant="outlined" onClick={onResetFilters} startIcon={<ReplayIcon />}>
-        Reset All Filters
-      </Button>
+      <Section title="General">
+        <FormControlLabel
+          control={
+            <Switch
+              checked={filters.showActiveOnly}
+              onChange={(e) => handleFilterChange("showActiveOnly", e.target.checked)}
+            />
+          }
+          label="Show Active Events Only"
+          labelPlacement="start"
+          sx={{ justifyContent: "space-between", ml: 0 }}
+        />
+      </Section>
+
+      <Stack spacing={2}>
+        <Button variant="outlined" onClick={onOpenExportDialog} startIcon={<FileDownloadIcon />}>
+          Export
+        </Button>
+        <Button variant="contained" onClick={onNewEventClick} startIcon={<AddCircleOutlineIcon />}>
+          New Event
+        </Button>
+        <Button variant="outlined" onClick={onResetFilters} startIcon={<ReplayIcon />}>
+          Reset All Filters
+        </Button>
+      </Stack>
     </Stack>
   );
 }

@@ -8,25 +8,26 @@ export const getTheme = (mode: PaletteMode) =>
         ? {
             // Light Mode Palette
             primary: {
-              main: "#7E57C2", // Deep Purple
+              main: "#E53935", // Vibrant Red
             },
             background: {
-              default: "#F8F9FA", // Lighter, softer grey
+              default: "#F8F9FA",
               paper: "#FFFFFF",
             },
           }
         : {
             // Dark Mode Palette
             primary: {
-              main: "#B39DDB", // Lighter Purple for contrast
+              main: "#EF5350", // Lighter Red for contrast
             },
             background: {
-              default: "#1A1A2E", // Dark Slate Blue
-              paper: "#24243E", // Slightly lighter Slate Blue
+              default: "#121212", // Standard dark background
+              paper: "#1E1E1E",
             },
           }),
     },
     components: {
+      // Small tweaks for a more modern feel on components
       MuiButton: {
         styleOverrides: {
           root: {

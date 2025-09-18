@@ -1,13 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
-import { EVENT_NOTES_KEY } from "../config/storage";
+import { EVENT_NOTES_KEY } from "../config/constants";
 
 type EventNotes = Record<string, string>;
 
-/**
- * Custom hook to manage user-created notes for events with localStorage persistence.
- *
- * @returns An object containing the notes and a function to update them.
- */
 export function useEventNotes() {
   const [eventNotes, setEventNotes] = useState<EventNotes>(() => {
     try {
@@ -19,15 +14,10 @@ export function useEventNotes() {
     }
   });
 
-  // Persist notes to localStorage whenever they change.
   useEffect(() => {
     localStorage.setItem(EVENT_NOTES_KEY, JSON.stringify(eventNotes));
   }, [eventNotes]);
 
-  /**
-   * Updates or deletes a note for a specific event.
-   * If the note text is empty, the note is deleted.
-   */
   const updateNote = useCallback((eventId: string, noteText: string) => {
     setEventNotes((prevNotes) => {
       const newNotes = { ...prevNotes };

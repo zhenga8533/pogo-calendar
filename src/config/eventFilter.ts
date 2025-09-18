@@ -1,6 +1,3 @@
-export const SAVED_EVENTS_CATEGORY = "Saved";
-export const CUSTOM_EVENT_CATEGORY = "Custom Event";
-
 export const initialFilters = {
   searchTerm: "",
   selectedCategories: [] as string[],

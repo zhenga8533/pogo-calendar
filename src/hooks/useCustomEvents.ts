@@ -1,16 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import defaultBanner from "../assets/images/default-banner.jpg";
-import { CUSTOM_EVENT_CATEGORY } from "../config/eventFilter";
-import { CUSTOM_EVENTS_KEY } from "../config/storage";
+import { CUSTOM_EVENT_CATEGORY, CUSTOM_EVENTS_KEY } from "../config/constants";
 import type { CalendarEvent, NewEventData } from "../types/events";
 import { formatToLocalTime } from "../utils/dateUtils";
 
-/**
- * Custom hook to manage user-created calendar events with localStorage persistence.
- *
- * @returns A custom hook for managing user-created calendar events with localStorage persistence.
- */
 export function useCustomEvents() {
   const [customEvents, setCustomEvents] = useState<CalendarEvent[]>(() => {
     try {

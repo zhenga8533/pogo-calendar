@@ -7,7 +7,7 @@ import Footer from "./components/layout/Footer";
 import Header from "./components/layout/Header";
 import ScrollToTop from "./components/shared/ScrollToTop";
 import { SettingsDialog } from "./components/shared/SettingsDialog";
-import { CUSTOM_EVENT_CATEGORY } from "./config/eventFilter";
+import { CUSTOM_EVENT_CATEGORY } from "./config/constants";
 import { useSettingsContext } from "./contexts/SettingsContext";
 import { useCustomEvents } from "./hooks/useCustomEvents";
 import { useDialogs } from "./hooks/useDialogs";
@@ -57,29 +57,26 @@ function App() {
     savedEventIds
   );
 
-  const allCategories = useMemo(
-    () => Array.from(new Set(combinedEvents.map((event) => event.extendedProps.category))).sort(),
-    [combinedEvents]
-  );
+  const { allCategories, allPokemon, allBonuses } = useMemo(() => {
+    const categories = new Set<string>();
+    const pokemon = new Set<string>();
+    const bonuses = new Set<string>();
 
-  const allPokemon = useMemo(() => {
-    const pokemonSet = new Set<string>();
     combinedEvents.forEach((event) => {
-      (event.extendedProps.features ?? []).forEach((p) => pokemonSet.add(p));
-      (event.extendedProps.spawns ?? []).forEach((p) => pokemonSet.add(p));
-      (event.extendedProps.raids ?? []).forEach((p) => pokemonSet.add(p));
-      (event.extendedProps.shiny ?? []).forEach((p) => pokemonSet.add(p));
-      (event.extendedProps.shadow ?? []).forEach((p) => pokemonSet.add(p));
+      categories.add(event.extendedProps.category);
+      (event.extendedProps.features ?? []).forEach((p) => pokemon.add(p));
+      (event.extendedProps.spawns ?? []).forEach((p) => pokemon.add(p));
+      (event.extendedProps.raids ?? []).forEach((p) => pokemon.add(p));
+      (event.extendedProps.shiny ?? []).forEach((p) => pokemon.add(p));
+      (event.extendedProps.shadow ?? []).forEach((p) => pokemon.add(p));
+      (event.extendedProps.bonuses ?? []).forEach((b) => bonuses.add(b));
     });
-    return Array.from(pokemonSet).sort();
-  }, [combinedEvents]);
 
-  const allBonuses = useMemo(() => {
-    const bonusSet = new Set<string>();
-    combinedEvents.forEach((event) => {
-      (event.extendedProps.bonuses ?? []).forEach((b) => bonusSet.add(b));
-    });
-    return Array.from(bonusSet).sort();
+    return {
+      allCategories: Array.from(categories).sort(),
+      allPokemon: Array.from(pokemon).sort(),
+      allBonuses: Array.from(bonuses).sort(),
+    };
   }, [combinedEvents]);
 
   const nextUpcomingEvent = useNextUpcomingEvent(filteredEvents);

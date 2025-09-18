@@ -1,11 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { SAVED_EVENTS_KEY } from "../config/storage";
+import { SAVED_EVENTS_KEY } from "../config/constants";
 
-/**
- * Custom hook to manage saved event IDs with localStorage persistence.
- *
- * @returns A custom hook to manage saved event IDs with localStorage persistence.
- */
 export function useSavedEvents() {
   const [savedEventIds, setSavedEventIds] = useState<string[]>(() => {
     try {
@@ -17,12 +12,10 @@ export function useSavedEvents() {
     }
   });
 
-  // Effect to persist the list of saved IDs to localStorage whenever it changes.
   useEffect(() => {
     localStorage.setItem(SAVED_EVENTS_KEY, JSON.stringify(savedEventIds));
   }, [savedEventIds]);
 
-  // Function to toggle the saved state of an event by its ID.
   const handleToggleSaveEvent = useCallback((eventId: string) => {
     setSavedEventIds((prevIds) =>
       prevIds.includes(eventId) ? prevIds.filter((id) => id !== eventId) : [...prevIds, eventId]

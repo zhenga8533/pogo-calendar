@@ -72,7 +72,16 @@ export function useFilters(allEvents: CalendarEvent[], savedEventIds: string[]) 
 
   // Memoize the filtered events to avoid unnecessary recalculations.
   const filteredEvents = useMemo(() => {
-    const { selectedCategories, searchTerm, startDate, endDate, timeRange, showActiveOnly } = filtersForCurrentView;
+    const {
+      selectedCategories,
+      searchTerm,
+      startDate,
+      endDate,
+      timeRange,
+      showActiveOnly,
+      pokemonSearch,
+      bonusSearch,
+    } = filtersForCurrentView;
     const isSavedFilterActive = selectedCategories.includes(SAVED_EVENTS_CATEGORY);
     const otherSelectedCategories = selectedCategories.filter((c: string) => c !== SAVED_EVENTS_CATEGORY);
     const now = new Date();
@@ -105,6 +114,24 @@ export function useFilters(allEvents: CalendarEvent[], savedEventIds: string[]) 
       // "Currently Active" filter: checks if the current time is between the event's start and end.
       const passesActiveOnlyFilter = !showActiveOnly || (now >= eventStart && now <= eventEnd);
 
+      // Advanced Pokémon Filter
+      const passesPokemonFilter =
+        pokemonSearch.length === 0 ||
+        pokemonSearch.every((pokemon: string) =>
+          [
+            ...(event.extendedProps.features ?? []),
+            ...(event.extendedProps.spawns ?? []),
+            ...(event.extendedProps.raids ?? []),
+            ...(event.extendedProps.shiny ?? []),
+            ...(event.extendedProps.shadow ?? []),
+          ].includes(pokemon)
+        );
+
+      // Advanced Bonus Filter
+      const passesBonusFilter =
+        bonusSearch.length === 0 ||
+        bonusSearch.every((bonus: string) => (event.extendedProps.bonuses ?? []).includes(bonus));
+
       // The event is included only if it passes all active filter conditions.
       return (
         passesSavedFilter &&
@@ -112,7 +139,9 @@ export function useFilters(allEvents: CalendarEvent[], savedEventIds: string[]) 
         passesSearchFilter &&
         passesDateFilter &&
         passesTimeFilter &&
-        passesActiveOnlyFilter
+        passesActiveOnlyFilter &&
+        passesPokemonFilter &&
+        passesBonusFilter
       );
     });
   }, [allEvents, allFilters, currentView, savedEventIds]);

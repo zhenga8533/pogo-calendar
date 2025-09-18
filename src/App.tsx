@@ -57,6 +57,26 @@ function App() {
     [combinedEvents]
   );
 
+  const allPokemon = useMemo(() => {
+    const pokemonSet = new Set<string>();
+    combinedEvents.forEach((event) => {
+      (event.extendedProps.features ?? []).forEach((p) => pokemonSet.add(p));
+      (event.extendedProps.spawns ?? []).forEach((p) => pokemonSet.add(p));
+      (event.extendedProps.raids ?? []).forEach((p) => pokemonSet.add(p));
+      (event.extendedProps.shiny ?? []).forEach((p) => pokemonSet.add(p));
+      (event.extendedProps.shadow ?? []).forEach((p) => pokemonSet.add(p));
+    });
+    return Array.from(pokemonSet).sort();
+  }, [combinedEvents]);
+
+  const allBonuses = useMemo(() => {
+    const bonusSet = new Set<string>();
+    combinedEvents.forEach((event) => {
+      (event.extendedProps.bonuses ?? []).forEach((b) => bonusSet.add(b));
+    });
+    return Array.from(bonusSet).sort();
+  }, [combinedEvents]);
+
   const nextUpcomingEvent = useNextUpcomingEvent(filteredEvents);
 
   const handleSettingsOpen = useCallback(() => setSettingsOpen(true), []);
@@ -144,6 +164,8 @@ function App() {
           onNewEventClick={() => setCreateDialogOpen(true)}
           onOpenExportDialog={() => setExportDialogOpen(true)}
           allCategories={allCategories}
+          allPokemon={allPokemon}
+          allBonuses={allBonuses}
           nextUpcomingEvent={nextUpcomingEvent}
           onSelectEvent={setSelectedEvent}
           showNextEventTracker={settings.showNextEvent}

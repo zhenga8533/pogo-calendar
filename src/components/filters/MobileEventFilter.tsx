@@ -24,6 +24,7 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import React from "react";
 import { formatTime, marks, SAVED_EVENTS_CATEGORY } from "../../config/eventFilter";
 import type { EventFilterProps, Filters } from "../../types/filters";
+import AdvancedFilter from "./AdvancedFilter";
 import { CategoryCheckbox } from "./CategoryCheckbox";
 
 interface MobileEventFilterProps extends Omit<EventFilterProps, "isMobile"> {
@@ -49,6 +50,8 @@ function MobileEventFilterComponent({
   allCategories,
   handleFilterChange,
   handleCategoryChange,
+  allPokemon,
+  allBonuses,
 }: MobileEventFilterProps) {
   return (
     <Stack spacing={4}>
@@ -121,6 +124,19 @@ function MobileEventFilterComponent({
           </AccordionDetails>
         </Accordion>
       </Section>
+      <Accordion>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography>Advanced</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <AdvancedFilter
+            filters={filters}
+            handleFilterChange={handleFilterChange}
+            allPokemon={allPokemon}
+            allBonuses={allBonuses}
+          />
+        </AccordionDetails>
+      </Accordion>
 
       <Section title="General">
         <FormControlLabel

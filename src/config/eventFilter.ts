@@ -7,6 +7,8 @@ export const initialFilters = {
   endDate: null as Date | null,
   timeRange: [0, 24],
   showActiveOnly: false,
+  pokemonSearch: [] as string[],
+  bonusSearch: [] as string[],
 };
 
 export const marks = [

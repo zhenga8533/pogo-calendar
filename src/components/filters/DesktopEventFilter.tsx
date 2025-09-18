@@ -1,9 +1,13 @@
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import ReplayIcon from "@mui/icons-material/Replay";
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Button,
   Checkbox,
   Divider,
@@ -18,6 +22,7 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import React, { useMemo } from "react";
 import { categoryGroups, SAVED_EVENTS_CATEGORY } from "../../config/eventFilter";
 import type { EventFilterProps, Filters } from "../../types/filters";
+import AdvancedFilter from "./AdvancedFilter";
 import { CategoryCheckbox } from "./CategoryCheckbox";
 import { ColorKeyLabel } from "./ColorKeyLabel";
 
@@ -151,6 +156,22 @@ function DesktopEventFilterComponent(props: DesktopEventFilterProps) {
           )}
         </Stack>
       </Section>
+      <Divider />
+      <Accordion sx={{ "&:before": { display: "none" } }}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography variant="overline" color="text.secondary">
+            Advanced
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <AdvancedFilter
+            filters={filters}
+            handleFilterChange={handleFilterChange}
+            allPokemon={props.allPokemon}
+            allBonuses={props.allBonuses}
+          />
+        </AccordionDetails>
+      </Accordion>
       <Divider />
       <Stack direction="row" spacing={2} justifyContent="flex-end">
         <Button variant="outlined" onClick={onOpenExportDialog} startIcon={<FileDownloadIcon />}>

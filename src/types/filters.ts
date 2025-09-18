@@ -6,6 +6,8 @@ export interface EventFilterProps {
   onOpenExportDialog: () => void;
   allCategories: string[];
   isMobile: boolean;
+  allPokemon: string[];
+  allBonuses: string[];
 }
 
 export interface Filters {
@@ -15,4 +17,6 @@ export interface Filters {
   endDate: Date | null;
   timeRange: number[];
   showActiveOnly: boolean;
+  pokemonSearch: string[];
+  bonusSearch: string[];
 }

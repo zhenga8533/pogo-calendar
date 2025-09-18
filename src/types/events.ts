@@ -6,6 +6,14 @@ export interface CalendarEvent {
     category: string;
     article_url: string;
     banner_url: string;
+    description?: string;
+    bonuses?: string[];
+    features?: string[];
+    spawns?: string[];
+    eggs?: string[];
+    raids?: string[];
+    shiny?: string[];
+    shadow?: string[];
   };
 }
 
@@ -17,6 +25,14 @@ export interface ApiEvent {
   end_time: string | number;
   article_url: string;
   banner_url: string;
+  description?: string;
+  bonuses?: string[];
+  features?: string[];
+  spawns?: string[];
+  eggs?: string[];
+  raids?: string[];
+  shiny?: string[];
+  shadow?: string[];
 }
 
 export type NewEventData = {

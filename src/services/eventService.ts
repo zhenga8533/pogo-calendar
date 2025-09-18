@@ -12,6 +12,12 @@ function parseApiTime(time: string | number, isLocal: boolean, timezone: string)
   } else if (typeof time === "number") {
     date = new Date(time * 1000);
   } else {
+    // Handle null or undefined end_time
+    if (time === null && isLocal && typeof time === "string") {
+      const startDate = new Date(time);
+      startDate.setHours(startDate.getHours() + 1); // Default to a 1-hour duration if end is null
+      return startDate.toISOString();
+    }
     throw new Error("Invalid time format. Expected UNIX timestamp for UTC time.");
   }
 
@@ -49,11 +55,23 @@ function transformApiData(data: ApiResponse, timezone: string): CalendarEvent[] 
     eventsInCategory.map((event: ApiEvent) => ({
       title: event.title,
       start: parseApiTime(event.start_time, event.is_local_time, timezone),
-      end: parseApiTime(event.end_time, event.is_local_time, timezone),
+      end: event.end_time
+        ? parseApiTime(event.end_time, event.is_local_time, timezone)
+        : new Date(
+            new Date(parseApiTime(event.start_time, event.is_local_time, timezone)).getTime() + 60 * 60 * 1000
+          ).toISOString(),
       extendedProps: {
         category: event.category,
         article_url: event.article_url,
         banner_url: event.banner_url,
+        description: event.description,
+        bonuses: event.bonuses,
+        features: event.features,
+        spawns: event.spawns,
+        eggs: event.eggs,
+        raids: event.raids,
+        shiny: event.shiny,
+        shadow: event.shadow,
       },
     }))
   );
@@ -65,7 +83,7 @@ function transformApiData(data: ApiResponse, timezone: string): CalendarEvent[] 
  * @returns A promise that resolves to an array of CalendarEvent objects fetched from the API.
  */
 export const fetchEvents = async (timezone: string): Promise<CalendarEvent[]> => {
-  const response = await fetch(GITHUB_EVENTS_API_URL);
+  const response = await fetch(GITHUB_EVENTS_API_URL, { cache: "no-store" });
 
   if (!response.ok) {
     throw new Error(`API request failed with status ${response.status}`);

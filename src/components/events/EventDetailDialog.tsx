@@ -8,6 +8,7 @@ import StarBorderIcon from "@mui/icons-material/StarBorder";
 import {
   Box,
   Button,
+  Chip,
   Dialog,
   DialogActions,
   DialogContent,
@@ -41,43 +42,23 @@ interface EventDetailDialogProps {
   setToast: (toast: { open: boolean; message: string; severity: "success" | "error" | "info" | "warning" }) => void;
 }
 
-function DetailItem({ icon, text }: { icon: React.ReactNode; text: string | null }) {
-  return (
-    <Stack direction="row" spacing={1.5} alignItems="center">
-      {icon}
-      <Typography variant="body1">{text}</Typography>
-    </Stack>
-  );
-}
+const DetailSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
+  <Stack spacing={1.5}>
+    <Typography variant="h6" component="h3" fontWeight="bold">
+      {title}
+    </Typography>
+    {children}
+    <Divider sx={{ pt: 1 }} />
+  </Stack>
+);
 
-function DeleteConfirmationDialog({
-  open,
-  onClose,
-  onConfirm,
-  eventName,
-}: {
-  open: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  eventName: string;
-}) {
-  return (
-    <Dialog open={open} onClose={onClose} disableRestoreFocus>
-      <DialogTitle>Confirm Deletion</DialogTitle>
-      <DialogContent>
-        <DialogContentText>
-          Are you sure you want to delete the event "{eventName}"? This action cannot be undone.
-        </DialogContentText>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button onClick={onConfirm} color="error" variant="contained">
-          Delete
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
-}
+const ChipList = ({ items }: { items: string[] }) => (
+  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+    {items.map((item) => (
+      <Chip key={item} label={item} />
+    ))}
+  </Box>
+);
 
 function EventDetailDialog({
   event,
@@ -98,14 +79,12 @@ function EventDetailDialog({
 
   const eventDetails = useMemo(() => {
     if (!event) return null;
-    const eventId = event.extendedProps.article_url;
     return {
-      id: eventId,
+      ...event.extendedProps,
+      id: event.extendedProps.article_url,
       title: event.title,
-      category: event.extendedProps.category,
-      bannerUrl: event.extendedProps.banner_url,
       isCustomEvent: event.extendedProps.category === "Custom Event",
-      isSaved: savedEventIds.includes(eventId),
+      isSaved: savedEventIds.includes(event.extendedProps.article_url),
       start: formatDateLine(event.start, hour12),
       end: event.end ? formatDateLine(event.end, hour12) : null,
     };
@@ -149,7 +128,7 @@ function EventDetailDialog({
     return null;
   }
 
-  const { id, title, bannerUrl, isCustomEvent, isSaved } = eventDetails;
+  const { id, title, banner_url, isCustomEvent, isSaved } = eventDetails;
 
   return (
     <>
@@ -180,13 +159,9 @@ function EventDetailDialog({
 
           <Box
             component="img"
-            src={bannerUrl}
+            src={banner_url}
             alt={`${title} banner`}
-            sx={{
-              width: "100%",
-              aspectRatio: "16 / 9",
-              objectFit: "cover",
-            }}
+            sx={{ width: "100%", aspectRatio: "16 / 9", objectFit: "cover" }}
           />
 
           <Box sx={{ p: 3, position: "relative", zIndex: 1, backgroundColor: "background.paper" }}>
@@ -204,19 +179,70 @@ function EventDetailDialog({
               {title}
             </Typography>
 
+            <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 2 }}>
+              <CalendarTodayIcon color="action" />
+              <Typography variant="body1">
+                {eventDetails.start} - {eventDetails.end}
+              </Typography>
+            </Stack>
             <Divider sx={{ my: 2 }} />
 
             <Stack spacing={3}>
-              <Stack spacing={2}>
-                <DetailItem icon={<CalendarTodayIcon color="action" />} text={`Start: ${eventDetails.start}`} />
-                {event.end && (
-                  <DetailItem icon={<CalendarTodayIcon color="action" />} text={`End: ${eventDetails.end}`} />
-                )}
-              </Stack>
-              <Stack spacing={2}>
-                <Typography variant="subtitle1" component="h3" fontWeight="bold">
-                  Notes
-                </Typography>
+              {eventDetails.description && (
+                <DetailSection title="Description">
+                  <Typography variant="body1">{eventDetails.description}</Typography>
+                </DetailSection>
+              )}
+
+              {eventDetails.bonuses && eventDetails.bonuses.length > 0 && (
+                <DetailSection title="Event Bonuses">
+                  <Stack spacing={1}>
+                    {eventDetails.bonuses.map((bonus) => (
+                      <Typography key={bonus} variant="body1">
+                        • {bonus}
+                      </Typography>
+                    ))}
+                  </Stack>
+                </DetailSection>
+              )}
+
+              {eventDetails.features && eventDetails.features.length > 0 && (
+                <DetailSection title="Featured Pokémon">
+                  <ChipList items={eventDetails.features} />
+                </DetailSection>
+              )}
+
+              {eventDetails.spawns && eventDetails.spawns.length > 0 && (
+                <DetailSection title="Wild Encounters">
+                  <ChipList items={eventDetails.spawns} />
+                </DetailSection>
+              )}
+
+              {eventDetails.raids && eventDetails.raids.length > 0 && (
+                <DetailSection title="Raids">
+                  <ChipList items={eventDetails.raids} />
+                </DetailSection>
+              )}
+
+              {eventDetails.eggs && eventDetails.eggs.length > 0 && (
+                <DetailSection title="Eggs">
+                  <ChipList items={eventDetails.eggs} />
+                </DetailSection>
+              )}
+
+              {eventDetails.shiny && eventDetails.shiny.length > 0 && (
+                <DetailSection title="Shiny Debuts">
+                  <ChipList items={eventDetails.shiny} />
+                </DetailSection>
+              )}
+
+              {eventDetails.shadow && eventDetails.shadow.length > 0 && (
+                <DetailSection title="New Shadow Pokémon">
+                  <ChipList items={eventDetails.shadow} />
+                </DetailSection>
+              )}
+
+              <DetailSection title="Notes">
                 <TextField
                   fullWidth
                   multiline
@@ -229,12 +255,10 @@ function EventDetailDialog({
                     setIsDirty(true);
                   }}
                 />
-              </Stack>
+              </DetailSection>
             </Stack>
           </Box>
         </DialogContent>
-
-        <Divider />
         <DialogActions
           sx={{
             p: 2,
@@ -244,13 +268,7 @@ function EventDetailDialog({
             gap: 2,
           }}
         >
-          <Stack
-            direction="row"
-            gap={1}
-            flexWrap="wrap"
-            justifyContent={{ xs: "center", sm: "flex-start" }}
-            sx={{ width: { xs: "100%", sm: "auto" } }}
-          >
+          <Stack direction="row" gap={1} flexWrap="wrap" justifyContent={{ xs: "center", sm: "flex-start" }}>
             {!isCustomEvent && (
               <Button
                 component={Link}
@@ -259,28 +277,15 @@ function EventDetailDialog({
                 rel="noopener noreferrer"
                 variant="contained"
                 endIcon={<OpenInNewIcon />}
-                sx={{ whiteSpace: "nowrap" }}
               >
                 Learn More
               </Button>
             )}
-            <Button
-              variant="outlined"
-              startIcon={<AddToCalendarIcon />}
-              onClick={() => downloadIcsFile(event)}
-              sx={{ whiteSpace: "nowrap" }}
-            >
+            <Button variant="outlined" startIcon={<AddToCalendarIcon />} onClick={() => downloadIcsFile(event)}>
               Add to Calendar
             </Button>
           </Stack>
-
-          <Stack
-            direction="row"
-            gap={1}
-            flexWrap="wrap"
-            justifyContent={{ xs: "center", sm: "flex-end" }}
-            sx={{ width: { xs: "100%", sm: "auto" } }}
-          >
+          <Stack direction="row" gap={1} flexWrap="wrap" justifyContent={{ xs: "center", sm: "flex-end" }}>
             {isCustomEvent && (
               <>
                 <Button onClick={() => onEditEvent(event)} startIcon={<EditIcon />}>
@@ -291,7 +296,7 @@ function EventDetailDialog({
                 </Button>
               </>
             )}
-            <Button variant="contained" onClick={handleSave} sx={{ whiteSpace: "nowrap" }}>
+            <Button variant="contained" onClick={handleSave}>
               Save
             </Button>
             <Button onClick={handleClose}>Close</Button>
@@ -310,6 +315,35 @@ function EventDetailDialog({
         onConfirm={handleConfirmClose}
       />
     </>
+  );
+}
+
+function DeleteConfirmationDialog({
+  open,
+  onClose,
+  onConfirm,
+  eventName,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  eventName: string;
+}) {
+  return (
+    <Dialog open={open} onClose={onClose} disableRestoreFocus>
+      <DialogTitle>Confirm Deletion</DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+          Are you sure you want to delete the event "{eventName}"? This action cannot be undone.
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={onConfirm} color="error" variant="contained">
+          Delete
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 }
 

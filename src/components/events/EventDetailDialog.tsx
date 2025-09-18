@@ -19,7 +19,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { CUSTOM_EVENT_CATEGORY } from "../../config/eventFilter";
 import { useSettingsContext } from "../../contexts/SettingsContext";
 import type { ToastSeverity } from "../../hooks/useToast";
@@ -30,6 +30,7 @@ import { CategoryTag } from "../shared/CategoryTag";
 import { DeleteConfirmationDialog } from "../shared/DeleteConfirmationDialog";
 import { EventStatusTag } from "../shared/EventStatusTag";
 import { UnsavedChangesDialog } from "../shared/UnsavedChangesDialog";
+import { DetailSection } from "./DetailSection"; // Import the new component
 
 interface EventDetailDialogProps {
   event: CalendarEvent | null;
@@ -42,16 +43,6 @@ interface EventDetailDialogProps {
   onEditEvent: (event: CalendarEvent) => void;
   showToast: (message: string, severity?: ToastSeverity) => void;
 }
-
-const DetailSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
-  <Stack spacing={1.5}>
-    <Typography variant="h6" component="h3" fontWeight="bold">
-      {title}
-    </Typography>
-    {children}
-    <Divider sx={{ pt: 1 }} />
-  </Stack>
-);
 
 const ChipList = ({ items }: { items: string[] }) => (
   <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>

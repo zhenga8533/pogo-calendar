@@ -1,21 +1,10 @@
-import { format } from "date-fns";
 import { useCallback, useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import defaultBanner from "../assets/images/default-banner.jpg";
+import { CUSTOM_EVENT_CATEGORY } from "../config/eventFilter";
 import { CUSTOM_EVENTS_KEY } from "../config/storage";
 import type { CalendarEvent, NewEventData } from "../types/events";
-
-const CUSTOM_EVENT_CATEGORY = "Custom Event";
-
-/**
- * Formats a Date object or a date string into a timezone-agnostic ISO-like string.
- * This format (YYYY-MM-DDTHH:mm:ss) is interpreted as "local time" by FullCalendar.
- * @param date - The date to format.
- * @returns The formatted date string.
- */
-function formatToLocalTime(date: string | Date): string {
-  return format(new Date(date), "yyyy-MM-dd'T'HH:mm:ss");
-}
+import { formatToLocalTime } from "../utils/dateUtils";
 
 /**
  * Custom hook to manage user-created calendar events with localStorage persistence.

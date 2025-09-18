@@ -1,6 +1,7 @@
 import { Box } from "@mui/material";
 import { CalendarSkeleton } from "../components/calendar/CalendarSkeleton";
 import EventCalendar from "../components/calendar/EventCalendar";
+import type { ToastSeverity } from "../hooks/useToast";
 import type { CalendarEvent } from "../types/events";
 import type { Settings } from "../types/settings";
 
@@ -18,7 +19,7 @@ interface CalendarPageProps {
   onEditEvent: (event: CalendarEvent) => void;
   onDateSelect: (selection: { start: Date | null; end: Date | null }) => void;
   onViewChange: (viewName: string) => void;
-  setToast: (toast: { open: boolean; message: string; severity: "success" | "error" | "info" | "warning" }) => void;
+  showToast: (message: string, severity?: ToastSeverity) => void;
   filterStartDate: Date | null;
   filterEndDate: Date | null;
 }
@@ -38,7 +39,7 @@ function CalendarPage(props: CalendarPageProps) {
     onEditEvent,
     onDateSelect,
     onViewChange,
-    setToast,
+    showToast,
     filterStartDate,
     filterEndDate,
   } = props;
@@ -67,7 +68,7 @@ function CalendarPage(props: CalendarPageProps) {
         onDeleteEvent={onDeleteEvent}
         onEditEvent={onEditEvent}
         onDateSelect={onDateSelect}
-        setToast={setToast}
+        showToast={showToast}
       />
     </Box>
   );

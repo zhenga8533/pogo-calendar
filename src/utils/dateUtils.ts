@@ -33,3 +33,23 @@ export function formatDateLine(dateString: string | null, hour12: boolean, showT
   const formatString = showTime ? `MMM d, yyyy ${hour12 ? "h:mm a" : "HH:mm"}` : "MMM d, yyyy";
   return format(date, formatString);
 }
+
+/**
+ * Formats an hour value (0-24) to a 12-hour time string with AM/PM.
+ */
+export function formatHour(value: number): string {
+  if (value === 24 || value === 0) return "12 AM";
+  const ampm = value < 12 ? "AM" : "PM";
+  const hour = value % 12 === 0 ? 12 : value % 12;
+  return `${hour} ${ampm}`;
+}
+
+/**
+ * Formats a Date object or a date string into a timezone-agnostic ISO-like string.
+ * This format (YYYY-MM-DDTHH:mm:ss) is interpreted as "local time" by FullCalendar.
+ * @param date - The date to format.
+ * @returns The formatted date string.
+ */
+export function formatToLocalTime(date: string | Date): string {
+  return format(new Date(date), "yyyy-MM-dd'T'HH:mm:ss");
+}

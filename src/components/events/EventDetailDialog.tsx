@@ -12,8 +12,6 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
-  DialogTitle,
   Divider,
   IconButton,
   Link,
@@ -22,10 +20,13 @@ import {
   Typography,
 } from "@mui/material";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { CUSTOM_EVENT_CATEGORY } from "../../config/eventFilter";
+import type { ToastSeverity } from "../../hooks/useToast";
 import type { CalendarEvent } from "../../types/events";
 import { downloadIcsFile } from "../../utils/calendarUtils";
 import { formatDateLine } from "../../utils/dateUtils";
 import { CategoryTag } from "../shared/CategoryTag";
+import { DeleteConfirmationDialog } from "../shared/DeleteConfirmationDialog";
 import { EventStatusTag } from "../shared/EventStatusTag";
 import { UnsavedChangesDialog } from "../shared/UnsavedChangesDialog";
 
@@ -39,7 +40,7 @@ interface EventDetailDialogProps {
   eventNotes: Record<string, string>;
   onEditEvent: (event: CalendarEvent) => void;
   hour12: boolean;
-  setToast: (toast: { open: boolean; message: string; severity: "success" | "error" | "info" | "warning" }) => void;
+  showToast: (message: string, severity?: ToastSeverity) => void;
 }
 
 const DetailSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
@@ -70,7 +71,7 @@ function EventDetailDialog({
   onUpdateNote,
   eventNotes,
   hour12,
-  setToast,
+  showToast,
 }: EventDetailDialogProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [noteText, setNoteText] = useState("");
@@ -83,7 +84,7 @@ function EventDetailDialog({
       ...event.extendedProps,
       id: event.extendedProps.article_url,
       title: event.title,
-      isCustomEvent: event.extendedProps.category === "Custom Event",
+      isCustomEvent: event.extendedProps.category === CUSTOM_EVENT_CATEGORY,
       isSaved: savedEventIds.includes(event.extendedProps.article_url),
       start: formatDateLine(event.start, hour12),
       end: event.end ? formatDateLine(event.end, hour12) : null,
@@ -108,9 +109,9 @@ function EventDetailDialog({
     if (!eventDetails) return;
     onUpdateNote(eventDetails.id, noteText);
     setIsDirty(false);
-    setToast({ open: true, message: "Note saved successfully!", severity: "success" });
+    showToast("Note saved successfully!", "success");
     onClose(); // Close dialog on save
-  }, [eventDetails, noteText, onUpdateNote, setToast, onClose]);
+  }, [eventDetails, noteText, onUpdateNote, showToast, onClose]);
 
   const handleClose = () => {
     if (isDirty) {
@@ -316,35 +317,6 @@ function EventDetailDialog({
         onConfirm={handleConfirmClose}
       />
     </>
-  );
-}
-
-function DeleteConfirmationDialog({
-  open,
-  onClose,
-  onConfirm,
-  eventName,
-}: {
-  open: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  eventName: string;
-}) {
-  return (
-    <Dialog open={open} onClose={onClose} disableRestoreFocus>
-      <DialogTitle>Confirm Deletion</DialogTitle>
-      <DialogContent>
-        <DialogContentText>
-          Are you sure you want to delete the event "{eventName}"? This action cannot be undone.
-        </DialogContentText>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button onClick={onConfirm} color="error" variant="contained">
-          Delete
-        </Button>
-      </DialogActions>
-    </Dialog>
   );
 }
 

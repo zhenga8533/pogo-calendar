@@ -1,18 +1,22 @@
-import { Box, Container, CssBaseline, ThemeProvider } from "@mui/material";
+import { Alert, Box, Container, CssBaseline, Snackbar, ThemeProvider } from "@mui/material";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { Route, Routes } from "react-router-dom";
-import { CalendarOverlays } from "./components/calendar/CalendarOverlays";
+import CreateEventDialog from "./components/events/CreateEventDialog";
+import { ExportEventDialog } from "./components/events/ExportEventDialog";
 import Footer from "./components/layout/Footer";
 import Header from "./components/layout/Header";
 import ScrollToTop from "./components/shared/ScrollToTop";
 import { SettingsDialog } from "./components/shared/SettingsDialog";
+import { CUSTOM_EVENT_CATEGORY } from "./config/eventFilter";
 import { useCustomEvents } from "./hooks/useCustomEvents";
+import { useDialogs } from "./hooks/useDialogs";
 import { useEventData } from "./hooks/useEventData";
 import { useEventNotes } from "./hooks/useEventNotes";
 import { useFilters } from "./hooks/useFilters";
 import { useNextUpcomingEvent } from "./hooks/useNextUpcomingEvent";
 import { useSavedEvents } from "./hooks/useSavedEvents";
 import { useSettings } from "./hooks/useSettings";
+import { useToast } from "./hooks/useToast";
 import CalendarPage from "./pages/Calendar";
 import FaqPage from "./pages/Faq";
 import { CalendarDarkStyles } from "./styles/calendarDarkStyles";
@@ -26,15 +30,19 @@ import { downloadIcsForEvents } from "./utils/calendarUtils";
  * @returns The main application component.
  */
 function App() {
-  const [settingsOpen, setSettingsOpen] = useState(false);
   const { theme, settings, setSettings } = useSettings();
-  const [toast, setToast] = useState<{
-    open: boolean;
-    message: string;
-    severity: "success" | "error" | "info" | "warning";
-  }>({ open: false, message: "", severity: "success" });
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const {
+    settingsOpen,
+    createDialogOpen,
+    exportDialogOpen,
+    handleSettingsOpen,
+    handleSettingsClose,
+    handleCreateOpen,
+    handleCreateClose,
+    handleExportOpen,
+    handleExportClose,
+  } = useDialogs();
+  const { toast, showToast, handleCloseToast } = useToast();
   const [eventToEdit, setEventToEdit] = useState<CalendarEvent | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
 
@@ -79,9 +87,6 @@ function App() {
 
   const nextUpcomingEvent = useNextUpcomingEvent(filteredEvents);
 
-  const handleSettingsOpen = useCallback(() => setSettingsOpen(true), []);
-  const handleSettingsClose = useCallback(() => setSettingsOpen(false), []);
-
   const handleSettingsChange = useCallback(
     (newSettings: Partial<Settings>) => {
       setSettings((prev) => ({ ...prev, ...newSettings }));
@@ -96,58 +101,60 @@ function App() {
   const handleRefresh = useCallback(async () => {
     try {
       await Promise.all([refetchEvents(), refetchLastUpdatedRef.current()]);
-      setToast({ open: true, message: "Data refreshed successfully!", severity: "success" });
+      showToast("Data refreshed successfully!", "success");
     } catch (error) {
-      setToast({ open: true, message: "Failed to refresh data.", severity: "error" });
+      showToast("Failed to refresh data.", "error");
     }
-  }, [refetchEvents]);
+  }, [refetchEvents, showToast]);
 
-  const handleCloseToast = useCallback(() => {
-    setToast((prev) => ({ ...prev, open: false }));
-  }, []);
-
-  const handleOpenEditDialog = useCallback((event: CalendarEvent) => {
-    setEventToEdit(event);
-    setCreateDialogOpen(true);
-  }, []);
+  const handleOpenEditDialog = useCallback(
+    (event: CalendarEvent) => {
+      setEventToEdit(event);
+      handleCreateOpen();
+    },
+    [handleCreateOpen]
+  );
 
   const handleCloseCreateDialog = useCallback(() => {
-    setCreateDialogOpen(false);
+    handleCreateClose();
     setEventToEdit(null);
-  }, []);
+  }, [handleCreateClose]);
 
   const handleSaveEvent = useCallback(
     (eventData: NewEventData, eventId?: string) => {
       if (eventId) {
         updateEvent(eventId, eventData);
-        setToast({ open: true, message: "Event updated successfully!", severity: "success" });
+        showToast("Event updated successfully!", "success");
       } else {
         addEvent(eventData);
         if (filters.selectedCategories.length > 0) {
           setFilters((prev) => ({
             ...prev,
-            selectedCategories: [...new Set([...prev.selectedCategories, "Custom Event"])],
+            selectedCategories: [...new Set([...prev.selectedCategories, CUSTOM_EVENT_CATEGORY])],
           }));
         }
-        setToast({ open: true, message: "Event created successfully!", severity: "success" });
+        showToast("Event created successfully!", "success");
       }
       handleCloseCreateDialog();
     },
-    [addEvent, updateEvent, filters.selectedCategories, setFilters, handleCloseCreateDialog]
+    [addEvent, updateEvent, filters.selectedCategories, setFilters, handleCloseCreateDialog, showToast]
   );
 
   const handleDeleteEvent = useCallback(
     (eventId: string) => {
       deleteEvent(eventId);
-      setToast({ open: true, message: "Event deleted successfully", severity: "success" });
+      showToast("Event deleted successfully", "success");
     },
-    [deleteEvent]
+    [deleteEvent, showToast]
   );
 
-  const handleExport = useCallback((eventsToExport: CalendarEvent[]) => {
-    downloadIcsForEvents(eventsToExport);
-    setToast({ open: true, message: `Exported ${eventsToExport.length} events!`, severity: "success" });
-  }, []);
+  const handleExport = useCallback(
+    (eventsToExport: CalendarEvent[]) => {
+      downloadIcsForEvents(eventsToExport);
+      showToast(`Exported ${eventsToExport.length} events!`, "success");
+    },
+    [showToast]
+  );
 
   return (
     <ThemeProvider theme={theme}>
@@ -161,8 +168,8 @@ function App() {
           filters={filters}
           onFilterChange={setFilters}
           onResetFilters={handleResetFilters}
-          onNewEventClick={() => setCreateDialogOpen(true)}
-          onOpenExportDialog={() => setExportDialogOpen(true)}
+          onNewEventClick={handleCreateOpen}
+          onOpenExportDialog={handleExportOpen}
           allCategories={allCategories}
           allPokemon={allPokemon}
           allBonuses={allBonuses}
@@ -192,7 +199,7 @@ function App() {
                       setFilters((prev) => ({ ...prev, startDate: selection.start, endDate: selection.end }))
                     }
                     onViewChange={setCurrentView}
-                    setToast={setToast}
+                    showToast={showToast}
                     filterStartDate={filters.startDate}
                     filterEndDate={filters.endDate}
                   />
@@ -211,20 +218,25 @@ function App() {
         settings={settings}
         onSettingsChange={handleSettingsChange}
       />
-      <CalendarOverlays
-        createDialogOpen={createDialogOpen}
-        exportDialogOpen={exportDialogOpen}
-        toast={toast}
+      <CreateEventDialog
+        open={createDialogOpen}
+        onClose={handleCloseCreateDialog}
+        onSave={handleSaveEvent}
         eventToEdit={eventToEdit}
-        combinedEvents={combinedEvents}
+      />
+      <ExportEventDialog
+        open={exportDialogOpen}
+        onClose={handleExportClose}
+        onExport={handleExport}
+        allEvents={combinedEvents}
         filteredEvents={filteredEvents}
         savedEventIds={savedEventIds}
-        onCloseCreateDialog={handleCloseCreateDialog}
-        onCloseExportDialog={() => setExportDialogOpen(false)}
-        onSaveEvent={handleSaveEvent}
-        onExport={handleExport}
-        onCloseToast={handleCloseToast}
       />
+      <Snackbar open={toast.open} autoHideDuration={6000} onClose={handleCloseToast}>
+        <Alert onClose={handleCloseToast} severity={toast.severity} sx={{ width: "100%" }}>
+          {toast.message}
+        </Alert>
+      </Snackbar>
       <ScrollToTop />
     </ThemeProvider>
   );

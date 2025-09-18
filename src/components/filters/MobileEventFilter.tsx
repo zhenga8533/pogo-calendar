@@ -22,8 +22,9 @@ import {
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import React from "react";
-import { formatTime, marks, SAVED_EVENTS_CATEGORY } from "../../config/eventFilter";
+import { marks, SAVED_EVENTS_CATEGORY } from "../../config/eventFilter";
 import type { EventFilterProps, Filters } from "../../types/filters";
+import { formatHour } from "../../utils/dateUtils";
 import AdvancedFilter from "./AdvancedFilter";
 import { CategoryCheckbox } from "./CategoryCheckbox";
 
@@ -85,7 +86,7 @@ function MobileEventFilterComponent({
           <Slider
             value={filters.timeRange}
             onChange={(_, value) => handleFilterChange("timeRange", value as number[])}
-            valueLabelFormat={formatTime}
+            valueLabelFormat={formatHour}
             valueLabelDisplay="auto"
             marks={marks}
             min={0}

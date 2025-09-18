@@ -5,14 +5,13 @@ import listPlugin from "@fullcalendar/list";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import EventBusyIcon from "@mui/icons-material/EventBusy";
-import StarIcon from "@mui/icons-material/Star";
-import StarBorderIcon from "@mui/icons-material/StarBorder";
-import { Box, IconButton, Paper, Typography, useTheme } from "@mui/material";
+import { Paper, Typography } from "@mui/material";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import type { ToastSeverity } from "../../hooks/useToast";
 import type { CalendarEvent } from "../../types/events";
-import { getColorForCategory } from "../../utils/colorUtils";
 import EventDetailDialog from "../events/EventDetailDialog";
 import EventHoverDetails from "../events/EventHoverDetails";
+import { CalendarEventContent } from "./CalendarEventContent";
 
 interface EventCalendarProps {
   events: CalendarEvent[];
@@ -32,69 +31,8 @@ interface EventCalendarProps {
   eventNotes: Record<string, string>;
   onEditEvent: (event: CalendarEvent) => void;
   onDateSelect: (selection: { start: Date | null; end: Date | null }) => void;
-  setToast: (toast: { open: boolean; message: string; severity: "success" | "error" | "info" | "warning" }) => void;
+  showToast: (message: string, severity?: ToastSeverity) => void;
 }
-
-interface CalendarEventContentProps {
-  eventInfo: EventContentArg;
-  isSaved: boolean;
-  onToggleSave: (eventId: string) => void;
-  onMouseEnter: (e: React.MouseEvent<HTMLElement>, event: CalendarEvent) => void;
-  onMouseLeave: () => void;
-}
-
-const CalendarEventContent = React.memo(function CalendarEventContent({
-  eventInfo,
-  isSaved,
-  onToggleSave,
-  onMouseEnter,
-  onMouseLeave,
-}: CalendarEventContentProps) {
-  const theme = useTheme();
-  const { category, article_url } = eventInfo.event.extendedProps;
-  const backgroundColor = getColorForCategory(category, theme.palette.mode);
-
-  return (
-    <Box
-      sx={{
-        backgroundColor,
-        color: theme.palette.getContrastText(backgroundColor),
-        borderRadius: "4px",
-        overflow: "hidden",
-        width: "100%",
-        height: "100%",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        cursor: "pointer",
-        border: `1px solid ${theme.palette.divider}`,
-        boxSizing: "border-box",
-        boxShadow: theme.shadows[1],
-        transition: "box-shadow 0.15s ease-in-out",
-        "&:hover": {
-          boxShadow: theme.shadows[4],
-        },
-      }}
-      onMouseEnter={(e) => onMouseEnter(e, eventInfo.event as unknown as CalendarEvent)}
-      onMouseLeave={onMouseLeave}
-    >
-      <Box sx={{ p: "2px 8px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-        <b>{eventInfo.timeText}</b> <i>{eventInfo.event.title}</i>
-      </Box>
-
-      <IconButton
-        size="small"
-        onClick={(e) => {
-          e.stopPropagation();
-          onToggleSave(article_url);
-        }}
-        sx={{ color: "inherit" }}
-      >
-        {isSaved ? <StarIcon fontSize="inherit" /> : <StarBorderIcon fontSize="inherit" />}
-      </IconButton>
-    </Box>
-  );
-});
 
 function EventCalendar({
   events,
@@ -114,7 +52,7 @@ function EventCalendar({
   eventNotes,
   onEditEvent,
   onDateSelect,
-  setToast,
+  showToast,
 }: EventCalendarProps) {
   const calendarRef = useRef<FullCalendar>(null);
   const [popoverState, setPopoverState] = useState<{
@@ -308,7 +246,7 @@ function EventCalendar({
         onToggleSaveEvent={onToggleSaveEvent}
         onDeleteEvent={onDeleteEvent}
         onEditEvent={onEditEvent}
-        setToast={setToast}
+        showToast={showToast}
       />
     </>
   );

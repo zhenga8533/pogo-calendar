@@ -1,4 +1,5 @@
 export const SAVED_EVENTS_CATEGORY = "Saved";
+export const CUSTOM_EVENT_CATEGORY = "Custom Event";
 
 export const initialFilters = {
   searchTerm: "",
@@ -33,13 +34,3 @@ export const categoryGroups = {
   "Major Events": ["Community Day", "Pokémon GO Fest", "Pokémon GO Tour", "Raid Day", "Raid Weekend", "Wild Area"],
   "Weekly Events": ["Raid Hour", "Pokémon Spotlight Hour", "Max Mondays"],
 };
-
-/**
- * Formats an hour value (0-24) to a 12-hour time string with AM/PM.
- */
-export function formatTime(value: number): string {
-  if (value === 24) return "12 AM";
-  const ampm = value < 12 ? "AM" : "PM";
-  const hour = value % 12 === 0 ? 12 : value % 12;
-  return `${hour} ${ampm}`;
-}

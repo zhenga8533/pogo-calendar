@@ -4,6 +4,7 @@ import { Route, Routes } from "react-router-dom";
 import { CalendarOverlays } from "./components/calendar/CalendarOverlays";
 import Footer from "./components/layout/Footer";
 import Header from "./components/layout/Header";
+import ScrollToTop from "./components/shared/ScrollToTop";
 import { SettingsDialog } from "./components/shared/SettingsDialog";
 import { useCustomEvents } from "./hooks/useCustomEvents";
 import { useEventData } from "./hooks/useEventData";
@@ -191,6 +192,7 @@ function App() {
         onExport={handleExport}
         onCloseToast={handleCloseToast}
       />
+      <ScrollToTop />
     </ThemeProvider>
   );
 }

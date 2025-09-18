@@ -21,6 +21,7 @@ import {
 } from "@mui/material";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { CUSTOM_EVENT_CATEGORY } from "../../config/eventFilter";
+import { useSettingsContext } from "../../contexts/SettingsContext";
 import type { ToastSeverity } from "../../hooks/useToast";
 import type { CalendarEvent } from "../../types/events";
 import { downloadIcsFile } from "../../utils/calendarUtils";
@@ -39,7 +40,6 @@ interface EventDetailDialogProps {
   onUpdateNote: (eventId: string, noteText: string) => void;
   eventNotes: Record<string, string>;
   onEditEvent: (event: CalendarEvent) => void;
-  hour12: boolean;
   showToast: (message: string, severity?: ToastSeverity) => void;
 }
 
@@ -70,9 +70,10 @@ function EventDetailDialog({
   onEditEvent,
   onUpdateNote,
   eventNotes,
-  hour12,
   showToast,
 }: EventDetailDialogProps) {
+  const { settings } = useSettingsContext();
+  const { hour12 } = settings;
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [noteText, setNoteText] = useState("");
   const [isDirty, setIsDirty] = useState(false);
@@ -110,7 +111,7 @@ function EventDetailDialog({
     onUpdateNote(eventDetails.id, noteText);
     setIsDirty(false);
     showToast("Note saved successfully!", "success");
-    onClose(); // Close dialog on save
+    onClose();
   }, [eventDetails, noteText, onUpdateNote, showToast, onClose]);
 
   const handleClose = () => {

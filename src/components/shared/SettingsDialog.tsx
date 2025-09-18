@@ -23,6 +23,7 @@ import {
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { dayOptions } from "../../config/eventFilter";
+import { useSettingsContext } from "../../contexts/SettingsContext";
 import { fetchTimezones } from "../../services/eventService";
 import type { Settings, ThemeSetting, Timezone } from "../../types/settings";
 
@@ -35,19 +36,12 @@ const themeOptions: { value: ThemeSetting; text: string; Icon: React.ElementType
 interface SettingsDialogProps {
   open: boolean;
   onClose: () => void;
-  settings: Settings;
   onSettingsChange: (newSettings: Partial<Settings>) => void;
 }
 
-/**
- * Renders a dialog for managing user settings with a modern UI.
- *
- * @param param0 Props for the SettingsDialog component.
- * @returns A dialog for managing user settings.
- */
-function SettingsDialogComponent({ open, onClose, settings, onSettingsChange }: SettingsDialogProps) {
+function SettingsDialogComponent({ open, onClose, onSettingsChange }: SettingsDialogProps) {
   const theme = useTheme();
-  // Initialize state with the current timezone to prevent MUI warning
+  const { settings } = useSettingsContext();
   const [timezones, setTimezones] = useState<Timezone[]>([{ text: settings.timezone, value: settings.timezone }]);
   const [loadingTimezones, setLoadingTimezones] = useState(true);
 
@@ -67,7 +61,6 @@ function SettingsDialogComponent({ open, onClose, settings, onSettingsChange }: 
           }
         } catch (error) {
           console.error("Failed to fetch timezones:", error);
-          // If fetch fails, the list already contains the user's current timezone
         } finally {
           setLoadingTimezones(false);
         }
@@ -100,7 +93,6 @@ function SettingsDialogComponent({ open, onClose, settings, onSettingsChange }: 
       </DialogTitle>
       <DialogContent dividers>
         <Stack spacing={4} sx={{ pt: 1 }}>
-          {/* Theme Section */}
           <Stack spacing={2}>
             <Typography variant="subtitle1" fontWeight={500}>
               Appearance
@@ -156,7 +148,6 @@ function SettingsDialogComponent({ open, onClose, settings, onSettingsChange }: 
             </Box>
           </Stack>
 
-          {/* Calendar Section */}
           <Stack spacing={1.5}>
             <Typography variant="subtitle1" fontWeight={500}>
               Calendar Display
@@ -179,7 +170,6 @@ function SettingsDialogComponent({ open, onClose, settings, onSettingsChange }: 
             </FormControl>
           </Stack>
 
-          {/* Time Zone Section */}
           <Stack spacing={1.5}>
             <Typography variant="subtitle1" fontWeight={500}>
               Time & Date

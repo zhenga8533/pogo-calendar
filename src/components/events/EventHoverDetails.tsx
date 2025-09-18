@@ -1,5 +1,6 @@
 import { Box, Divider, Popover, Typography } from "@mui/material";
 import { useMemo } from "react";
+import { useSettingsContext } from "../../contexts/SettingsContext";
 import type { CalendarEvent } from "../../types/events";
 import { formatDateLine } from "../../utils/dateUtils";
 import { CategoryTag } from "../shared/CategoryTag";
@@ -10,11 +11,13 @@ interface EventHoverDetailsProps {
   id: string | undefined;
   mousePosition: { top: number; left: number } | null;
   event: CalendarEvent | null;
-  hour12: boolean;
   onClose: () => void;
 }
 
-function EventHoverDetails({ open, id, mousePosition, event, hour12, onClose }: EventHoverDetailsProps) {
+function EventHoverDetails({ open, id, mousePosition, event, onClose }: EventHoverDetailsProps) {
+  const { settings } = useSettingsContext();
+  const { hour12 } = settings;
+
   const formattedStart = useMemo(
     () => (event?.start ? formatDateLine(event.start, hour12) : null),
     [event?.start, hour12]

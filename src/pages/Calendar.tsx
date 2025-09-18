@@ -1,12 +1,11 @@
 import { Box } from "@mui/material";
 import { CalendarSkeleton } from "../components/calendar/CalendarSkeleton";
 import EventCalendar from "../components/calendar/EventCalendar";
+import { useSettingsContext } from "../contexts/SettingsContext";
 import type { ToastSeverity } from "../hooks/useToast";
 import type { CalendarEvent } from "../types/events";
-import type { Settings } from "../types/settings";
 
 interface CalendarPageProps {
-  settings: Settings;
   isLoading: boolean;
   filteredEvents: CalendarEvent[];
   savedEventIds: string[];
@@ -25,8 +24,8 @@ interface CalendarPageProps {
 }
 
 function CalendarPage(props: CalendarPageProps) {
+  const { settings } = useSettingsContext(); // Get settings from context
   const {
-    settings,
     isLoading,
     filteredEvents,
     savedEventIds,

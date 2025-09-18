@@ -8,6 +8,7 @@ import Header from "./components/layout/Header";
 import ScrollToTop from "./components/shared/ScrollToTop";
 import { SettingsDialog } from "./components/shared/SettingsDialog";
 import { CUSTOM_EVENT_CATEGORY } from "./config/eventFilter";
+import { useSettingsContext } from "./contexts/SettingsContext";
 import { useCustomEvents } from "./hooks/useCustomEvents";
 import { useDialogs } from "./hooks/useDialogs";
 import { useEventData } from "./hooks/useEventData";
@@ -15,22 +16,18 @@ import { useEventNotes } from "./hooks/useEventNotes";
 import { useFilters } from "./hooks/useFilters";
 import { useNextUpcomingEvent } from "./hooks/useNextUpcomingEvent";
 import { useSavedEvents } from "./hooks/useSavedEvents";
-import { useSettings } from "./hooks/useSettings";
 import { useToast } from "./hooks/useToast";
 import CalendarPage from "./pages/Calendar";
 import FaqPage from "./pages/Faq";
 import { CalendarDarkStyles } from "./styles/calendarDarkStyles";
+import { getTheme } from "./theme";
 import type { CalendarEvent, NewEventData } from "./types/events";
 import type { Settings } from "./types/settings";
 import { downloadIcsForEvents } from "./utils/calendarUtils";
 
-/**
- * The main application component that sets up theming, layout, and state management.
- *
- * @returns The main application component.
- */
 function App() {
-  const { theme, settings, setSettings } = useSettings();
+  const { settings, setSettings } = useSettingsContext();
+  const theme = useMemo(() => getTheme(settings.theme === "auto" ? "light" : settings.theme), [settings.theme]);
   const {
     settingsOpen,
     createDialogOpen,
@@ -184,7 +181,6 @@ function App() {
               element={
                 <Container maxWidth="xl">
                   <CalendarPage
-                    settings={settings}
                     isLoading={loading}
                     filteredEvents={filteredEvents}
                     savedEventIds={savedEventIds}
@@ -212,12 +208,7 @@ function App() {
         <Footer />
       </Box>
 
-      <SettingsDialog
-        open={settingsOpen}
-        onClose={handleSettingsClose}
-        settings={settings}
-        onSettingsChange={handleSettingsChange}
-      />
+      <SettingsDialog open={settingsOpen} onClose={handleSettingsClose} onSettingsChange={handleSettingsChange} />
       <CreateEventDialog
         open={createDialogOpen}
         onClose={handleCloseCreateDialog}

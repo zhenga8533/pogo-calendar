@@ -179,17 +179,15 @@ function HeaderComponent(props: HeaderProps) {
                 </Button>
               </Badge>
             </Tooltip>
-            <Tooltip title="Filters">
-              <Badge badgeContent={activeFilterCount} color="primary">
-                <Button
-                  color="inherit"
-                  startIcon={<TuneIcon />}
-                  onClick={onSettingsClick}
-                  sx={{ "&:hover": { backgroundColor: "action.hover" } }}
-                >
-                  Settings
-                </Button>
-              </Badge>
+            <Tooltip title="Settings">
+              <Button
+                color="inherit"
+                startIcon={<TuneIcon />}
+                onClick={onSettingsClick}
+                sx={{ "&:hover": { backgroundColor: "action.hover" } }}
+              >
+                Settings
+              </Button>
             </Tooltip>
           </Stack>
         </Toolbar>

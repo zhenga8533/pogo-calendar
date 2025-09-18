@@ -26,7 +26,7 @@ function EventFilter(props: EventFilterProps) {
     setAnchorEl(null);
   }, []);
 
-  // Handler to update filters.
+  // Handler to update a specific filter field.
   const handleFilterChange = useCallback(
     (field: keyof Filters, value: any) => {
       onFilterChange({ ...filters, [field]: value });
@@ -34,7 +34,7 @@ function EventFilter(props: EventFilterProps) {
     [filters, onFilterChange]
   );
 
-  // Handler to toggle category selection.
+  // Handler specifically for toggling a category's selection.
   const handleCategoryChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const { name: category, checked } = event.target;
@@ -49,14 +49,13 @@ function EventFilter(props: EventFilterProps) {
     [filters, handleFilterChange]
   );
 
-  // Handler to select all categories.
+  // Handler to select all available categories.
   const handleSelectAll = useCallback(() => {
-    // Include the special "Saved" category along with all dynamic categories.
     const all = [SAVED_EVENTS_CATEGORY, ...allCategories];
     handleFilterChange("selectedCategories", all);
   }, [allCategories, handleFilterChange]);
 
-  // Handler to clear all category selections.
+  // Handler to clear all selected categories.
   const handleClearAll = useCallback(() => {
     handleFilterChange("selectedCategories", []);
   }, [handleFilterChange]);
@@ -72,7 +71,6 @@ function EventFilter(props: EventFilterProps) {
     handleClearAll,
   };
 
-  // Render the appropriate filter component based on the device type.
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       {isMobile ? <MobileEventFilter {...sharedProps} /> : <DesktopEventFilter {...sharedProps} />}

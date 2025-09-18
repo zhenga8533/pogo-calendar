@@ -1,4 +1,3 @@
-import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import SyncIcon from "@mui/icons-material/Sync";
 import TuneIcon from "@mui/icons-material/Tune";
@@ -25,6 +24,7 @@ import type { CalendarEvent } from "../../types/events";
 import type { EventFilterProps } from "../../types/filters";
 import EventFilter from "../filters/EventFilter";
 import NextEventTracker from "../shared/NextEventTracker";
+import LogoIcon from "/icon.svg";
 
 const LastUpdatedDisplay = React.memo(function LastUpdatedDisplay({
   onRefresh,
@@ -141,7 +141,16 @@ function HeaderComponent(props: HeaderProps) {
             alignItems="center"
             sx={{ cursor: "pointer", textDecoration: "none", color: "inherit", flexShrink: 0 }}
           >
-            <CalendarMonthIcon sx={{ mr: 1.5 }} />
+            <Box
+              component="img"
+              src={LogoIcon}
+              alt="PoGo Calendar Logo"
+              sx={{
+                mr: 1.5,
+                height: 28,
+                width: 28,
+              }}
+            />
             <Typography variant="h6" component="div">
               PoGo Event Calendar
             </Typography>

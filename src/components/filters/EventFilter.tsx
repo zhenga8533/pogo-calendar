@@ -10,6 +10,8 @@ import {
   AccordionSummary,
   Box,
   Button,
+  Card,
+  CardContent,
   Checkbox,
   Divider,
   FormControlLabel,
@@ -31,18 +33,14 @@ import { formatHour } from "../../utils/dateUtils";
 import AdvancedFilter from "./AdvancedFilter";
 import { ColorKeyLabel } from "./ColorKeyLabel";
 
-// --- Merged CategoryCheckbox Component ---
+// --- Reusable CategoryCheckbox Component ---
 interface CategoryCheckboxProps {
   category: string;
   isChecked: boolean;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-const CategoryCheckbox = React.memo(function CategoryCheckbox({
-  category,
-  isChecked,
-  onChange,
-}: CategoryCheckboxProps) {
+const CategoryCheckbox = React.memo(({ category, isChecked, onChange }: CategoryCheckboxProps) => {
   return (
     <FormControlLabel
       key={category}
@@ -51,15 +49,16 @@ const CategoryCheckbox = React.memo(function CategoryCheckbox({
     />
   );
 });
-// ------------------------------------
 
-const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
-  <Stack spacing={2}>
-    <Typography variant="overline" color="text.secondary">
+const FilterSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
+  <Box sx={{ mb: 3 }}>
+    <Typography variant="h6" component="h3" fontWeight="bold" gutterBottom>
       {title}
     </Typography>
-    {children}
-  </Stack>
+    <Stack spacing={2} sx={{ mt: 1 }}>
+      {children}
+    </Stack>
+  </Box>
 );
 
 function EventFilter(props: EventFilterProps) {
@@ -100,245 +99,205 @@ function EventFilter(props: EventFilterProps) {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      {isMobile ? (
-        // Mobile Layout
-        <Stack spacing={4}>
-          <Section title="Search & Date">
-            <TextField
-              fullWidth
-              label="Search by Event Title"
-              variant="filled"
-              value={filters.searchTerm}
-              onChange={(e) => handleFilterChange("searchTerm", e.target.value)}
-            />
-            <DatePicker
-              label="Start Date"
-              value={filters.startDate}
-              onChange={(date) => handleFilterChange("startDate", date)}
-              slotProps={{ textField: { variant: "filled" } }}
-            />
-            <DatePicker
-              label="End Date"
-              value={filters.endDate}
-              onChange={(date) => handleFilterChange("endDate", date)}
-              slotProps={{ textField: { variant: "filled" } }}
-            />
-          </Section>
-
-          <Section title="Time & Categories">
-            <Box sx={{ px: 1 }}>
-              <Typography gutterBottom variant="body2" color="text.secondary">
-                Time of Day
-              </Typography>
-              <Slider
-                value={filters.timeRange}
-                onChange={(_, value) => handleFilterChange("timeRange", value as number[])}
-                valueLabelFormat={formatHour}
-                valueLabelDisplay="auto"
-                marks={marks}
-                min={0}
-                max={24}
-                step={1}
+      <Card
+        sx={{
+          width: { xs: "100%", md: "450px" },
+          borderRadius: 2,
+          boxShadow: 3,
+        }}
+      >
+        <CardContent sx={{ p: { xs: 3, md: 4 } }}>
+          <Stack spacing={4}>
+            {/* Search & Filter Section */}
+            <FilterSection title="Search & Filter">
+              <TextField
+                fullWidth
+                label="Search by Event Title"
+                variant="outlined"
+                value={filters.searchTerm}
+                onChange={(e) => handleFilterChange("searchTerm", e.target.value)}
               />
-            </Box>
+              <Stack
+                direction={{ xs: "column", md: "row" }}
+                spacing={2}
+                sx={{
+                  "& .MuiFormControl-root": { width: "100%" },
+                }}
+              >
+                <DatePicker
+                  label="Start Date"
+                  value={filters.startDate}
+                  onChange={(date) => handleFilterChange("startDate", date)}
+                  slotProps={{ textField: { variant: "outlined" } }}
+                />
+                <DatePicker
+                  label="End Date"
+                  value={filters.endDate}
+                  onChange={(date) => handleFilterChange("endDate", date)}
+                  slotProps={{ textField: { variant: "outlined" } }}
+                />
+              </Stack>
+              <Box sx={{ px: 1, mt: 2 }}>
+                <Typography gutterBottom variant="body2" color="text.secondary">
+                  Time of Day
+                </Typography>
+                <Slider
+                  value={filters.timeRange}
+                  onChange={(_, value) => handleFilterChange("timeRange", value as number[])}
+                  valueLabelFormat={formatHour}
+                  valueLabelDisplay="auto"
+                  marks={marks}
+                  min={0}
+                  max={24}
+                  step={1}
+                />
+              </Box>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={filters.showActiveOnly}
+                    onChange={(e) => handleFilterChange("showActiveOnly", e.target.checked)}
+                  />
+                }
+                label="Show Active Events Only"
+                sx={{ ml: -0.5 }}
+              />
+            </FilterSection>
+
+            {/* Categories Section */}
+            <Divider />
+            <FilterSection title="Categories">
+              <Stack direction="row" justifyContent="space-between" alignItems="center">
+                <Typography variant="body2" color="text.secondary">
+                  Select categories to display
+                </Typography>
+                <Stack direction="row" spacing={1}>
+                  <Button size="small" onClick={handleSelectAll}>
+                    Select All
+                  </Button>
+                  <Button size="small" onClick={handleClearAll}>
+                    Clear All
+                  </Button>
+                </Stack>
+              </Stack>
+              <Stack spacing={1}>
+                <Accordion defaultExpanded={isMobile}>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    <Typography variant="body1" fontWeight="bold">
+                      Saved Events
+                    </Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <FormGroup>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={filters.selectedCategories.includes(SAVED_EVENTS_CATEGORY)}
+                            onChange={handleCategoryChange}
+                            name={SAVED_EVENTS_CATEGORY}
+                            icon={<StarBorderIcon />}
+                            checkedIcon={<StarIcon />}
+                          />
+                        }
+                        label={<ColorKeyLabel category="Saved Events" />}
+                      />
+                    </FormGroup>
+                  </AccordionDetails>
+                </Accordion>
+                {Object.entries(categoryGroups).map(([groupName, categories]) => {
+                  const groupCategories = categories.filter((c) => allCategories.includes(c));
+                  if (groupCategories.length === 0) {
+                    return null;
+                  }
+                  return (
+                    <Accordion key={groupName} defaultExpanded={isMobile}>
+                      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                        <Typography variant="body1" fontWeight="bold">
+                          {groupName}
+                        </Typography>
+                      </AccordionSummary>
+                      <AccordionDetails>
+                        <FormGroup>
+                          {groupCategories.map((category) => (
+                            <CategoryCheckbox
+                              key={category}
+                              category={category}
+                              isChecked={filters.selectedCategories.includes(category)}
+                              onChange={handleCategoryChange}
+                            />
+                          ))}
+                        </FormGroup>
+                      </AccordionDetails>
+                    </Accordion>
+                  );
+                })}
+                {otherCategories.length > 0 && (
+                  <Accordion defaultExpanded={isMobile}>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                      <Typography variant="body1" fontWeight="bold">
+                        Other Categories
+                      </Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <FormGroup>
+                        {otherCategories.map((category) => (
+                          <CategoryCheckbox
+                            key={category}
+                            category={category}
+                            isChecked={filters.selectedCategories.includes(category)}
+                            onChange={handleCategoryChange}
+                          />
+                        ))}
+                      </FormGroup>
+                    </AccordionDetails>
+                  </Accordion>
+                )}
+              </Stack>
+            </FilterSection>
+
+            {/* Advanced Section */}
+            <Divider />
             <Accordion>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <Typography>Categories ({filters.selectedCategories.length})</Typography>
+                <Typography variant="h6" component="h3" fontWeight="bold">
+                  Advanced Filters
+                </Typography>
               </AccordionSummary>
               <AccordionDetails>
-                <FormGroup>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={filters.selectedCategories.includes(SAVED_EVENTS_CATEGORY)}
-                        onChange={handleCategoryChange}
-                        name={SAVED_EVENTS_CATEGORY}
-                        icon={<StarBorderIcon />}
-                        checkedIcon={<StarIcon />}
-                      />
-                    }
-                    label="Saved Events"
-                  />
-                  <Divider sx={{ my: 1 }} />
-                  {allCategories.map((category) => (
-                    <CategoryCheckbox
-                      key={category}
-                      category={category}
-                      isChecked={filters.selectedCategories.includes(category)}
-                      onChange={handleCategoryChange}
-                    />
-                  ))}
-                </FormGroup>
+                <AdvancedFilter
+                  filters={filters}
+                  handleFilterChange={handleFilterChange}
+                  allPokemon={props.allPokemon}
+                  allBonuses={props.allBonuses}
+                />
               </AccordionDetails>
             </Accordion>
-          </Section>
-          <Accordion>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Typography>Advanced</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              <AdvancedFilter
-                filters={filters}
-                handleFilterChange={handleFilterChange}
-                allPokemon={props.allPokemon}
-                allBonuses={props.allBonuses}
-              />
-            </AccordionDetails>
-          </Accordion>
 
-          <Section title="General">
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={filters.showActiveOnly}
-                  onChange={(e) => handleFilterChange("showActiveOnly", e.target.checked)}
-                />
-              }
-              label="Show Active Events Only"
-              labelPlacement="start"
-              sx={{ justifyContent: "space-between", ml: 0 }}
-            />
-          </Section>
+            <Divider />
 
-          <Stack spacing={2}>
-            <Button variant="outlined" onClick={onOpenExportDialog} startIcon={<FileDownloadIcon />}>
-              Export
-            </Button>
-            <Button variant="contained" onClick={onNewEventClick} startIcon={<AddCircleOutlineIcon />}>
-              New Event
-            </Button>
-            <Button variant="outlined" onClick={onResetFilters} startIcon={<ReplayIcon />}>
-              Reset All Filters
-            </Button>
+            {/* Action Buttons */}
+            <Stack
+              direction={{ xs: "column", md: "row" }}
+              spacing={2}
+              sx={{
+                justifyContent: { xs: "flex-start", md: "flex-end" },
+                flexWrap: "wrap",
+                mt: 3,
+              }}
+            >
+              <Button variant="outlined" startIcon={<ReplayIcon />} onClick={onResetFilters}>
+                Reset
+              </Button>
+              <Button variant="outlined" startIcon={<FileDownloadIcon />} onClick={onOpenExportDialog}>
+                Export
+              </Button>
+              <Button variant="contained" startIcon={<AddCircleOutlineIcon />} onClick={onNewEventClick}>
+                New Event
+              </Button>
+            </Stack>
           </Stack>
-        </Stack>
-      ) : (
-        // Desktop Layout
-        <Stack spacing={4} sx={{ p: 3, width: { xs: "280px", md: "550px" } }}>
-          <Section title="Search & Filter">
-            <TextField
-              fullWidth
-              label="Search by Event Title"
-              variant="filled"
-              value={filters.searchTerm}
-              onChange={(e) => handleFilterChange("searchTerm", e.target.value)}
-            />
-            <Stack direction="row" spacing={2}>
-              <DatePicker
-                label="Start Date"
-                value={filters.startDate}
-                onChange={(date) => handleFilterChange("startDate", date)}
-                slotProps={{ textField: { variant: "filled" } }}
-                sx={{ width: "100%" }}
-              />
-              <DatePicker
-                label="End Date"
-                value={filters.endDate}
-                onChange={(date) => handleFilterChange("endDate", date)}
-                slotProps={{ textField: { variant: "filled" } }}
-                sx={{ width: "100%" }}
-              />
-            </Stack>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={filters.showActiveOnly}
-                  onChange={(e) => handleFilterChange("showActiveOnly", e.target.checked)}
-                />
-              }
-              label="Show Active Events Only"
-              sx={{ justifyContent: "space-between", ml: 0 }}
-              labelPlacement="start"
-            />
-          </Section>
-          <Divider />
-          <Section title="Categories">
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
-              <Typography variant="body2" color="text.secondary">
-                Select categories to display
-              </Typography>
-              <Stack direction="row" spacing={1}>
-                <Button size="small" onClick={handleSelectAll}>
-                  Select All
-                </Button>
-                <Button size="small" onClick={handleClearAll}>
-                  Clear All
-                </Button>
-              </Stack>
-            </Stack>
-            <Stack direction={{ xs: "column", md: "row" }} spacing={{ xs: 1, md: 4 }}>
-              <FormGroup>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={filters.selectedCategories.includes(SAVED_EVENTS_CATEGORY)}
-                      onChange={handleCategoryChange}
-                      name={SAVED_EVENTS_CATEGORY}
-                      icon={<StarBorderIcon />}
-                      checkedIcon={<StarIcon />}
-                    />
-                  }
-                  label={<ColorKeyLabel category={"Saved Events"} />}
-                />
-                {Object.entries(categoryGroups).map(([groupName, categories]) => (
-                  <React.Fragment key={groupName}>
-                    {categories
-                      .filter((c) => allCategories.includes(c))
-                      .map((category) => (
-                        <CategoryCheckbox
-                          key={category}
-                          category={category}
-                          isChecked={filters.selectedCategories.includes(category)}
-                          onChange={handleCategoryChange}
-                        />
-                      ))}
-                  </React.Fragment>
-                ))}
-              </FormGroup>
-              {otherCategories.length > 0 && (
-                <FormGroup>
-                  {otherCategories.map((category) => (
-                    <CategoryCheckbox
-                      key={category}
-                      category={category}
-                      isChecked={filters.selectedCategories.includes(category)}
-                      onChange={handleCategoryChange}
-                    />
-                  ))}
-                </FormGroup>
-              )}
-            </Stack>
-          </Section>
-          <Divider />
-          <Accordion sx={{ "&:before": { display: "none" } }}>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Typography variant="overline" color="text.secondary">
-                Advanced
-              </Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              <AdvancedFilter
-                filters={filters}
-                handleFilterChange={handleFilterChange}
-                allPokemon={props.allPokemon}
-                allBonuses={props.allBonuses}
-              />
-            </AccordionDetails>
-          </Accordion>
-          <Divider />
-          <Stack direction="row" spacing={2} justifyContent="flex-end">
-            <Button variant="outlined" onClick={onOpenExportDialog} startIcon={<FileDownloadIcon />}>
-              Export
-            </Button>
-            <Button variant="contained" onClick={onNewEventClick} startIcon={<AddCircleOutlineIcon />}>
-              New Event
-            </Button>
-            <Button variant="outlined" onClick={onResetFilters} startIcon={<ReplayIcon />}>
-              Reset
-            </Button>
-          </Stack>
-        </Stack>
-      )}
+        </CardContent>
+      </Card>
     </LocalizationProvider>
   );
 }

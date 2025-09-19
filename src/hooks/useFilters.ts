@@ -13,6 +13,56 @@ const defaultAllFilters: Record<string, Filters> = {
   listWeek: initialFilters,
 };
 
+// --- Helper functions for filtering logic ---
+const passesSavedFilter = (event: CalendarEvent, isSavedFilterActive: boolean, savedEventIds: string[]) =>
+  !isSavedFilterActive || savedEventIds.includes(event.extendedProps.article_url);
+
+const passesCategoryFilter = (event: CalendarEvent, otherSelectedCategories: string[]) =>
+  otherSelectedCategories.length === 0 || otherSelectedCategories.includes(event.extendedProps.category);
+
+const passesSearchFilter = (event: CalendarEvent, searchTerm: string) =>
+  event.title.toLowerCase().includes(searchTerm.toLowerCase());
+
+const passesDateFilter = (event: CalendarEvent, startDate: Date | null, endDate: Date | null) => {
+  const eventStart = new Date(event.start!);
+  const eventEnd = new Date(event.end!);
+  return !((startDate && eventEnd < startDate) || (endDate && eventStart > endDate));
+};
+
+const passesTimeFilter = (event: CalendarEvent, timeRange: number[]) => {
+  const eventStart = new Date(event.start!);
+  const eventEnd = new Date(event.end!);
+  const [startHour, endHour] = timeRange;
+  const eventDurationHours = (eventEnd.getTime() - eventStart.getTime()) / (1000 * 60 * 60);
+  const isAllDayEvent = eventDurationHours >= 24;
+  const eventStartHour = eventStart.getHours();
+  return isAllDayEvent || (eventStartHour >= startHour && eventStartHour < endHour);
+};
+
+const passesActiveOnlyFilter = (event: CalendarEvent, showActiveOnly: boolean) => {
+  if (!showActiveOnly) return true;
+  const now = new Date();
+  const eventStart = new Date(event.start!);
+  const eventEnd = new Date(event.end!);
+  return now >= eventStart && now <= eventEnd;
+};
+
+const passesPokemonFilter = (event: CalendarEvent, pokemonSearch: string[]) =>
+  pokemonSearch.length === 0 ||
+  pokemonSearch.every((pokemon: string) =>
+    [
+      ...(event.extendedProps.features ?? []),
+      ...(event.extendedProps.spawns ?? []),
+      ...(event.extendedProps.raids ?? []),
+      ...(event.extendedProps.shiny ?? []),
+      ...(event.extendedProps.shadow ?? []),
+    ].includes(pokemon)
+  );
+
+const passesBonusFilter = (event: CalendarEvent, bonusSearch: string[]) =>
+  bonusSearch.length === 0 || bonusSearch.every((bonus: string) => (event.extendedProps.bonuses ?? []).includes(bonus));
+// ---------------------------------------------
+
 export function useFilters(allEvents: CalendarEvent[], savedEventIds: string[]) {
   const [currentView, setCurrentView] = useState("dayGridMonth");
 
@@ -70,58 +120,21 @@ export function useFilters(allEvents: CalendarEvent[], savedEventIds: string[]) 
       pokemonSearch,
       bonusSearch,
     } = filtersForCurrentView;
+
     const isSavedFilterActive = selectedCategories.includes(SAVED_EVENTS_CATEGORY);
     const otherSelectedCategories = selectedCategories.filter((c: string) => c !== SAVED_EVENTS_CATEGORY);
-    const now = new Date();
 
-    return allEvents.filter((event) => {
-      const passesSavedFilter = !isSavedFilterActive || savedEventIds.includes(event.extendedProps.article_url);
-
-      const passesCategoryFilter =
-        otherSelectedCategories.length === 0 || otherSelectedCategories.includes(event.extendedProps.category);
-
-      const passesSearchFilter = event.title.toLowerCase().includes(searchTerm.toLowerCase());
-
-      const eventStart = new Date(event.start!);
-      const eventEnd = new Date(event.end!);
-      const passesDateFilter = !((startDate && eventEnd < startDate) || (endDate && eventStart > endDate));
-
-      const [startHour, endHour] = timeRange;
-      const eventDurationHours = (eventEnd.getTime() - eventStart.getTime()) / (1000 * 60 * 60);
-      const isAllDayEvent = eventDurationHours >= 24;
-      const eventStartHour = eventStart.getHours();
-
-      const passesTimeFilter = isAllDayEvent || (eventStartHour >= startHour && eventStartHour < endHour);
-
-      const passesActiveOnlyFilter = !showActiveOnly || (now >= eventStart && now <= eventEnd);
-
-      const passesPokemonFilter =
-        pokemonSearch.length === 0 ||
-        pokemonSearch.every((pokemon: string) =>
-          [
-            ...(event.extendedProps.features ?? []),
-            ...(event.extendedProps.spawns ?? []),
-            ...(event.extendedProps.raids ?? []),
-            ...(event.extendedProps.shiny ?? []),
-            ...(event.extendedProps.shadow ?? []),
-          ].includes(pokemon)
-        );
-
-      const passesBonusFilter =
-        bonusSearch.length === 0 ||
-        bonusSearch.every((bonus: string) => (event.extendedProps.bonuses ?? []).includes(bonus));
-
-      return (
-        passesSavedFilter &&
-        passesCategoryFilter &&
-        passesSearchFilter &&
-        passesDateFilter &&
-        passesTimeFilter &&
-        passesActiveOnlyFilter &&
-        passesPokemonFilter &&
-        passesBonusFilter
-      );
-    });
+    return allEvents.filter(
+      (event) =>
+        passesSavedFilter(event, isSavedFilterActive, savedEventIds) &&
+        passesCategoryFilter(event, otherSelectedCategories) &&
+        passesSearchFilter(event, searchTerm) &&
+        passesDateFilter(event, startDate, endDate) &&
+        passesTimeFilter(event, timeRange) &&
+        passesActiveOnlyFilter(event, showActiveOnly) &&
+        passesPokemonFilter(event, pokemonSearch) &&
+        passesBonusFilter(event, bonusSearch)
+    );
   }, [allEvents, allFilters, currentView, savedEventIds]);
 
   return {

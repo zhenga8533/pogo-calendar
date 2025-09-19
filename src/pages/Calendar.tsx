@@ -1,45 +1,31 @@
 import { Box } from "@mui/material";
 import { CalendarSkeleton } from "../components/calendar/CalendarSkeleton";
 import EventCalendar from "../components/calendar/EventCalendar";
+import { useCalendarContext } from "../contexts/CalendarContext";
 import type { ToastSeverity } from "../hooks/useToast";
 import type { CalendarEvent } from "../types/events";
 
 interface CalendarPageProps {
   isLoading: boolean;
-  filteredEvents: CalendarEvent[];
-  savedEventIds: string[];
-  eventNotes: Record<string, string>;
-  selectedEvent: CalendarEvent | null;
-  onSelectEvent: (event: CalendarEvent | null) => void;
-  onToggleSaveEvent: (eventId: string) => void;
-  onUpdateNote: (eventId: string, noteText: string) => void;
-  onDeleteEvent: (eventId: string) => void;
   onEditEvent: (event: CalendarEvent) => void;
-  onDateSelect: (selection: { start: Date | null; end: Date | null }) => void;
-  onViewChange: (viewName: string) => void;
+  onDeleteEvent: (eventId: string) => void;
   showToast: (message: string, severity?: ToastSeverity) => void;
-  filterStartDate: Date | null;
-  filterEndDate: Date | null;
 }
 
 function CalendarPage(props: CalendarPageProps) {
+  const { isLoading, onEditEvent, onDeleteEvent, showToast } = props;
   const {
-    isLoading,
     filteredEvents,
     savedEventIds,
     eventNotes,
     selectedEvent,
-    onSelectEvent,
-    onToggleSaveEvent,
-    onUpdateNote,
-    onDeleteEvent,
-    onEditEvent,
-    onDateSelect,
-    onViewChange,
-    showToast,
-    filterStartDate,
-    filterEndDate,
-  } = props;
+    setSelectedEvent,
+    handleToggleSaveEvent,
+    updateNote,
+    setFilters,
+    setCurrentView,
+    filters,
+  } = useCalendarContext();
 
   if (isLoading) {
     return <CalendarSkeleton isMobile={false} />;
@@ -51,17 +37,19 @@ function CalendarPage(props: CalendarPageProps) {
         events={filteredEvents}
         isMobile={false}
         savedEventIds={savedEventIds}
-        filterStartDate={filterStartDate}
-        filterEndDate={filterEndDate}
+        filterStartDate={filters.startDate}
+        filterEndDate={filters.endDate}
         selectedEvent={selectedEvent}
-        onSelectEvent={onSelectEvent}
-        onToggleSaveEvent={onToggleSaveEvent}
-        onViewChange={onViewChange}
-        onUpdateNote={onUpdateNote}
+        onSelectEvent={setSelectedEvent}
+        onToggleSaveEvent={handleToggleSaveEvent}
+        onViewChange={setCurrentView}
+        onUpdateNote={updateNote}
         eventNotes={eventNotes}
         onDeleteEvent={onDeleteEvent}
         onEditEvent={onEditEvent}
-        onDateSelect={onDateSelect}
+        onDateSelect={(selection) =>
+          setFilters((prev: any) => ({ ...prev, startDate: selection.start, endDate: selection.end }))
+        }
         showToast={showToast}
       />
     </Box>

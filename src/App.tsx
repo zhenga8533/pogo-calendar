@@ -27,31 +27,38 @@ function App() {
   const { activeDialog, openDialog, closeDialog } = useDialogs();
   const { toast, showToast, handleCloseToast } = useToast();
   const [eventToEdit, setEventToEdit] = useState<CalendarEvent | null>(null);
-  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
 
   const {
     loading: eventsLoading,
     filters,
     setFilters,
     handleResetFilters,
-    setCurrentView,
     filteredEvents,
     allEvents,
     savedEventIds,
-    eventNotes,
     allCategories,
     allPokemon,
     allBonuses,
     refetchEvents,
-    handleToggleSaveEvent,
     addEvent,
     updateEvent,
     deleteEvent,
-    updateNote,
+    setSelectedEvent,
   } = useCalendarContext();
 
   const { lastUpdated, loading: lastUpdatedLoading, error, refetch: refetchLastUpdated } = useLastUpdated();
   const nextUpcomingEvent = useNextUpcomingEvent(filteredEvents);
+
+  const activeFilterCount = useMemo(() => {
+    return (
+      (filters.searchTerm ? 1 : 0) +
+      filters.selectedCategories.length +
+      (filters.startDate ? 1 : 0) +
+      (filters.endDate ? 1 : 0) +
+      (filters.showActiveOnly ? 1 : 0) +
+      (filters.timeRange[0] > 0 || filters.timeRange[1] < 24 ? 1 : 0)
+    );
+  }, [filters]);
 
   const handleSettingsChange = useCallback(
     (newSettings: Partial<Settings>) => {
@@ -134,6 +141,7 @@ function App() {
           lastUpdated={lastUpdated}
           lastUpdatedLoading={lastUpdatedLoading}
           lastUpdatedError={error}
+          activeFilterCount={activeFilterCount}
         />
         <Box component="main" sx={{ flexGrow: 1, p: 3, backgroundColor: "background.default" }}>
           <Routes>
@@ -143,22 +151,9 @@ function App() {
                 <Container maxWidth="xl">
                   <CalendarPage
                     isLoading={eventsLoading}
-                    filteredEvents={filteredEvents}
-                    savedEventIds={savedEventIds}
-                    eventNotes={eventNotes}
-                    selectedEvent={selectedEvent}
-                    onSelectEvent={setSelectedEvent}
-                    onToggleSaveEvent={handleToggleSaveEvent}
-                    onUpdateNote={updateNote}
-                    onDeleteEvent={handleDeleteEvent}
                     onEditEvent={handleOpenEditDialog}
-                    onDateSelect={(selection) =>
-                      setFilters((prev: any) => ({ ...prev, startDate: selection.start, endDate: selection.end }))
-                    }
-                    onViewChange={setCurrentView}
+                    onDeleteEvent={handleDeleteEvent}
                     showToast={showToast}
-                    filterStartDate={filters.startDate}
-                    filterEndDate={filters.endDate}
                   />
                 </Container>
               }

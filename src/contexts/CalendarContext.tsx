@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useMemo } from "react";
+import { createContext, useCallback, useContext, useMemo, useState } from "react";
 import { CUSTOM_EVENT_CATEGORY } from "../config/constants";
 import { useCustomEvents } from "../hooks/useCustomEvents";
 import { useEventData } from "../hooks/useEventData";
@@ -21,6 +21,8 @@ interface CalendarContextType {
   allCategories: string[];
   allPokemon: string[];
   allBonuses: string[];
+  selectedEvent: CalendarEvent | null;
+  setSelectedEvent: (event: CalendarEvent | null) => void;
   refetchEvents: () => Promise<void>;
   handleToggleSaveEvent: (eventId: string) => void;
   addEvent: (eventData: NewEventData) => void;
@@ -33,6 +35,7 @@ const CalendarContext = createContext<CalendarContextType | undefined>(undefined
 
 export function CalendarProvider({ children }: { children: React.ReactNode }) {
   const { settings } = useSettingsContext();
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const { allEvents: apiEvents, loading, refetch: refetchEvents } = useEventData(settings.timezone);
   const { savedEventIds, handleToggleSaveEvent } = useSavedEvents();
   const { customEvents, addEvent, updateEvent, deleteEvent } = useCustomEvents();
@@ -94,6 +97,8 @@ export function CalendarProvider({ children }: { children: React.ReactNode }) {
       allCategories,
       allPokemon,
       allBonuses,
+      selectedEvent,
+      setSelectedEvent,
       refetchEvents,
       handleToggleSaveEvent,
       addEvent: handleAddEvent,
@@ -114,6 +119,7 @@ export function CalendarProvider({ children }: { children: React.ReactNode }) {
       allCategories,
       allPokemon,
       allBonuses,
+      selectedEvent,
       refetchEvents,
       handleToggleSaveEvent,
       handleAddEvent,

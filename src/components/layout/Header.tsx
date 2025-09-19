@@ -70,6 +70,7 @@ type HeaderProps = Omit<EventFilterProps, "isMobile"> & {
   lastUpdated: string | null;
   lastUpdatedLoading: boolean;
   lastUpdatedError: string | null;
+  activeFilterCount: number;
 };
 
 function HeaderComponent(props: HeaderProps) {
@@ -82,6 +83,7 @@ function HeaderComponent(props: HeaderProps) {
     lastUpdated,
     lastUpdatedLoading,
     lastUpdatedError,
+    activeFilterCount,
     ...filterProps
   } = props;
   const theme = useTheme();
@@ -106,14 +108,6 @@ function HeaderComponent(props: HeaderProps) {
 
   const filterContent = <EventFilter {...filterProps} isMobile={isMobile} />;
   const open = Boolean(filterAnchorEl);
-
-  const activeFilterCount =
-    (props.filters.searchTerm ? 1 : 0) +
-    props.filters.selectedCategories.length +
-    (props.filters.startDate ? 1 : 0) +
-    (props.filters.endDate ? 1 : 0) +
-    (props.filters.showActiveOnly ? 1 : 0) +
-    (props.filters.timeRange[0] > 0 || props.filters.timeRange[1] < 24 ? 1 : 0);
 
   return (
     <>

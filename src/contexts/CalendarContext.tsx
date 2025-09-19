@@ -10,6 +10,7 @@ import { useSettingsContext } from "./SettingsContext";
 
 interface CalendarContextType {
   loading: boolean;
+  error: string | null;
   filters: any;
   setFilters: (filters: any) => void;
   handleResetFilters: () => void;
@@ -36,7 +37,7 @@ const CalendarContext = createContext<CalendarContextType | undefined>(undefined
 export function CalendarProvider({ children }: { children: React.ReactNode }) {
   const { settings } = useSettingsContext();
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
-  const { allEvents: apiEvents, loading, refetch: refetchEvents } = useEventData(settings.timezone);
+  const { allEvents: apiEvents, loading, error, refetch: refetchEvents } = useEventData(settings.timezone);
   const { savedEventIds, handleToggleSaveEvent } = useSavedEvents();
   const { customEvents, addEvent, updateEvent, deleteEvent } = useCustomEvents();
   const { eventNotes, updateNote } = useEventNotes();
@@ -86,6 +87,7 @@ export function CalendarProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo(
     () => ({
       loading,
+      error,
       filters,
       setFilters,
       handleResetFilters,
@@ -108,6 +110,7 @@ export function CalendarProvider({ children }: { children: React.ReactNode }) {
     }),
     [
       loading,
+      error,
       filters,
       setFilters,
       handleResetFilters,

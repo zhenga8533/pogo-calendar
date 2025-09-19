@@ -1,4 +1,5 @@
-import { Box } from "@mui/material";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import { Box, Paper, Typography } from "@mui/material";
 import { CalendarSkeleton } from "../components/calendar/CalendarSkeleton";
 import EventCalendar from "../components/calendar/EventCalendar";
 import { useCalendarContext } from "../contexts/CalendarContext";
@@ -15,6 +16,7 @@ interface CalendarPageProps {
 function CalendarPage(props: CalendarPageProps) {
   const { isLoading, onEditEvent, onDeleteEvent, showToast } = props;
   const {
+    error,
     filteredEvents,
     savedEventIds,
     eventNotes,
@@ -29,6 +31,29 @@ function CalendarPage(props: CalendarPageProps) {
 
   if (isLoading) {
     return <CalendarSkeleton isMobile={false} />;
+  }
+
+  if (error) {
+    return (
+      <Paper
+        elevation={3}
+        sx={{
+          p: { xs: 2, md: 4 },
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "60vh",
+          textAlign: "center",
+        }}
+      >
+        <ErrorOutlineIcon sx={{ fontSize: 60, color: "error.main", mb: 2 }} />
+        <Typography variant="h5" component="p" color="error.main" gutterBottom>
+          Failed to Load Events
+        </Typography>
+        <Typography color="text.secondary">{error}</Typography>
+      </Paper>
+    );
   }
 
   return (

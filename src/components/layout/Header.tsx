@@ -108,7 +108,7 @@ function HeaderComponent(props: HeaderProps) {
     setDrawerOpen(false);
   };
 
-  const filterContent = <EventFilter {...filterProps} isMobile={isMobile} />;
+  const filterContent = <EventFilter {...filterProps} />;
   const open = Boolean(filterAnchorEl);
 
   return (

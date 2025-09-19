@@ -62,8 +62,7 @@ const FilterSection = ({ title, children }: { title: string; children: React.Rea
 );
 
 function EventFilter(props: EventFilterProps) {
-  const { filters, onFilterChange, allCategories, isMobile, onNewEventClick, onResetFilters, onOpenExportDialog } =
-    props;
+  const { filters, onFilterChange, allCategories, onNewEventClick, onResetFilters, onOpenExportDialog } = props;
 
   const handleFilterChange = useCallback(
     (field: keyof Filters, value: any) => {
@@ -181,7 +180,7 @@ function EventFilter(props: EventFilterProps) {
                 </Stack>
               </Stack>
               <Stack spacing={1}>
-                <Accordion defaultExpanded={isMobile}>
+                <Accordion defaultExpanded={false}>
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                     <Typography variant="body1" fontWeight="bold">
                       Saved Events
@@ -210,7 +209,7 @@ function EventFilter(props: EventFilterProps) {
                     return null;
                   }
                   return (
-                    <Accordion key={groupName} defaultExpanded={isMobile}>
+                    <Accordion key={groupName} defaultExpanded={false}>
                       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                         <Typography variant="body1" fontWeight="bold">
                           {groupName}
@@ -232,7 +231,7 @@ function EventFilter(props: EventFilterProps) {
                   );
                 })}
                 {otherCategories.length > 0 && (
-                  <Accordion defaultExpanded={isMobile}>
+                  <Accordion defaultExpanded={false}>
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                       <Typography variant="body1" fontWeight="bold">
                         Other Categories

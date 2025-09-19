@@ -5,7 +5,6 @@ export interface EventFilterProps {
   onNewEventClick: () => void;
   onOpenExportDialog: () => void;
   allCategories: string[];
-  isMobile: boolean;
   allPokemon: string[];
   allBonuses: string[];
 }

@@ -1,4 +1,5 @@
 import FilterListIcon from "@mui/icons-material/FilterList";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import SyncIcon from "@mui/icons-material/Sync";
 import TuneIcon from "@mui/icons-material/Tune";
 import {
@@ -8,12 +9,12 @@ import {
   Button,
   Divider,
   Drawer,
+  IconButton,
   Popover,
   Stack,
   Toolbar,
   Tooltip,
   Typography,
-  useMediaQuery,
   useScrollTrigger,
   useTheme,
 } from "@mui/material";
@@ -71,6 +72,7 @@ type HeaderProps = Omit<EventFilterProps, "isMobile"> & {
   lastUpdatedLoading: boolean;
   lastUpdatedError: string | null;
   activeFilterCount: number;
+  isMobile: boolean;
 };
 
 function HeaderComponent(props: HeaderProps) {
@@ -84,10 +86,10 @@ function HeaderComponent(props: HeaderProps) {
     lastUpdatedLoading,
     lastUpdatedError,
     activeFilterCount,
+    isMobile,
     ...filterProps
   } = props;
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const trigger = useScrollTrigger({ disableHysteresis: true, threshold: 0 });
 
   const [filterAnchorEl, setFilterAnchorEl] = useState<HTMLButtonElement | null>(null);
@@ -146,7 +148,7 @@ function HeaderComponent(props: HeaderProps) {
                 width: 28,
               }}
             />
-            <Typography variant="h6" component="div">
+            <Typography variant="h6" component="div" sx={{ display: { xs: "none", sm: "block" } }}>
               PoGo Event Calendar
             </Typography>
           </Stack>
@@ -157,7 +159,7 @@ function HeaderComponent(props: HeaderProps) {
             </Box>
           )}
 
-          <Stack direction="row" alignItems="center" spacing={1}>
+          <Stack direction="row" alignItems="center" spacing={isMobile ? 0 : 1}>
             <Box sx={{ display: { xs: "none", sm: "block" } }}>
               <LastUpdatedDisplay
                 onRefresh={onRefresh}
@@ -167,36 +169,57 @@ function HeaderComponent(props: HeaderProps) {
               />
             </Box>
             <Divider orientation="vertical" flexItem sx={{ display: { xs: "none", sm: "block" }, mx: 1 }} />
-            <Button
-              component={RouterLink}
-              to="/faq"
-              color="inherit"
-              sx={{ "&:hover": { backgroundColor: "action.hover" } }}
-            >
-              FAQ
-            </Button>
-            <Divider orientation="vertical" flexItem sx={{ display: { xs: "none", sm: "block" }, mx: 1 }} />
-            <Tooltip title="Filters">
-              <Badge badgeContent={activeFilterCount} color="primary">
-                <Button
-                  color="inherit"
-                  startIcon={<FilterListIcon />}
-                  onClick={handleFilterClick}
-                  sx={{ "&:hover": { backgroundColor: "action.hover" } }}
-                >
-                  Filters
-                </Button>
-              </Badge>
-            </Tooltip>
-            <Tooltip title="Settings">
+            {isMobile ? (
+              <Tooltip title="FAQ">
+                <IconButton component={RouterLink} to="/faq" color="inherit">
+                  <HelpOutlineIcon />
+                </IconButton>
+              </Tooltip>
+            ) : (
               <Button
+                component={RouterLink}
+                to="/faq"
                 color="inherit"
-                startIcon={<TuneIcon />}
-                onClick={onSettingsClick}
                 sx={{ "&:hover": { backgroundColor: "action.hover" } }}
               >
-                Settings
+                FAQ
               </Button>
+            )}
+
+            <Tooltip title="Filters">
+              <Badge badgeContent={activeFilterCount} color="primary">
+                {isMobile ? (
+                  <IconButton color="inherit" onClick={handleFilterClick}>
+                    <FilterListIcon />
+                  </IconButton>
+                ) : (
+                  <Button
+                    color="inherit"
+                    startIcon={<FilterListIcon />}
+                    onClick={handleFilterClick}
+                    sx={{ "&:hover": { backgroundColor: "action.hover" } }}
+                  >
+                    Filters
+                  </Button>
+                )}
+              </Badge>
+            </Tooltip>
+
+            <Tooltip title="Settings">
+              {isMobile ? (
+                <IconButton color="inherit" onClick={onSettingsClick}>
+                  <TuneIcon />
+                </IconButton>
+              ) : (
+                <Button
+                  color="inherit"
+                  startIcon={<TuneIcon />}
+                  onClick={onSettingsClick}
+                  sx={{ "&:hover": { backgroundColor: "action.hover" } }}
+                >
+                  Settings
+                </Button>
+              )}
             </Tooltip>
           </Stack>
         </Toolbar>

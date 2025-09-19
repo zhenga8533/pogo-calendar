@@ -1,4 +1,4 @@
-import { Alert, Box, Container, CssBaseline, Snackbar, ThemeProvider } from "@mui/material";
+import { Alert, Box, Container, CssBaseline, Snackbar, ThemeProvider, useMediaQuery } from "@mui/material";
 import { useCallback, useMemo, useState } from "react";
 import { Route, Routes } from "react-router-dom";
 import CreateEventDialog from "./components/events/CreateEventDialog";
@@ -23,7 +23,8 @@ import { downloadIcsForEvents } from "./utils/calendarUtils";
 
 function App() {
   const { settings, setSettings } = useSettingsContext();
-  const theme = useMemo(() => getTheme(settings.theme === "auto" ? "light" : settings.theme), [settings.theme]);
+  const muiTheme = useMemo(() => getTheme(settings.theme === "auto" ? "light" : settings.theme), [settings.theme]);
+  const isMobile = useMediaQuery(muiTheme.breakpoints.down("md"));
   const { activeDialog, openDialog, closeDialog } = useDialogs();
   const { toast, showToast, handleCloseToast } = useToast();
   const [eventToEdit, setEventToEdit] = useState<CalendarEvent | null>(null);
@@ -120,7 +121,7 @@ function App() {
   );
 
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={muiTheme}>
       <CssBaseline />
       <CalendarDarkStyles />
       <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
@@ -142,6 +143,7 @@ function App() {
           lastUpdatedLoading={lastUpdatedLoading}
           lastUpdatedError={error}
           activeFilterCount={activeFilterCount}
+          isMobile={isMobile}
         />
         <Box component="main" sx={{ flexGrow: 1, p: 3, backgroundColor: "background.default" }}>
           <Routes>
@@ -154,6 +156,7 @@ function App() {
                     onEditEvent={handleOpenEditDialog}
                     onDeleteEvent={handleDeleteEvent}
                     showToast={showToast}
+                    isMobile={isMobile}
                   />
                 </Container>
               }

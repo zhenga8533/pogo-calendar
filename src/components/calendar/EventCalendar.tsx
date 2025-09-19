@@ -1,4 +1,4 @@
-import type { DateSelectArg, EventClickArg, EventContentArg } from "@fullcalendar/core";
+import type { DateSelectArg, EventClickArg, EventContentArg, FormatterInput } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
@@ -58,8 +58,17 @@ function EventCalendar({
   }>({ event: null, position: null });
 
   useEffect(() => {
-    calendarRef.current?.getApi().changeView(isMobile ? "listWeek" : "dayGridMonth");
+    const timer = setTimeout(() => {
+      calendarRef.current?.getApi().changeView(isMobile ? "listWeek" : "dayGridMonth");
+    }, 0);
+    return () => clearTimeout(timer);
   }, [isMobile]);
+
+  const eventTimeFormat: FormatterInput = {
+    hour: isMobile ? "numeric" : hour12 ? "numeric" : "2-digit",
+    minute: isMobile ? undefined : "2-digit",
+    meridiem: isMobile ? "short" : hour12,
+  };
 
   const findOriginalEvent = useCallback(
     (fcEvent: any) => {
@@ -194,11 +203,7 @@ function EventCalendar({
           selectable={true}
           select={handleDateSelect}
           unselectAuto={false}
-          eventTimeFormat={{
-            hour: hour12 ? "numeric" : "2-digit",
-            minute: "2-digit",
-            meridiem: hour12,
-          }}
+          eventTimeFormat={eventTimeFormat}
           timeZone={timezone}
           eventDidMount={(arg) => {
             arg.el.setAttribute("data-event-id", arg.event.extendedProps.article_url);

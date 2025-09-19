@@ -8,13 +8,14 @@ import type { CalendarEvent } from "../types/events";
 
 interface CalendarPageProps {
   isLoading: boolean;
+  isMobile: boolean;
   onEditEvent: (event: CalendarEvent) => void;
   onDeleteEvent: (eventId: string) => void;
   showToast: (message: string, severity?: ToastSeverity) => void;
 }
 
 function CalendarPage(props: CalendarPageProps) {
-  const { isLoading, onEditEvent, onDeleteEvent, showToast } = props;
+  const { isLoading, isMobile, onEditEvent, onDeleteEvent, showToast } = props;
   const {
     error,
     filteredEvents,
@@ -30,7 +31,7 @@ function CalendarPage(props: CalendarPageProps) {
   } = useCalendarContext();
 
   if (isLoading) {
-    return <CalendarSkeleton isMobile={false} />;
+    return <CalendarSkeleton isMobile={isMobile} />;
   }
 
   if (error) {
@@ -60,7 +61,7 @@ function CalendarPage(props: CalendarPageProps) {
     <Box>
       <EventCalendar
         events={filteredEvents}
-        isMobile={false}
+        isMobile={isMobile}
         savedEventIds={savedEventIds}
         filterStartDate={filters.startDate}
         filterEndDate={filters.endDate}

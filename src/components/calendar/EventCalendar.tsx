@@ -7,6 +7,7 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import EventBusyIcon from "@mui/icons-material/EventBusy";
 import { Paper, Typography } from "@mui/material";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useSettingsContext } from "../../contexts/SettingsContext";
 import type { ToastSeverity } from "../../hooks/useToast";
 import type { CalendarEvent } from "../../types/events";
 import EventDetailDialog from "../events/EventDetailDialog";
@@ -17,9 +18,6 @@ interface EventCalendarProps {
   events: CalendarEvent[];
   isMobile: boolean;
   savedEventIds: string[];
-  firstDay: number;
-  hour12: boolean;
-  timeZone: string;
   filterStartDate: Date | null;
   filterEndDate: Date | null;
   selectedEvent: CalendarEvent | null;
@@ -38,9 +36,6 @@ function EventCalendar({
   events,
   isMobile,
   savedEventIds,
-  firstDay,
-  hour12,
-  timeZone,
   filterStartDate,
   filterEndDate,
   selectedEvent,
@@ -55,6 +50,8 @@ function EventCalendar({
   showToast,
 }: EventCalendarProps) {
   const calendarRef = useRef<FullCalendar>(null);
+  const { settings } = useSettingsContext();
+  const { firstDay, hour12, timezone } = settings;
   const [popoverState, setPopoverState] = useState<{
     event: CalendarEvent | null;
     position: { top: number; left: number } | null;
@@ -175,7 +172,7 @@ function EventCalendar({
     <>
       <Paper elevation={3} sx={{ p: { xs: 1, md: 2 } }} onMouseMove={handleMouseMove}>
         <FullCalendar
-          key={timeZone}
+          key={timezone}
           ref={calendarRef}
           plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
           headerToolbar={
@@ -202,7 +199,7 @@ function EventCalendar({
             minute: "2-digit",
             meridiem: hour12,
           }}
-          timeZone={timeZone}
+          timeZone={timezone}
           eventDidMount={(arg) => {
             arg.el.setAttribute("data-event-id", arg.event.extendedProps.article_url);
           }}
@@ -232,12 +229,10 @@ function EventCalendar({
         id={popoverState.event ? "mouse-over-popover" : undefined}
         mousePosition={popoverState.position}
         event={popoverState.event}
-        hour12={hour12}
         onClose={handlePopoverClose}
       />
 
       <EventDetailDialog
-        hour12={hour12}
         eventNotes={eventNotes}
         onUpdateNote={onUpdateNote}
         event={selectedEvent}

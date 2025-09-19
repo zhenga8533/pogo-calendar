@@ -1,4 +1,5 @@
-import { createContext, useContext, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { SETTINGS_KEY } from "../config/constants";
 import type { Settings, ThemeSetting } from "../types/settings";
 
 interface SettingsContextType {
@@ -9,14 +10,30 @@ interface SettingsContextType {
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
+const initialSettings: Settings = {
+  theme: "auto",
+  firstDay: 0,
+  timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  hour12: true,
+  showNextEvent: true,
+};
+
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
-  const [settings, setSettings] = useState<Settings>({
-    theme: "auto",
-    firstDay: 0,
-    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    hour12: true,
-    showNextEvent: true,
+  const [settings, setSettings] = useState<Settings>(() => {
+    try {
+      const saved = localStorage.getItem(SETTINGS_KEY);
+      if (saved) {
+        return { ...initialSettings, ...JSON.parse(saved) };
+      }
+    } catch (error) {
+      console.error("Failed to parse settings from localStorage:", error);
+    }
+    return initialSettings;
   });
+
+  useEffect(() => {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  }, [settings]);
 
   const changeTheme = (theme: ThemeSetting) => {
     setSettings((prev) => ({ ...prev, theme }));

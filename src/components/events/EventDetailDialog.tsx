@@ -30,7 +30,25 @@ import { CategoryTag } from "../shared/CategoryTag";
 import { DeleteConfirmationDialog } from "../shared/DeleteConfirmationDialog";
 import { EventStatusTag } from "../shared/EventStatusTag";
 import { UnsavedChangesDialog } from "../shared/UnsavedChangesDialog";
-import { DetailSection } from "./DetailSection"; // Import the new component
+
+// --- Merged DetailSection Component ---
+interface DetailSectionProps {
+  title: string;
+  children: React.ReactNode;
+}
+
+function DetailSection({ title, children }: DetailSectionProps) {
+  return (
+    <Stack spacing={1.5}>
+      <Typography variant="h6" component="h3" fontWeight="bold">
+        {title}
+      </Typography>
+      {children}
+      <Divider sx={{ pt: 1 }} />
+    </Stack>
+  );
+}
+// ------------------------------------
 
 interface EventDetailDialogProps {
   event: CalendarEvent | null;

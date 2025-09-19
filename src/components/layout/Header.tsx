@@ -17,9 +17,8 @@ import {
   useScrollTrigger,
   useTheme,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
-import { useLastUpdated } from "../../hooks/useLastUpdated";
 import type { CalendarEvent } from "../../types/events";
 import type { EventFilterProps } from "../../types/filters";
 import EventFilter from "../filters/EventFilter";
@@ -28,17 +27,15 @@ import LogoIcon from "/icon.svg";
 
 const LastUpdatedDisplay = React.memo(function LastUpdatedDisplay({
   onRefresh,
-  setRefetchLastUpdated,
+  lastUpdated,
+  loading,
+  error,
 }: {
   onRefresh: () => void;
-  setRefetchLastUpdated: (refetch: () => Promise<void>) => void;
+  lastUpdated: string | null;
+  loading: boolean;
+  error: string | null;
 }) {
-  const { lastUpdated, loading, error, refetch } = useLastUpdated();
-
-  useEffect(() => {
-    setRefetchLastUpdated(refetch);
-  }, [refetch, setRefetchLastUpdated]);
-
   if (loading)
     return (
       <Typography variant="body2" sx={{ opacity: 0.7 }}>
@@ -67,20 +64,24 @@ const LastUpdatedDisplay = React.memo(function LastUpdatedDisplay({
 type HeaderProps = Omit<EventFilterProps, "isMobile"> & {
   onSettingsClick: () => void;
   onRefresh: () => void;
-  setRefetchLastUpdated: (refetch: () => Promise<void>) => void;
   nextUpcomingEvent: CalendarEvent | null;
   onSelectEvent: (event: CalendarEvent) => void;
   showNextEventTracker: boolean;
+  lastUpdated: string | null;
+  lastUpdatedLoading: boolean;
+  lastUpdatedError: string | null;
 };
 
 function HeaderComponent(props: HeaderProps) {
   const {
     onSettingsClick,
     onRefresh,
-    setRefetchLastUpdated,
     nextUpcomingEvent,
     onSelectEvent,
     showNextEventTracker,
+    lastUpdated,
+    lastUpdatedLoading,
+    lastUpdatedError,
     ...filterProps
   } = props;
   const theme = useTheme();
@@ -164,7 +165,12 @@ function HeaderComponent(props: HeaderProps) {
 
           <Stack direction="row" alignItems="center" spacing={1}>
             <Box sx={{ display: { xs: "none", sm: "block" } }}>
-              <LastUpdatedDisplay onRefresh={onRefresh} setRefetchLastUpdated={setRefetchLastUpdated} />
+              <LastUpdatedDisplay
+                onRefresh={onRefresh}
+                lastUpdated={lastUpdated}
+                loading={lastUpdatedLoading}
+                error={lastUpdatedError}
+              />
             </Box>
             <Divider orientation="vertical" flexItem sx={{ display: { xs: "none", sm: "block" }, mx: 1 }} />
             <Button

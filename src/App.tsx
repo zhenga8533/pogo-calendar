@@ -1,5 +1,5 @@
 import { Alert, Box, Container, CssBaseline, Snackbar, ThemeProvider } from "@mui/material";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Route, Routes } from "react-router-dom";
 import CreateEventDialog from "./components/events/CreateEventDialog";
 import { ExportEventDialog } from "./components/events/ExportEventDialog";
@@ -24,23 +24,13 @@ import { downloadIcsForEvents } from "./utils/calendarUtils";
 function App() {
   const { settings, setSettings } = useSettingsContext();
   const theme = useMemo(() => getTheme(settings.theme === "auto" ? "light" : settings.theme), [settings.theme]);
-  const {
-    settingsOpen,
-    createDialogOpen,
-    exportDialogOpen,
-    handleSettingsOpen,
-    handleSettingsClose,
-    handleCreateOpen,
-    handleCreateClose,
-    handleExportOpen,
-    handleExportClose,
-  } = useDialogs();
+  const { activeDialog, openDialog, closeDialog } = useDialogs();
   const { toast, showToast, handleCloseToast } = useToast();
   const [eventToEdit, setEventToEdit] = useState<CalendarEvent | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
 
   const {
-    loading,
+    loading: eventsLoading,
     filters,
     setFilters,
     handleResetFilters,
@@ -60,8 +50,7 @@ function App() {
     updateNote,
   } = useCalendarContext();
 
-  const refetchLastUpdatedRef = useRef<() => Promise<void>>(() => Promise.resolve());
-  const { refetch } = useLastUpdated();
+  const { lastUpdated, loading: lastUpdatedLoading, error, refetch: refetchLastUpdated } = useLastUpdated();
   const nextUpcomingEvent = useNextUpcomingEvent(filteredEvents);
 
   const handleSettingsChange = useCallback(
@@ -71,31 +60,27 @@ function App() {
     [setSettings]
   );
 
-  const setRefetchLastUpdated = useCallback((fetcher: () => Promise<void>) => {
-    refetchLastUpdatedRef.current = fetcher;
-  }, []);
-
   const handleRefresh = useCallback(async () => {
     try {
-      await Promise.all([refetchEvents(), refetch()]);
+      await Promise.all([refetchEvents(), refetchLastUpdated()]);
       showToast("Data refreshed successfully!", "success");
     } catch (error) {
       showToast("Failed to refresh data.", "error");
     }
-  }, [refetchEvents, refetch, showToast]);
+  }, [refetchEvents, refetchLastUpdated, showToast]);
 
   const handleOpenEditDialog = useCallback(
     (event: CalendarEvent) => {
       setEventToEdit(event);
-      handleCreateOpen();
+      openDialog("create");
     },
-    [handleCreateOpen]
+    [openDialog]
   );
 
   const handleCloseCreateDialog = useCallback(() => {
-    handleCreateClose();
+    closeDialog();
     setEventToEdit(null);
-  }, [handleCreateClose]);
+  }, [closeDialog]);
 
   const handleSaveEvent = useCallback(
     (eventData: NewEventData, eventId?: string) => {
@@ -133,20 +118,22 @@ function App() {
       <CalendarDarkStyles />
       <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
         <Header
-          onSettingsClick={handleSettingsOpen}
+          onSettingsClick={() => openDialog("settings")}
           onRefresh={handleRefresh}
-          setRefetchLastUpdated={setRefetchLastUpdated}
           filters={filters}
           onFilterChange={setFilters}
           onResetFilters={handleResetFilters}
-          onNewEventClick={handleCreateOpen}
-          onOpenExportDialog={handleExportOpen}
+          onNewEventClick={() => openDialog("create")}
+          onOpenExportDialog={() => openDialog("export")}
           allCategories={allCategories}
           allPokemon={allPokemon}
           allBonuses={allBonuses}
           nextUpcomingEvent={nextUpcomingEvent}
           onSelectEvent={setSelectedEvent}
           showNextEventTracker={settings.showNextEvent}
+          lastUpdated={lastUpdated}
+          lastUpdatedLoading={lastUpdatedLoading}
+          lastUpdatedError={error}
         />
         <Box component="main" sx={{ flexGrow: 1, p: 3, backgroundColor: "background.default" }}>
           <Routes>
@@ -155,7 +142,7 @@ function App() {
               element={
                 <Container maxWidth="xl">
                   <CalendarPage
-                    isLoading={loading}
+                    isLoading={eventsLoading}
                     filteredEvents={filteredEvents}
                     savedEventIds={savedEventIds}
                     eventNotes={eventNotes}
@@ -182,16 +169,20 @@ function App() {
         <Footer />
       </Box>
 
-      <SettingsDialog open={settingsOpen} onClose={handleSettingsClose} onSettingsChange={handleSettingsChange} />
+      <SettingsDialog
+        open={activeDialog === "settings"}
+        onClose={closeDialog}
+        onSettingsChange={handleSettingsChange}
+      />
       <CreateEventDialog
-        open={createDialogOpen}
+        open={activeDialog === "create"}
         onClose={handleCloseCreateDialog}
         onSave={handleSaveEvent}
         eventToEdit={eventToEdit}
       />
       <ExportEventDialog
-        open={exportDialogOpen}
-        onClose={handleExportClose}
+        open={activeDialog === "export"}
+        onClose={closeDialog}
         onExport={handleExport}
         allEvents={allEvents}
         filteredEvents={filteredEvents}

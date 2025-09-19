@@ -1,28 +1,16 @@
 import { useCallback, useState } from "react";
 
+export type DialogType = "settings" | "create" | "export";
+
 export function useDialogs() {
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [activeDialog, setActiveDialog] = useState<DialogType | null>(null);
 
-  const handleSettingsOpen = useCallback(() => setSettingsOpen(true), []);
-  const handleSettingsClose = useCallback(() => setSettingsOpen(false), []);
-
-  const handleCreateOpen = useCallback(() => setCreateDialogOpen(true), []);
-  const handleCreateClose = useCallback(() => setCreateDialogOpen(false), []);
-
-  const handleExportOpen = useCallback(() => setExportDialogOpen(true), []);
-  const handleExportClose = useCallback(() => setExportDialogOpen(false), []);
+  const openDialog = useCallback((dialog: DialogType) => setActiveDialog(dialog), []);
+  const closeDialog = useCallback(() => setActiveDialog(null), []);
 
   return {
-    settingsOpen,
-    createDialogOpen,
-    exportDialogOpen,
-    handleSettingsOpen,
-    handleSettingsClose,
-    handleCreateOpen,
-    handleCreateClose,
-    handleExportOpen,
-    handleExportClose,
+    activeDialog,
+    openDialog,
+    closeDialog,
   };
 }

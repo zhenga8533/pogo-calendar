@@ -1,7 +1,6 @@
 import { Box } from "@mui/material";
 import { CalendarSkeleton } from "../components/calendar/CalendarSkeleton";
 import EventCalendar from "../components/calendar/EventCalendar";
-import { useSettingsContext } from "../contexts/SettingsContext";
 import type { ToastSeverity } from "../hooks/useToast";
 import type { CalendarEvent } from "../types/events";
 
@@ -24,7 +23,6 @@ interface CalendarPageProps {
 }
 
 function CalendarPage(props: CalendarPageProps) {
-  const { settings } = useSettingsContext(); // Get settings from context
   const {
     isLoading,
     filteredEvents,
@@ -53,9 +51,6 @@ function CalendarPage(props: CalendarPageProps) {
         events={filteredEvents}
         isMobile={false}
         savedEventIds={savedEventIds}
-        firstDay={settings.firstDay}
-        hour12={settings.hour12}
-        timeZone={settings.timezone}
         filterStartDate={filterStartDate}
         filterEndDate={filterEndDate}
         selectedEvent={selectedEvent}

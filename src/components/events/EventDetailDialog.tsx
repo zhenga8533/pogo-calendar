@@ -19,9 +19,10 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { CUSTOM_EVENT_CATEGORY } from "../../config/constants";
 import { useSettingsContext } from "../../contexts/SettingsContext";
+import { useNoteEditor } from "../../hooks/useNoteEditor";
 import type { ToastSeverity } from "../../hooks/useToast";
 import type { CalendarEvent } from "../../types/events";
 import { downloadIcsFile } from "../../utils/calendarUtils";
@@ -31,12 +32,11 @@ import { DeleteConfirmationDialog } from "../shared/DeleteConfirmationDialog";
 import { EventStatusTag } from "../shared/EventStatusTag";
 import { UnsavedChangesDialog } from "../shared/UnsavedChangesDialog";
 
-// --- Merged DetailSection Component ---
+// Merged DetailSection Component
 interface DetailSectionProps {
   title: string;
   children: React.ReactNode;
 }
-
 function DetailSection({ title, children }: DetailSectionProps) {
   return (
     <Stack spacing={1.5}>
@@ -48,7 +48,6 @@ function DetailSection({ title, children }: DetailSectionProps) {
     </Stack>
   );
 }
-// ------------------------------------
 
 interface EventDetailDialogProps {
   event: CalendarEvent | null;
@@ -83,10 +82,7 @@ function EventDetailDialog({
 }: EventDetailDialogProps) {
   const { settings } = useSettingsContext();
   const { hour12 } = settings;
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [noteText, setNoteText] = useState("");
-  const [isDirty, setIsDirty] = useState(false);
-  const [isUnsavedChangesDialogOpen, setUnsavedChangesDialogOpen] = useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   const eventDetails = useMemo(() => {
     if (!event) return null;
@@ -101,40 +97,32 @@ function EventDetailDialog({
     };
   }, [event, savedEventIds, hour12]);
 
-  useEffect(() => {
-    if (eventDetails) {
-      setNoteText(eventNotes[eventDetails.id] || "");
-      setIsDirty(false);
-    }
-  }, [eventDetails, eventNotes]);
+  const onSaveNote = useCallback(
+    (noteText: string) => {
+      if (!eventDetails) return;
+      onUpdateNote(eventDetails.id, noteText);
+      showToast("Note saved successfully!", "success");
+    },
+    [eventDetails, onUpdateNote, showToast]
+  );
+
+  const {
+    noteText,
+    isDirty,
+    isUnsavedChangesDialogOpen,
+    handleNoteChange,
+    handleSave,
+    handleClose,
+    handleConfirmClose,
+    closeUnsavedDialog,
+  } = useNoteEditor(eventDetails ? eventNotes[eventDetails.id] || "" : "", onSaveNote, onClose);
 
   const handleDelete = useCallback(() => {
     if (!eventDetails) return;
     onDeleteEvent(eventDetails.id);
-    setConfirmOpen(false);
+    setConfirmDeleteOpen(false);
     onClose();
   }, [eventDetails, onDeleteEvent, onClose]);
-
-  const handleSave = useCallback(() => {
-    if (!eventDetails) return;
-    onUpdateNote(eventDetails.id, noteText);
-    setIsDirty(false);
-    showToast("Note saved successfully!", "success");
-    onClose();
-  }, [eventDetails, noteText, onUpdateNote, showToast, onClose]);
-
-  const handleClose = () => {
-    if (isDirty) {
-      setUnsavedChangesDialogOpen(true);
-    } else {
-      onClose();
-    }
-  };
-
-  const handleConfirmClose = () => {
-    setUnsavedChangesDialogOpen(false);
-    onClose();
-  };
 
   if (!event || !eventDetails) {
     return null;
@@ -262,10 +250,7 @@ function EventDetailDialog({
                   variant="outlined"
                   placeholder="Add your personal notes here..."
                   value={noteText}
-                  onChange={(e) => {
-                    setNoteText(e.target.value);
-                    setIsDirty(true);
-                  }}
+                  onChange={(e) => handleNoteChange(e.target.value)}
                 />
               </DetailSection>
             </Stack>
@@ -303,7 +288,7 @@ function EventDetailDialog({
                 <Button onClick={() => onEditEvent(event)} startIcon={<EditIcon />}>
                   Edit
                 </Button>
-                <Button onClick={() => setConfirmOpen(true)} color="error" startIcon={<DeleteIcon />}>
+                <Button onClick={() => setConfirmDeleteOpen(true)} color="error" startIcon={<DeleteIcon />}>
                   Delete
                 </Button>
               </>
@@ -316,14 +301,14 @@ function EventDetailDialog({
         </DialogActions>
       </Dialog>
       <DeleteConfirmationDialog
-        open={confirmOpen}
-        onClose={() => setConfirmOpen(false)}
+        open={confirmDeleteOpen}
+        onClose={() => setConfirmDeleteOpen(false)}
         onConfirm={handleDelete}
         eventName={title}
       />
       <UnsavedChangesDialog
         open={isUnsavedChangesDialogOpen}
-        onClose={() => setUnsavedChangesDialogOpen(false)}
+        onClose={closeUnsavedDialog}
         onConfirm={handleConfirmClose}
       />
     </>

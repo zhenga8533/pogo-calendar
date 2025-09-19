@@ -7,15 +7,11 @@ import Footer from "./components/layout/Footer";
 import Header from "./components/layout/Header";
 import ScrollToTop from "./components/shared/ScrollToTop";
 import { SettingsDialog } from "./components/shared/SettingsDialog";
-import { CUSTOM_EVENT_CATEGORY } from "./config/constants";
+import { useCalendarContext } from "./contexts/CalendarContext";
 import { useSettingsContext } from "./contexts/SettingsContext";
-import { useCustomEvents } from "./hooks/useCustomEvents";
 import { useDialogs } from "./hooks/useDialogs";
-import { useEventData } from "./hooks/useEventData";
-import { useEventNotes } from "./hooks/useEventNotes";
-import { useFilters } from "./hooks/useFilters";
+import { useLastUpdated } from "./hooks/useLastUpdated";
 import { useNextUpcomingEvent } from "./hooks/useNextUpcomingEvent";
-import { useSavedEvents } from "./hooks/useSavedEvents";
 import { useToast } from "./hooks/useToast";
 import CalendarPage from "./pages/Calendar";
 import FaqPage from "./pages/Faq";
@@ -43,42 +39,29 @@ function App() {
   const [eventToEdit, setEventToEdit] = useState<CalendarEvent | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
 
+  const {
+    loading,
+    filters,
+    setFilters,
+    handleResetFilters,
+    setCurrentView,
+    filteredEvents,
+    allEvents,
+    savedEventIds,
+    eventNotes,
+    allCategories,
+    allPokemon,
+    allBonuses,
+    refetchEvents,
+    handleToggleSaveEvent,
+    addEvent,
+    updateEvent,
+    deleteEvent,
+    updateNote,
+  } = useCalendarContext();
+
   const refetchLastUpdatedRef = useRef<() => Promise<void>>(() => Promise.resolve());
-
-  const { allEvents: apiEvents, loading, refetch: refetchEvents } = useEventData(settings.timezone);
-  const { savedEventIds, handleToggleSaveEvent } = useSavedEvents();
-  const { customEvents, addEvent, updateEvent, deleteEvent } = useCustomEvents();
-  const { eventNotes, updateNote } = useEventNotes();
-
-  const combinedEvents = useMemo(() => [...apiEvents, ...customEvents], [apiEvents, customEvents]);
-
-  const { filters, setFilters, handleResetFilters, setCurrentView, filteredEvents } = useFilters(
-    combinedEvents,
-    savedEventIds
-  );
-
-  const { allCategories, allPokemon, allBonuses } = useMemo(() => {
-    const categories = new Set<string>();
-    const pokemon = new Set<string>();
-    const bonuses = new Set<string>();
-
-    combinedEvents.forEach((event) => {
-      categories.add(event.extendedProps.category);
-      (event.extendedProps.features ?? []).forEach((p) => pokemon.add(p));
-      (event.extendedProps.spawns ?? []).forEach((p) => pokemon.add(p));
-      (event.extendedProps.raids ?? []).forEach((p) => pokemon.add(p));
-      (event.extendedProps.shiny ?? []).forEach((p) => pokemon.add(p));
-      (event.extendedProps.shadow ?? []).forEach((p) => pokemon.add(p));
-      (event.extendedProps.bonuses ?? []).forEach((b) => bonuses.add(b));
-    });
-
-    return {
-      allCategories: Array.from(categories).sort(),
-      allPokemon: Array.from(pokemon).sort(),
-      allBonuses: Array.from(bonuses).sort(),
-    };
-  }, [combinedEvents]);
-
+  const { refetch } = useLastUpdated();
   const nextUpcomingEvent = useNextUpcomingEvent(filteredEvents);
 
   const handleSettingsChange = useCallback(
@@ -88,18 +71,18 @@ function App() {
     [setSettings]
   );
 
-  const setRefetchLastUpdated = useCallback((refetch: () => Promise<void>) => {
-    refetchLastUpdatedRef.current = refetch;
+  const setRefetchLastUpdated = useCallback((fetcher: () => Promise<void>) => {
+    refetchLastUpdatedRef.current = fetcher;
   }, []);
 
   const handleRefresh = useCallback(async () => {
     try {
-      await Promise.all([refetchEvents(), refetchLastUpdatedRef.current()]);
+      await Promise.all([refetchEvents(), refetch()]);
       showToast("Data refreshed successfully!", "success");
     } catch (error) {
       showToast("Failed to refresh data.", "error");
     }
-  }, [refetchEvents, showToast]);
+  }, [refetchEvents, refetch, showToast]);
 
   const handleOpenEditDialog = useCallback(
     (event: CalendarEvent) => {
@@ -121,17 +104,11 @@ function App() {
         showToast("Event updated successfully!", "success");
       } else {
         addEvent(eventData);
-        if (filters.selectedCategories.length > 0) {
-          setFilters((prev) => ({
-            ...prev,
-            selectedCategories: [...new Set([...prev.selectedCategories, CUSTOM_EVENT_CATEGORY])],
-          }));
-        }
         showToast("Event created successfully!", "success");
       }
       handleCloseCreateDialog();
     },
-    [addEvent, updateEvent, filters.selectedCategories, setFilters, handleCloseCreateDialog, showToast]
+    [addEvent, updateEvent, handleCloseCreateDialog, showToast]
   );
 
   const handleDeleteEvent = useCallback(
@@ -189,7 +166,7 @@ function App() {
                     onDeleteEvent={handleDeleteEvent}
                     onEditEvent={handleOpenEditDialog}
                     onDateSelect={(selection) =>
-                      setFilters((prev) => ({ ...prev, startDate: selection.start, endDate: selection.end }))
+                      setFilters((prev: any) => ({ ...prev, startDate: selection.start, endDate: selection.end }))
                     }
                     onViewChange={setCurrentView}
                     showToast={showToast}
@@ -216,7 +193,7 @@ function App() {
         open={exportDialogOpen}
         onClose={handleExportClose}
         onExport={handleExport}
-        allEvents={combinedEvents}
+        allEvents={allEvents}
         filteredEvents={filteredEvents}
         savedEventIds={savedEventIds}
       />

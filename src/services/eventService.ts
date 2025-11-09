@@ -45,6 +45,36 @@ function parseApiTime(time: string | number, isLocal: boolean, timezone: string)
 }
 
 /**
+ * Extracts specific detail fields from the details object.
+ *
+ * @param details The details object from the API event.
+ * @returns An object containing extracted arrays for each detail type.
+ */
+function extractDetails(details?: { [key: string]: string[] }) {
+  if (!details) {
+    return {
+      bonuses: undefined,
+      features: undefined,
+      spawns: undefined,
+      eggs: undefined,
+      raids: undefined,
+      shiny: undefined,
+      shadow: undefined,
+    };
+  }
+
+  return {
+    bonuses: details.bonuses,
+    features: details.features,
+    spawns: details.spawns,
+    eggs: details.eggs,
+    raids: details.raids,
+    shiny: details.shiny,
+    shadow: details.shadow,
+  };
+}
+
+/**
  * Transforms the raw API response data into an array of CalendarEvent objects.
  *
  * @param data The raw API response data.
@@ -52,28 +82,26 @@ function parseApiTime(time: string | number, isLocal: boolean, timezone: string)
  */
 function transformApiData(data: ApiResponse, timezone: string): CalendarEvent[] {
   return Object.values(data).flatMap((eventsInCategory) =>
-    eventsInCategory.map((event: ApiEvent) => ({
-      title: event.title,
-      start: parseApiTime(event.start_time, event.is_local_time, timezone),
-      end: event.end_time
-        ? parseApiTime(event.end_time, event.is_local_time, timezone)
-        : new Date(
-            new Date(parseApiTime(event.start_time, event.is_local_time, timezone)).getTime() + 60 * 60 * 1000
-          ).toISOString(),
-      extendedProps: {
-        category: event.category,
-        article_url: event.article_url,
-        banner_url: event.banner_url,
-        description: event.description,
-        bonuses: event.bonuses,
-        features: event.features,
-        spawns: event.spawns,
-        eggs: event.eggs,
-        raids: event.raids,
-        shiny: event.shiny,
-        shadow: event.shadow,
-      },
-    }))
+    eventsInCategory.map((event: ApiEvent) => {
+      const extractedDetails = extractDetails(event.details);
+
+      return {
+        title: event.title,
+        start: parseApiTime(event.start_time, event.is_local_time, timezone),
+        end: event.end_time
+          ? parseApiTime(event.end_time, event.is_local_time, timezone)
+          : new Date(
+              new Date(parseApiTime(event.start_time, event.is_local_time, timezone)).getTime() + 60 * 60 * 1000
+            ).toISOString(),
+        extendedProps: {
+          category: event.category,
+          article_url: event.article_url,
+          banner_url: event.banner_url,
+          description: event.description,
+          ...extractedDetails,
+        },
+      };
+    })
   );
 }
 

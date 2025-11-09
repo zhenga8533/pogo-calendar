@@ -26,13 +26,9 @@ export interface ApiEvent {
   article_url: string;
   banner_url: string;
   description?: string;
-  bonuses?: string[];
-  features?: string[];
-  spawns?: string[];
-  eggs?: string[];
-  raids?: string[];
-  shiny?: string[];
-  shadow?: string[];
+  details?: {
+    [key: string]: string[];
+  };
 }
 
 export type NewEventData = {

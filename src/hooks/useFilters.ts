@@ -47,17 +47,21 @@ const passesActiveOnlyFilter = (event: CalendarEvent, showActiveOnly: boolean) =
   return now >= eventStart && now <= eventEnd;
 };
 
-const passesPokemonFilter = (event: CalendarEvent, pokemonSearch: string[]) =>
-  pokemonSearch.length === 0 ||
-  pokemonSearch.every((pokemon: string) =>
-    [
-      ...(event.extendedProps.features ?? []),
-      ...(event.extendedProps.spawns ?? []),
-      ...(event.extendedProps.raids ?? []),
-      ...(event.extendedProps.shiny ?? []),
-      ...(event.extendedProps.shadow ?? []),
-    ].includes(pokemon)
-  );
+const passesPokemonFilter = (event: CalendarEvent, pokemonSearch: string[]) => {
+  if (pokemonSearch.length === 0) return true;
+
+  // Collect all Pokemon from all fields (everything except bonuses and non-array fields)
+  const allPokemonInEvent: string[] = [];
+  const nonPokemonFields = ['category', 'article_url', 'banner_url', 'description', 'bonuses'];
+
+  Object.entries(event.extendedProps).forEach(([key, value]) => {
+    if (!nonPokemonFields.includes(key) && Array.isArray(value)) {
+      allPokemonInEvent.push(...value);
+    }
+  });
+
+  return pokemonSearch.every((pokemon: string) => allPokemonInEvent.includes(pokemon));
+};
 
 const passesBonusFilter = (event: CalendarEvent, bonusSearch: string[]) =>
   bonusSearch.length === 0 || bonusSearch.every((bonus: string) => (event.extendedProps.bonuses ?? []).includes(bonus));

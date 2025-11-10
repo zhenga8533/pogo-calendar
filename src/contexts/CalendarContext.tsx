@@ -56,12 +56,19 @@ export function CalendarProvider({ children }: { children: React.ReactNode }) {
 
     combinedEvents.forEach((event) => {
       categories.add(event.extendedProps.category);
-      (event.extendedProps.features ?? []).forEach((p) => pokemon.add(p));
-      (event.extendedProps.spawns ?? []).forEach((p) => pokemon.add(p));
-      (event.extendedProps.raids ?? []).forEach((p) => pokemon.add(p));
-      (event.extendedProps.shiny ?? []).forEach((p) => pokemon.add(p));
-      (event.extendedProps.shadow ?? []).forEach((p) => pokemon.add(p));
-      (event.extendedProps.bonuses ?? []).forEach((b) => bonuses.add(b));
+
+      // Collect all bonuses
+      if (event.extendedProps.bonuses) {
+        event.extendedProps.bonuses.forEach((b) => bonuses.add(b));
+      }
+
+      // Collect all other fields as Pokemon (everything except the known non-Pokemon fields)
+      const nonPokemonFields = ['category', 'article_url', 'banner_url', 'description', 'bonuses'];
+      Object.entries(event.extendedProps).forEach(([key, value]) => {
+        if (!nonPokemonFields.includes(key) && Array.isArray(value)) {
+          value.forEach((item) => pokemon.add(item));
+        }
+      });
     });
 
     return {

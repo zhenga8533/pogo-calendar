@@ -8,13 +8,7 @@ export interface CalendarEvent {
     banner_url: string;
     description?: string;
     bonuses?: string[];
-    features?: string[];
-    spawns?: string[];
-    eggs?: string[];
-    raids?: string[];
-    shiny?: string[];
-    shadow?: string[];
-    moves?: string[];
+    [key: string]: string | string[] | undefined; // All other fields are Pokemon lists
   };
 }
 

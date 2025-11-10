@@ -69,6 +69,34 @@ const ChipList = ({ items }: { items: string[] }) => (
   </Box>
 );
 
+// Field name to display title mapping (optional custom titles)
+const POKEMON_FIELD_TITLES: Record<string, string> = {
+  features: "Featured Pokémon",
+  spawns: "Wild Encounters",
+  raids: "Raids",
+  eggs: "Eggs",
+  shiny: "Shiny Debuts",
+  shadow: "New Shadow Pokémon",
+  moves: "Pokémon with Special Moves",
+};
+
+/**
+ * Generates a display title for a Pokemon field.
+ * Uses the mapping if available, otherwise generates from field name.
+ * Example: "field_research" -> "Field Research"
+ */
+function getPokemonFieldTitle(fieldName: string): string {
+  if (fieldName in POKEMON_FIELD_TITLES) {
+    return POKEMON_FIELD_TITLES[fieldName];
+  }
+
+  // Auto-generate title: capitalize first letter and replace underscores with spaces
+  return fieldName
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
 function EventDetailDialog({
   event,
   onClose,
@@ -206,47 +234,18 @@ function EventDetailDialog({
                 </DetailSection>
               )}
 
-              {eventDetails.features && eventDetails.features.length > 0 && (
-                <DetailSection title="Featured Pokémon">
-                  <ChipList items={eventDetails.features} />
-                </DetailSection>
-              )}
-
-              {eventDetails.spawns && eventDetails.spawns.length > 0 && (
-                <DetailSection title="Wild Encounters">
-                  <ChipList items={eventDetails.spawns} />
-                </DetailSection>
-              )}
-
-              {eventDetails.raids && eventDetails.raids.length > 0 && (
-                <DetailSection title="Raids">
-                  <ChipList items={eventDetails.raids} />
-                </DetailSection>
-              )}
-
-              {eventDetails.eggs && eventDetails.eggs.length > 0 && (
-                <DetailSection title="Eggs">
-                  <ChipList items={eventDetails.eggs} />
-                </DetailSection>
-              )}
-
-              {eventDetails.shiny && eventDetails.shiny.length > 0 && (
-                <DetailSection title="Shiny Debuts">
-                  <ChipList items={eventDetails.shiny} />
-                </DetailSection>
-              )}
-
-              {eventDetails.shadow && eventDetails.shadow.length > 0 && (
-                <DetailSection title="New Shadow Pokémon">
-                  <ChipList items={eventDetails.shadow} />
-                </DetailSection>
-              )}
-
-              {eventDetails.moves && eventDetails.moves.length > 0 && (
-                <DetailSection title="Pokémon with Special Moves">
-                  <ChipList items={eventDetails.moves} />
-                </DetailSection>
-              )}
+              {/* Dynamically render all Pokemon-related fields */}
+              {Object.entries(eventDetails)
+                .filter(([key, value]) => {
+                  // Exclude known non-Pokemon fields and only show arrays with content
+                  const nonPokemonFields = ['category', 'article_url', 'banner_url', 'description', 'bonuses', 'id', 'title', 'isCustomEvent', 'isSaved', 'start', 'end'];
+                  return !nonPokemonFields.includes(key) && Array.isArray(value) && value.length > 0;
+                })
+                .map(([key, value]) => (
+                  <DetailSection key={key} title={getPokemonFieldTitle(key)}>
+                    <ChipList items={value as string[]} />
+                  </DetailSection>
+                ))}
 
               <DetailSection title="Notes">
                 <TextField

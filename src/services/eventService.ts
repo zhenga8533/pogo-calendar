@@ -39,35 +39,19 @@ function parseApiTime(time: string | number, isLocal: boolean, timezone: string)
 }
 
 /**
- * Extracts specific detail fields from the details object.
+ * Extracts detail fields from the details object.
+ * Bonuses and all other fields (Pokemon-related) are passed through as-is.
  *
  * @param details The details object from the API event.
- * @returns An object containing extracted arrays for each detail type.
+ * @returns An object containing all detail fields.
  */
 function extractDetails(details?: { [key: string]: string[] }) {
   if (!details) {
-    return {
-      bonuses: undefined,
-      features: undefined,
-      spawns: undefined,
-      eggs: undefined,
-      raids: undefined,
-      shiny: undefined,
-      shadow: undefined,
-      moves: undefined,
-    };
+    return {};
   }
 
-  return {
-    bonuses: details.bonuses,
-    features: details.features,
-    spawns: details.spawns,
-    eggs: details.eggs,
-    raids: details.raids,
-    shiny: details.shiny,
-    shadow: details.shadow,
-    moves: details.moves,
-  };
+  // Pass through all fields as-is
+  return { ...details };
 }
 
 /**

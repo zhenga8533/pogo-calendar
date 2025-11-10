@@ -1,5 +1,5 @@
 import { Alert, Box, Container, CssBaseline, Snackbar, ThemeProvider, useMediaQuery } from "@mui/material";
-import { useCallback, useMemo, useState } from "react";
+import { lazy, Suspense, useCallback, useMemo, useState } from "react";
 import { Route, Routes } from "react-router-dom";
 import CreateEventDialog from "./components/events/CreateEventDialog";
 import { ExportEventDialog } from "./components/events/ExportEventDialog";
@@ -13,13 +13,15 @@ import { useDialogs } from "./hooks/useDialogs";
 import { useLastUpdated } from "./hooks/useLastUpdated";
 import { useNextUpcomingEvent } from "./hooks/useNextUpcomingEvent";
 import { useToast } from "./hooks/useToast";
-import CalendarPage from "./pages/Calendar";
-import FaqPage from "./pages/Faq";
 import { CalendarDarkStyles } from "./styles/calendarDarkStyles";
 import { getTheme } from "./theme";
 import type { CalendarEvent, NewEventData } from "./types/events";
 import type { Settings } from "./types/settings";
 import { downloadIcsForEvents } from "./utils/calendarUtils";
+
+// Lazy load page components
+const CalendarPage = lazy(() => import("./pages/Calendar"));
+const FaqPage = lazy(() => import("./pages/Faq"));
 
 function App() {
   const { settings, setSettings } = useSettingsContext();
@@ -146,23 +148,25 @@ function App() {
           isMobile={isMobile}
         />
         <Box component="main" sx={{ flexGrow: 1, p: 3, backgroundColor: "background.default" }}>
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <Container maxWidth="xl">
-                  <CalendarPage
-                    isLoading={eventsLoading}
-                    onEditEvent={handleOpenEditDialog}
-                    onDeleteEvent={handleDeleteEvent}
-                    showToast={showToast}
-                    isMobile={isMobile}
-                  />
-                </Container>
-              }
-            />
-            <Route path="/faq" element={<FaqPage />} />
-          </Routes>
+          <Suspense fallback={<Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>Loading...</Box>}>
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <Container maxWidth="xl">
+                    <CalendarPage
+                      isLoading={eventsLoading}
+                      onEditEvent={handleOpenEditDialog}
+                      onDeleteEvent={handleDeleteEvent}
+                      showToast={showToast}
+                      isMobile={isMobile}
+                    />
+                  </Container>
+                }
+              />
+              <Route path="/faq" element={<FaqPage />} />
+            </Routes>
+          </Suspense>
         </Box>
         <Footer />
       </Box>

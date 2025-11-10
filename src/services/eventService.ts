@@ -12,13 +12,7 @@ function parseApiTime(time: string | number, isLocal: boolean, timezone: string)
   } else if (typeof time === "number") {
     date = new Date(time * 1000);
   } else {
-    // Handle null or undefined end_time
-    if (time === null && isLocal && typeof time === "string") {
-      const startDate = new Date(time);
-      startDate.setHours(startDate.getHours() + 1); // Default to a 1-hour duration if end is null
-      return startDate.toISOString();
-    }
-    throw new Error("Invalid time format. Expected UNIX timestamp for UTC time.");
+    throw new Error("Invalid time format. Expected ISO string for local time or UNIX timestamp for UTC time.");
   }
 
   // Transform to the specified timezone
@@ -60,6 +54,7 @@ function extractDetails(details?: { [key: string]: string[] }) {
       raids: undefined,
       shiny: undefined,
       shadow: undefined,
+      moves: undefined,
     };
   }
 
@@ -71,6 +66,7 @@ function extractDetails(details?: { [key: string]: string[] }) {
     raids: details.raids,
     shiny: details.shiny,
     shadow: details.shadow,
+    moves: details.moves,
   };
 }
 

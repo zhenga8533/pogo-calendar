@@ -14,6 +14,7 @@ export interface CalendarEvent {
     raids?: string[];
     shiny?: string[];
     shadow?: string[];
+    moves?: string[];
   };
 }
 

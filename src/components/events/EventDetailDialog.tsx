@@ -242,6 +242,12 @@ function EventDetailDialog({
                 </DetailSection>
               )}
 
+              {eventDetails.moves && eventDetails.moves.length > 0 && (
+                <DetailSection title="Pokémon with Special Moves">
+                  <ChipList items={eventDetails.moves} />
+                </DetailSection>
+              )}
+
               <DetailSection title="Notes">
                 <TextField
                   fullWidth

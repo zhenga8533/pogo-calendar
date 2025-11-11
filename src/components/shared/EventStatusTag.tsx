@@ -1,6 +1,6 @@
-import { Box, useTheme } from "@mui/material";
-import React, { useMemo } from "react";
-import { useEventStatus } from "../../hooks/useEventStatus";
+import { Box, useTheme } from '@mui/material';
+import React, { useMemo } from 'react';
+import { useEventStatus } from '../../hooks/useEventStatus';
 
 interface EventStatusTagProps {
   start: string | null;
@@ -13,9 +13,9 @@ function EventStatusTagComponent({ start, end }: EventStatusTagProps) {
 
   const statusInfo = useMemo(
     () => ({
-      active: { label: "Active", color: theme.palette.success.main },
-      upcoming: { label: "Upcoming", color: theme.palette.warning.main },
-      finished: { label: "Finished", color: theme.palette.text.secondary },
+      active: { label: 'Active', color: theme.palette.success.main },
+      upcoming: { label: 'Upcoming', color: theme.palette.warning.main },
+      finished: { label: 'Finished', color: theme.palette.text.secondary },
     }),
     [theme]
   );
@@ -31,15 +31,17 @@ function EventStatusTagComponent({ start, end }: EventStatusTagProps) {
       sx={{
         backgroundColor: currentStatusInfo.color,
         color: theme.palette.getContrastText(currentStatusInfo.color),
-        borderRadius: "4px",
+        borderRadius: '4px',
         px: 1.5,
         py: 0.5,
-        fontSize: "0.875rem",
-        fontWeight: "bold",
-        whiteSpace: "nowrap",
+        fontSize: '0.875rem',
+        fontWeight: 'bold',
+        whiteSpace: 'nowrap',
       }}
     >
-      {status === "finished" ? currentStatusInfo.label : `${currentStatusInfo.label} (${displayTime})`}
+      {status === 'finished'
+        ? currentStatusInfo.label
+        : `${currentStatusInfo.label} (${displayTime})`}
     </Box>
   );
 }

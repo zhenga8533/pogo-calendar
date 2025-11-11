@@ -1,8 +1,18 @@
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Tab, Tabs, TextField } from "@mui/material";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import type { CalendarEvent } from "../../types/events";
-import { CategoryExportPanel } from "./CategoryExportPanel";
-import { SpecificEventExportPanel } from "./SpecificEventExportPanel";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Tab,
+  Tabs,
+  TextField,
+} from '@mui/material';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import type { CalendarEvent } from '../../types/events';
+import { CategoryExportPanel } from './CategoryExportPanel';
+import { SpecificEventExportPanel } from './SpecificEventExportPanel';
 
 interface ExportEventDialogProps {
   open: boolean;
@@ -24,53 +34,75 @@ export function ExportEventDialog({
   const [tab, setTab] = useState(0);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedEventIds, setSelectedEventIds] = useState<string[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     if (open) {
       setTab(0);
       setSelectedCategories([]);
       setSelectedEventIds([]);
-      setSearchTerm("");
+      setSearchTerm('');
     }
   }, [open]);
 
   const allCategories = useMemo(
-    () => Array.from(new Set(allEvents.map((e) => e.extendedProps.category))).sort(),
+    () =>
+      Array.from(
+        new Set(allEvents.map((e) => e.extendedProps.category))
+      ).sort(),
     [allEvents]
   );
 
   const eventsToList = useMemo(
-    () => filteredEvents.filter((event) => event.title.toLowerCase().includes(searchTerm.toLowerCase())),
+    () =>
+      filteredEvents.filter((event) =>
+        event.title.toLowerCase().includes(searchTerm.toLowerCase())
+      ),
     [filteredEvents, searchTerm]
   );
 
-  const handleTabChange = useCallback((_: React.SyntheticEvent, newValue: number) => {
-    setTab(newValue);
-  }, []);
+  const handleTabChange = useCallback(
+    (_: React.SyntheticEvent, newValue: number) => {
+      setTab(newValue);
+    },
+    []
+  );
 
   const handleExportClick = useCallback(() => {
     let eventsToExport: CalendarEvent[];
     if (tab === 0) {
-      eventsToExport = allEvents.filter((event) => selectedCategories.includes(event.extendedProps.category));
+      eventsToExport = allEvents.filter((event) =>
+        selectedCategories.includes(event.extendedProps.category)
+      );
     } else {
-      eventsToExport = allEvents.filter((event) => selectedEventIds.includes(event.extendedProps.article_url));
+      eventsToExport = allEvents.filter((event) =>
+        selectedEventIds.includes(event.extendedProps.article_url)
+      );
     }
     onExport(eventsToExport);
     onClose();
   }, [tab, allEvents, selectedCategories, selectedEventIds, onExport, onClose]);
 
-  const exportCount = tab === 0 ? selectedCategories.length : selectedEventIds.length;
+  const exportCount =
+    tab === 0 ? selectedCategories.length : selectedEventIds.length;
   const isExportDisabled = exportCount === 0;
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>Select Events to Export</DialogTitle>
-      <DialogContent sx={{ display: "flex", flexDirection: "column" }}>
-        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-          <Tabs value={tab} onChange={handleTabChange} aria-label="Export mode tabs">
+      <DialogContent sx={{ display: 'flex', flexDirection: 'column' }}>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs
+            value={tab}
+            onChange={handleTabChange}
+            aria-label="Export mode tabs"
+          >
             <Tab label="By Category" id="tab-0" aria-controls="tabpanel-0" />
-            <Tab label="By Specific Event" id="tab-1" aria-controls="tabpanel-1" />
+            <Tab
+              label="By Specific Event"
+              id="tab-1"
+              aria-controls="tabpanel-1"
+            />
           </Tabs>
         </Box>
 
@@ -107,7 +139,11 @@ export function ExportEventDialog({
 
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-        <Button onClick={handleExportClick} variant="contained" disabled={isExportDisabled}>
+        <Button
+          onClick={handleExportClick}
+          variant="contained"
+          disabled={isExportDisabled}
+        >
           Export ({exportCount})
         </Button>
       </DialogActions>

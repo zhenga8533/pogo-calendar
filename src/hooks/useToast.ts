@@ -1,6 +1,6 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState } from 'react';
 
-export type ToastSeverity = "success" | "error" | "info" | "warning";
+export type ToastSeverity = 'success' | 'error' | 'info' | 'warning';
 
 export interface ToastState {
   open: boolean;
@@ -11,13 +11,16 @@ export interface ToastState {
 export function useToast() {
   const [toast, setToast] = useState<ToastState>({
     open: false,
-    message: "",
-    severity: "success",
+    message: '',
+    severity: 'success',
   });
 
-  const showToast = useCallback((message: string, severity: ToastSeverity = "success") => {
-    setToast({ open: true, message, severity });
-  }, []);
+  const showToast = useCallback(
+    (message: string, severity: ToastSeverity = 'success') => {
+      setToast({ open: true, message, severity });
+    },
+    []
+  );
 
   const handleCloseToast = useCallback(() => {
     setToast((prev) => ({ ...prev, open: false }));

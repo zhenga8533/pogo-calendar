@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useState } from "react";
-import { v4 as uuidv4 } from "uuid";
-import defaultBanner from "../assets/images/default-banner.jpg";
-import { CUSTOM_EVENT_CATEGORY, CUSTOM_EVENTS_KEY } from "../config/constants";
-import type { CalendarEvent, NewEventData } from "../types/events";
-import { formatToLocalTime } from "../utils/dateUtils";
+import { useCallback, useEffect, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import defaultBanner from '../assets/images/default-banner.jpg';
+import { CUSTOM_EVENT_CATEGORY, CUSTOM_EVENTS_KEY } from '../config/constants';
+import type { CalendarEvent, NewEventData } from '../types/events';
+import { formatToLocalTime } from '../utils/dateUtils';
 
 export function useCustomEvents() {
   const [customEvents, setCustomEvents] = useState<CalendarEvent[]>(() => {
@@ -13,7 +13,7 @@ export function useCustomEvents() {
         return JSON.parse(saved);
       }
     } catch (error) {
-      console.error("Failed to parse custom events from localStorage:", error);
+      console.error('Failed to parse custom events from localStorage:', error);
     }
 
     return [];
@@ -37,23 +37,28 @@ export function useCustomEvents() {
     setCustomEvents((prevEvents) => [...prevEvents, newEvent]);
   }, []);
 
-  const updateEvent = useCallback((eventId: string, eventData: NewEventData) => {
-    setCustomEvents((prevEvents) =>
-      prevEvents.map((event) =>
-        event.extendedProps.article_url === eventId
-          ? {
-              ...event,
-              title: eventData.title,
-              start: formatToLocalTime(eventData.start),
-              end: formatToLocalTime(eventData.end),
-            }
-          : event
-      )
-    );
-  }, []);
+  const updateEvent = useCallback(
+    (eventId: string, eventData: NewEventData) => {
+      setCustomEvents((prevEvents) =>
+        prevEvents.map((event) =>
+          event.extendedProps.article_url === eventId
+            ? {
+                ...event,
+                title: eventData.title,
+                start: formatToLocalTime(eventData.start),
+                end: formatToLocalTime(eventData.end),
+              }
+            : event
+        )
+      );
+    },
+    []
+  );
 
   const deleteEvent = useCallback((eventId: string) => {
-    setCustomEvents((prevEvents) => prevEvents.filter((event) => event.extendedProps.article_url !== eventId));
+    setCustomEvents((prevEvents) =>
+      prevEvents.filter((event) => event.extendedProps.article_url !== eventId)
+    );
   }, []);
 
   return {

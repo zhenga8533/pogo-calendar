@@ -1,9 +1,9 @@
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import ReplayIcon from "@mui/icons-material/Replay";
-import StarIcon from "@mui/icons-material/Star";
-import StarBorderIcon from "@mui/icons-material/StarBorder";
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import ReplayIcon from '@mui/icons-material/Replay';
+import StarIcon from '@mui/icons-material/Star';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
 import {
   Accordion,
   AccordionDetails,
@@ -21,17 +21,17 @@ import {
   Switch,
   TextField,
   Typography,
-} from "@mui/material";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import React, { useCallback, useMemo } from "react";
-import { SAVED_EVENTS_CATEGORY } from "../../config/constants";
-import { categoryGroups, marks } from "../../config/eventFilter";
-import type { EventFilterProps, Filters } from "../../types/filters";
-import { formatHour } from "../../utils/dateUtils";
-import AdvancedFilter from "./AdvancedFilter";
-import { ColorKeyLabel } from "./ColorKeyLabel";
+} from '@mui/material';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import React, { useCallback, useMemo } from 'react';
+import { SAVED_EVENTS_CATEGORY } from '../../config/constants';
+import { categoryGroups, marks } from '../../config/eventFilter';
+import type { EventFilterProps, Filters } from '../../types/filters';
+import { formatHour } from '../../utils/dateUtils';
+import AdvancedFilter from './AdvancedFilter';
+import { ColorKeyLabel } from './ColorKeyLabel';
 
 // --- Reusable CategoryCheckbox Component ---
 interface CategoryCheckboxProps {
@@ -40,17 +40,27 @@ interface CategoryCheckboxProps {
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-const CategoryCheckbox = React.memo(({ category, isChecked, onChange }: CategoryCheckboxProps) => {
-  return (
-    <FormControlLabel
-      key={category}
-      control={<Checkbox checked={isChecked} onChange={onChange} name={category} />}
-      label={<ColorKeyLabel category={category} />}
-    />
-  );
-});
+const CategoryCheckbox = React.memo(
+  ({ category, isChecked, onChange }: CategoryCheckboxProps) => {
+    return (
+      <FormControlLabel
+        key={category}
+        control={
+          <Checkbox checked={isChecked} onChange={onChange} name={category} />
+        }
+        label={<ColorKeyLabel category={category} />}
+      />
+    );
+  }
+);
 
-const FilterSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
+const FilterSection = ({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) => (
   <Box sx={{ mb: 3 }}>
     <Typography variant="h6" component="h3" fontWeight="bold" gutterBottom>
       {title}
@@ -62,7 +72,14 @@ const FilterSection = ({ title, children }: { title: string; children: React.Rea
 );
 
 function EventFilter(props: EventFilterProps) {
-  const { filters, onFilterChange, allCategories, onNewEventClick, onResetFilters, onOpenExportDialog } = props;
+  const {
+    filters,
+    onFilterChange,
+    allCategories,
+    onNewEventClick,
+    onResetFilters,
+    onOpenExportDialog,
+  } = props;
 
   const handleFilterChange = useCallback(
     (field: keyof Filters, value: any) => {
@@ -77,22 +94,25 @@ function EventFilter(props: EventFilterProps) {
       const newSelectedCategories = checked
         ? [...filters.selectedCategories, category]
         : filters.selectedCategories.filter((c) => c !== category);
-      handleFilterChange("selectedCategories", newSelectedCategories);
+      handleFilterChange('selectedCategories', newSelectedCategories);
     },
     [filters.selectedCategories, handleFilterChange]
   );
 
   const handleSelectAll = useCallback(() => {
     const all = [SAVED_EVENTS_CATEGORY, ...allCategories];
-    handleFilterChange("selectedCategories", all);
+    handleFilterChange('selectedCategories', all);
   }, [allCategories, handleFilterChange]);
 
   const handleClearAll = useCallback(() => {
-    handleFilterChange("selectedCategories", []);
+    handleFilterChange('selectedCategories', []);
   }, [handleFilterChange]);
 
   const otherCategories = useMemo(
-    () => allCategories.filter((cat) => !Object.values(categoryGroups).flat().includes(cat)),
+    () =>
+      allCategories.filter(
+        (cat) => !Object.values(categoryGroups).flat().includes(cat)
+      ),
     [allCategories]
   );
 
@@ -100,7 +120,7 @@ function EventFilter(props: EventFilterProps) {
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <Card
         sx={{
-          width: { xs: "100%", md: "450px" },
+          width: { xs: '100%', md: '450px' },
           borderRadius: 2,
           boxShadow: 3,
         }}
@@ -114,26 +134,28 @@ function EventFilter(props: EventFilterProps) {
                 label="Search by Event Title"
                 variant="outlined"
                 value={filters.searchTerm}
-                onChange={(e) => handleFilterChange("searchTerm", e.target.value)}
+                onChange={(e) =>
+                  handleFilterChange('searchTerm', e.target.value)
+                }
               />
               <Stack
-                direction={{ xs: "column", md: "row" }}
+                direction={{ xs: 'column', md: 'row' }}
                 spacing={2}
                 sx={{
-                  "& .MuiFormControl-root": { width: "100%" },
+                  '& .MuiFormControl-root': { width: '100%' },
                 }}
               >
                 <DatePicker
                   label="Start Date"
                   value={filters.startDate}
-                  onChange={(date) => handleFilterChange("startDate", date)}
-                  slotProps={{ textField: { variant: "outlined" } }}
+                  onChange={(date) => handleFilterChange('startDate', date)}
+                  slotProps={{ textField: { variant: 'outlined' } }}
                 />
                 <DatePicker
                   label="End Date"
                   value={filters.endDate}
-                  onChange={(date) => handleFilterChange("endDate", date)}
-                  slotProps={{ textField: { variant: "outlined" } }}
+                  onChange={(date) => handleFilterChange('endDate', date)}
+                  slotProps={{ textField: { variant: 'outlined' } }}
                 />
               </Stack>
               <Box sx={{ px: 1, mt: 2 }}>
@@ -142,7 +164,9 @@ function EventFilter(props: EventFilterProps) {
                 </Typography>
                 <Slider
                   value={filters.timeRange}
-                  onChange={(_, value) => handleFilterChange("timeRange", value as number[])}
+                  onChange={(_, value) =>
+                    handleFilterChange('timeRange', value as number[])
+                  }
                   valueLabelFormat={formatHour}
                   valueLabelDisplay="auto"
                   marks={marks}
@@ -155,7 +179,9 @@ function EventFilter(props: EventFilterProps) {
                 control={
                   <Switch
                     checked={filters.showActiveOnly}
-                    onChange={(e) => handleFilterChange("showActiveOnly", e.target.checked)}
+                    onChange={(e) =>
+                      handleFilterChange('showActiveOnly', e.target.checked)
+                    }
                   />
                 }
                 label="Show Active Events Only"
@@ -166,7 +192,11 @@ function EventFilter(props: EventFilterProps) {
             {/* Categories Section */}
             <Divider />
             <FilterSection title="Categories">
-              <Stack direction="row" justifyContent="space-between" alignItems="center">
+              <Stack
+                direction="row"
+                justifyContent="space-between"
+                alignItems="center"
+              >
                 <Typography variant="body2" color="text.secondary">
                   Select categories to display
                 </Typography>
@@ -191,7 +221,9 @@ function EventFilter(props: EventFilterProps) {
                       <FormControlLabel
                         control={
                           <Checkbox
-                            checked={filters.selectedCategories.includes(SAVED_EVENTS_CATEGORY)}
+                            checked={filters.selectedCategories.includes(
+                              SAVED_EVENTS_CATEGORY
+                            )}
                             onChange={handleCategoryChange}
                             name={SAVED_EVENTS_CATEGORY}
                             icon={<StarBorderIcon />}
@@ -203,33 +235,39 @@ function EventFilter(props: EventFilterProps) {
                     </FormGroup>
                   </AccordionDetails>
                 </Accordion>
-                {Object.entries(categoryGroups).map(([groupName, categories]) => {
-                  const groupCategories = categories.filter((c) => allCategories.includes(c));
-                  if (groupCategories.length === 0) {
-                    return null;
+                {Object.entries(categoryGroups).map(
+                  ([groupName, categories]) => {
+                    const groupCategories = categories.filter((c) =>
+                      allCategories.includes(c)
+                    );
+                    if (groupCategories.length === 0) {
+                      return null;
+                    }
+                    return (
+                      <Accordion key={groupName} defaultExpanded={false}>
+                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                          <Typography variant="body1" fontWeight="bold">
+                            {groupName}
+                          </Typography>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                          <FormGroup>
+                            {groupCategories.map((category) => (
+                              <CategoryCheckbox
+                                key={category}
+                                category={category}
+                                isChecked={filters.selectedCategories.includes(
+                                  category
+                                )}
+                                onChange={handleCategoryChange}
+                              />
+                            ))}
+                          </FormGroup>
+                        </AccordionDetails>
+                      </Accordion>
+                    );
                   }
-                  return (
-                    <Accordion key={groupName} defaultExpanded={false}>
-                      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                        <Typography variant="body1" fontWeight="bold">
-                          {groupName}
-                        </Typography>
-                      </AccordionSummary>
-                      <AccordionDetails>
-                        <FormGroup>
-                          {groupCategories.map((category) => (
-                            <CategoryCheckbox
-                              key={category}
-                              category={category}
-                              isChecked={filters.selectedCategories.includes(category)}
-                              onChange={handleCategoryChange}
-                            />
-                          ))}
-                        </FormGroup>
-                      </AccordionDetails>
-                    </Accordion>
-                  );
-                })}
+                )}
                 {otherCategories.length > 0 && (
                   <Accordion defaultExpanded={false}>
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -243,7 +281,9 @@ function EventFilter(props: EventFilterProps) {
                           <CategoryCheckbox
                             key={category}
                             category={category}
-                            isChecked={filters.selectedCategories.includes(category)}
+                            isChecked={filters.selectedCategories.includes(
+                              category
+                            )}
                             onChange={handleCategoryChange}
                           />
                         ))}
@@ -276,21 +316,33 @@ function EventFilter(props: EventFilterProps) {
 
             {/* Action Buttons */}
             <Stack
-              direction={{ xs: "column", md: "row" }}
+              direction={{ xs: 'column', md: 'row' }}
               spacing={2}
               sx={{
-                justifyContent: { xs: "flex-start", md: "flex-end" },
-                flexWrap: "wrap",
+                justifyContent: { xs: 'flex-start', md: 'flex-end' },
+                flexWrap: 'wrap',
                 mt: 3,
               }}
             >
-              <Button variant="outlined" startIcon={<ReplayIcon />} onClick={onResetFilters}>
+              <Button
+                variant="outlined"
+                startIcon={<ReplayIcon />}
+                onClick={onResetFilters}
+              >
                 Reset
               </Button>
-              <Button variant="outlined" startIcon={<FileDownloadIcon />} onClick={onOpenExportDialog}>
+              <Button
+                variant="outlined"
+                startIcon={<FileDownloadIcon />}
+                onClick={onOpenExportDialog}
+              >
                 Export
               </Button>
-              <Button variant="contained" startIcon={<AddCircleOutlineIcon />} onClick={onNewEventClick}>
+              <Button
+                variant="contained"
+                startIcon={<AddCircleOutlineIcon />}
+                onClick={onNewEventClick}
+              >
                 New Event
               </Button>
             </Stack>

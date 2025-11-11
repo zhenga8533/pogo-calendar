@@ -1,6 +1,14 @@
-import { Box, Button, Checkbox, Divider, FormControlLabel, FormGroup, Stack } from "@mui/material";
-import React, { useCallback } from "react";
-import { ColorKeyLabel } from "../filters/ColorKeyLabel";
+import {
+  Box,
+  Button,
+  Checkbox,
+  Divider,
+  FormControlLabel,
+  FormGroup,
+  Stack,
+} from '@mui/material';
+import React, { useCallback } from 'react';
+import { ColorKeyLabel } from '../filters/ColorKeyLabel';
 
 interface CategoryExportPanelProps {
   allCategories: string[];
@@ -26,11 +34,13 @@ export const CategoryExportPanel = React.memo(function CategoryExportPanel({
   return (
     <Box sx={{ pt: 2 }}>
       <Stack direction="row" justifyContent="flex-end" sx={{ mb: 1 }}>
-        <Button onClick={() => onSelectionChange(allCategories)}>Select All</Button>
+        <Button onClick={() => onSelectionChange(allCategories)}>
+          Select All
+        </Button>
         <Button onClick={() => onSelectionChange([])}>Clear All</Button>
       </Stack>
       <Divider />
-      <FormGroup sx={{ mt: 2, maxHeight: "40vh", overflowY: "auto" }}>
+      <FormGroup sx={{ mt: 2, maxHeight: '40vh', overflowY: 'auto' }}>
         {allCategories.map((category) => (
           <FormControlLabel
             key={category}

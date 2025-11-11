@@ -1,5 +1,5 @@
-import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import { Box, Fab, Fade, useScrollTrigger } from "@mui/material";
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import { Box, Fab, Fade, useScrollTrigger } from '@mui/material';
 
 function ScrollToTop() {
   const trigger = useScrollTrigger({
@@ -10,7 +10,7 @@ function ScrollToTop() {
   const handleClick = () => {
     window.scrollTo({
       top: 0,
-      behavior: "smooth",
+      behavior: 'smooth',
     });
   };
 
@@ -19,7 +19,12 @@ function ScrollToTop() {
       <Box
         onClick={handleClick}
         role="presentation"
-        sx={{ position: "fixed", bottom: 32, right: 32, zIndex: (theme) => theme.zIndex.modal + 1 }}
+        sx={{
+          position: 'fixed',
+          bottom: 32,
+          right: 32,
+          zIndex: (theme) => theme.zIndex.modal + 1,
+        }}
       >
         <Fab color="primary" size="medium" aria-label="scroll back to top">
           <ArrowUpwardIcon />

@@ -1,10 +1,10 @@
-import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
-import { Box, Paper, Typography } from "@mui/material";
-import { CalendarSkeleton } from "../components/calendar/CalendarSkeleton";
-import EventCalendar from "../components/calendar/EventCalendar";
-import { useCalendarContext } from "../contexts/CalendarContext";
-import type { ToastSeverity } from "../hooks/useToast";
-import type { CalendarEvent } from "../types/events";
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import { Box, Paper, Typography } from '@mui/material';
+import { CalendarSkeleton } from '../components/calendar/CalendarSkeleton';
+import EventCalendar from '../components/calendar/EventCalendar';
+import { useCalendarContext } from '../contexts/CalendarContext';
+import type { ToastSeverity } from '../hooks/useToast';
+import type { CalendarEvent } from '../types/events';
 
 interface CalendarPageProps {
   isLoading: boolean;
@@ -40,15 +40,15 @@ function CalendarPage(props: CalendarPageProps) {
         elevation={3}
         sx={{
           p: { xs: 2, md: 4 },
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "60vh",
-          textAlign: "center",
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '60vh',
+          textAlign: 'center',
         }}
       >
-        <ErrorOutlineIcon sx={{ fontSize: 60, color: "error.main", mb: 2 }} />
+        <ErrorOutlineIcon sx={{ fontSize: 60, color: 'error.main', mb: 2 }} />
         <Typography variant="h5" component="p" color="error.main" gutterBottom>
           Failed to Load Events
         </Typography>
@@ -74,7 +74,11 @@ function CalendarPage(props: CalendarPageProps) {
         onDeleteEvent={onDeleteEvent}
         onEditEvent={onEditEvent}
         onDateSelect={(selection) =>
-          setFilters((prev: any) => ({ ...prev, startDate: selection.start, endDate: selection.end }))
+          setFilters((prev: any) => ({
+            ...prev,
+            startDate: selection.start,
+            endDate: selection.end,
+          }))
         }
         showToast={showToast}
       />

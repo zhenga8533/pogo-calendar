@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from 'react';
 
 /**
  * Custom hook to manage the state and logic for a text note editor.
@@ -8,10 +8,15 @@ import { useCallback, useEffect, useState } from "react";
  * @param onCloseDialog Callback function to close the parent dialog/modal.
  * @returns An object with state and handlers for the note editor.
  */
-export function useNoteEditor(initialNote: string, onSave: (noteText: string) => void, onCloseDialog: () => void) {
+export function useNoteEditor(
+  initialNote: string,
+  onSave: (noteText: string) => void,
+  onCloseDialog: () => void
+) {
   const [noteText, setNoteText] = useState(initialNote);
   const [isDirty, setIsDirty] = useState(false);
-  const [isUnsavedChangesDialogOpen, setUnsavedChangesDialogOpen] = useState(false);
+  const [isUnsavedChangesDialogOpen, setUnsavedChangesDialogOpen] =
+    useState(false);
 
   useEffect(() => {
     setNoteText(initialNote);

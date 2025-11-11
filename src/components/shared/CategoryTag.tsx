@@ -1,6 +1,6 @@
-import { Chip, useTheme } from "@mui/material";
-import React, { useMemo } from "react";
-import { getColorForCategory } from "../../utils/colorUtils";
+import { Chip, useTheme } from '@mui/material';
+import React, { useMemo } from 'react';
+import { getColorForCategory } from '../../utils/colorUtils';
 
 interface CategoryTagProps {
   category: string;
@@ -21,7 +21,7 @@ function CategoryTagComponent({ category }: CategoryTagProps) {
       sx={{
         backgroundColor: categoryColor,
         color: theme.palette.getContrastText(categoryColor),
-        fontWeight: "bold",
+        fontWeight: 'bold',
       }}
     />
   );

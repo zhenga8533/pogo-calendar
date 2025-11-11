@@ -1,12 +1,18 @@
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
-import { CUSTOM_EVENT_CATEGORY } from "../config/constants";
-import { useCustomEvents } from "../hooks/useCustomEvents";
-import { useEventData } from "../hooks/useEventData";
-import { useEventNotes } from "../hooks/useEventNotes";
-import { useFilters } from "../hooks/useFilters";
-import { useSavedEvents } from "../hooks/useSavedEvents";
-import type { CalendarEvent, NewEventData } from "../types/events";
-import { useSettingsContext } from "./SettingsContext";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from 'react';
+import { CUSTOM_EVENT_CATEGORY } from '../config/constants';
+import { useCustomEvents } from '../hooks/useCustomEvents';
+import { useEventData } from '../hooks/useEventData';
+import { useEventNotes } from '../hooks/useEventNotes';
+import { useFilters } from '../hooks/useFilters';
+import { useSavedEvents } from '../hooks/useSavedEvents';
+import type { CalendarEvent, NewEventData } from '../types/events';
+import { useSettingsContext } from './SettingsContext';
 
 interface CalendarContextType {
   loading: boolean;
@@ -32,22 +38,38 @@ interface CalendarContextType {
   updateNote: (eventId: string, noteText: string) => void;
 }
 
-const CalendarContext = createContext<CalendarContextType | undefined>(undefined);
+const CalendarContext = createContext<CalendarContextType | undefined>(
+  undefined
+);
 
 export function CalendarProvider({ children }: { children: React.ReactNode }) {
   const { settings } = useSettingsContext();
-  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
-  const { allEvents: apiEvents, loading, error, refetch: refetchEvents } = useEventData(settings.timezone);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
+    null
+  );
+  const {
+    allEvents: apiEvents,
+    loading,
+    error,
+    refetch: refetchEvents,
+  } = useEventData(settings.timezone);
   const { savedEventIds, handleToggleSaveEvent } = useSavedEvents();
-  const { customEvents, addEvent, updateEvent, deleteEvent } = useCustomEvents();
+  const { customEvents, addEvent, updateEvent, deleteEvent } =
+    useCustomEvents();
   const { eventNotes, updateNote } = useEventNotes();
 
-  const combinedEvents = useMemo(() => [...apiEvents, ...customEvents], [apiEvents, customEvents]);
-
-  const { filters, setFilters, handleResetFilters, setCurrentView, filteredEvents } = useFilters(
-    combinedEvents,
-    savedEventIds
+  const combinedEvents = useMemo(
+    () => [...apiEvents, ...customEvents],
+    [apiEvents, customEvents]
   );
+
+  const {
+    filters,
+    setFilters,
+    handleResetFilters,
+    setCurrentView,
+    filteredEvents,
+  } = useFilters(combinedEvents, savedEventIds);
 
   const { allCategories, allPokemon, allBonuses } = useMemo(() => {
     const categories = new Set<string>();
@@ -63,7 +85,13 @@ export function CalendarProvider({ children }: { children: React.ReactNode }) {
       }
 
       // Collect all other fields as Pokemon (everything except the known non-Pokemon fields)
-      const nonPokemonFields = ['category', 'article_url', 'banner_url', 'description', 'bonuses'];
+      const nonPokemonFields = [
+        'category',
+        'article_url',
+        'banner_url',
+        'description',
+        'bonuses',
+      ];
       Object.entries(event.extendedProps).forEach(([key, value]) => {
         if (!nonPokemonFields.includes(key) && Array.isArray(value)) {
           value.forEach((item) => pokemon.add(item));
@@ -84,7 +112,9 @@ export function CalendarProvider({ children }: { children: React.ReactNode }) {
       if (filters.selectedCategories.length > 0) {
         setFilters((prev: any) => ({
           ...prev,
-          selectedCategories: [...new Set([...prev.selectedCategories, CUSTOM_EVENT_CATEGORY])],
+          selectedCategories: [
+            ...new Set([...prev.selectedCategories, CUSTOM_EVENT_CATEGORY]),
+          ],
         }));
       }
     },
@@ -139,13 +169,19 @@ export function CalendarProvider({ children }: { children: React.ReactNode }) {
     ]
   );
 
-  return <CalendarContext.Provider value={value}>{children}</CalendarContext.Provider>;
+  return (
+    <CalendarContext.Provider value={value}>
+      {children}
+    </CalendarContext.Provider>
+  );
 }
 
 export function useCalendarContext() {
   const context = useContext(CalendarContext);
   if (!context) {
-    throw new Error("useCalendarContext must be used within a CalendarProvider");
+    throw new Error(
+      'useCalendarContext must be used within a CalendarProvider'
+    );
   }
   return context;
 }

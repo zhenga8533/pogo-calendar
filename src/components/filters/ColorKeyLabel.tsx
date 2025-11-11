@@ -1,6 +1,6 @@
-import { Box, Typography, useTheme } from "@mui/material";
-import React, { useMemo } from "react";
-import { getColorForCategory } from "../../utils/colorUtils";
+import { Box, Typography, useTheme } from '@mui/material';
+import React, { useMemo } from 'react';
+import { getColorForCategory } from '../../utils/colorUtils';
 
 interface ColorKeyLabelProps {
   category: string;
@@ -13,7 +13,10 @@ interface ColorKeyLabelProps {
  * @param param0 Props for the ColorKeyLabel component.
  * @returns A label with a colored dot representing the category.
  */
-function ColorKeyLabelComponent({ category, showText = true }: ColorKeyLabelProps) {
+function ColorKeyLabelComponent({
+  category,
+  showText = true,
+}: ColorKeyLabelProps) {
   const theme = useTheme();
 
   const backgroundColor = useMemo(
@@ -23,13 +26,13 @@ function ColorKeyLabelComponent({ category, showText = true }: ColorKeyLabelProp
 
   // Render the color key label.
   return (
-    <Box sx={{ display: "flex", alignItems: "center" }}>
+    <Box sx={{ display: 'flex', alignItems: 'center' }}>
       <Box
         component="span"
         sx={{
           width: 14,
           height: 14,
-          borderRadius: "50%",
+          borderRadius: '50%',
           backgroundColor,
           border: `1px solid ${theme.palette.divider}`,
         }}

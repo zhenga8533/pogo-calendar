@@ -1,4 +1,11 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from '@mui/material';
 
 interface DeleteConfirmationDialogProps {
   open: boolean;
@@ -7,13 +14,19 @@ interface DeleteConfirmationDialogProps {
   eventName: string;
 }
 
-export function DeleteConfirmationDialog({ open, onClose, onConfirm, eventName }: DeleteConfirmationDialogProps) {
+export function DeleteConfirmationDialog({
+  open,
+  onClose,
+  onConfirm,
+  eventName,
+}: DeleteConfirmationDialogProps) {
   return (
     <Dialog open={open} onClose={onClose} disableRestoreFocus>
       <DialogTitle>Confirm Deletion</DialogTitle>
       <DialogContent>
         <DialogContentText>
-          Are you sure you want to delete the event "{eventName}"? This action cannot be undone.
+          Are you sure you want to delete the event "{eventName}"? This action
+          cannot be undone.
         </DialogContentText>
       </DialogContent>
       <DialogActions>

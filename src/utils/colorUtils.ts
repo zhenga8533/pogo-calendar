@@ -1,5 +1,8 @@
-import type { PaletteMode } from "@mui/material";
-import { darkCategoryColors, lightCategoryColors } from "../config/colorMapping";
+import type { PaletteMode } from '@mui/material';
+import {
+  darkCategoryColors,
+  lightCategoryColors,
+} from '../config/colorMapping';
 
 /**
  * Generates a numeric hash from a string.
@@ -23,8 +26,11 @@ function stringToHash(str: string): number {
  * @param category The category name for which to get the color
  * @returns A string representing the color in HSL format
  */
-export function getColorForCategory(category: string, mode: PaletteMode): string {
-  const colorMap = mode === "light" ? lightCategoryColors : darkCategoryColors;
+export function getColorForCategory(
+  category: string,
+  mode: PaletteMode
+): string {
+  const colorMap = mode === 'light' ? lightCategoryColors : darkCategoryColors;
 
   if (colorMap[category]) {
     return colorMap[category];
@@ -32,8 +38,8 @@ export function getColorForCategory(category: string, mode: PaletteMode): string
 
   const hash = stringToHash(category);
   const hue = Math.abs(hash % 360);
-  const saturation = mode === "light" ? 70 : 60;
-  const lightness = mode === "light" ? 50 : 65;
+  const saturation = mode === 'light' ? 70 : 60;
+  const lightness = mode === 'light' ? 50 : 65;
 
   return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 }

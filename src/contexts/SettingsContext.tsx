@@ -1,6 +1,6 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { SETTINGS_KEY } from "../config/constants";
-import type { Settings, ThemeSetting } from "../types/settings";
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { SETTINGS_KEY } from '../config/constants';
+import type { Settings, ThemeSetting } from '../types/settings';
 
 interface SettingsContextType {
   settings: Settings;
@@ -8,10 +8,12 @@ interface SettingsContextType {
   changeTheme: (theme: ThemeSetting) => void;
 }
 
-const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
+const SettingsContext = createContext<SettingsContextType | undefined>(
+  undefined
+);
 
 const initialSettings: Settings = {
-  theme: "auto",
+  theme: 'auto',
   firstDay: 0,
   timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   hour12: true,
@@ -26,7 +28,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         return { ...initialSettings, ...JSON.parse(saved) };
       }
     } catch (error) {
-      console.error("Failed to parse settings from localStorage:", error);
+      console.error('Failed to parse settings from localStorage:', error);
     }
     return initialSettings;
   });
@@ -39,15 +41,24 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     setSettings((prev) => ({ ...prev, theme }));
   };
 
-  const value = useMemo(() => ({ settings, setSettings, changeTheme }), [settings]);
+  const value = useMemo(
+    () => ({ settings, setSettings, changeTheme }),
+    [settings]
+  );
 
-  return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;
+  return (
+    <SettingsContext.Provider value={value}>
+      {children}
+    </SettingsContext.Provider>
+  );
 }
 
 export function useSettingsContext() {
   const context = useContext(SettingsContext);
   if (!context) {
-    throw new Error("useSettingsContext must be used within a SettingsProvider");
+    throw new Error(
+      'useSettingsContext must be used within a SettingsProvider'
+    );
   }
   return context;
 }

@@ -1,6 +1,12 @@
-import { Autocomplete, Chip, Stack, TextField, Typography } from "@mui/material";
-import React from "react";
-import type { Filters } from "../../types/filters";
+import {
+  Autocomplete,
+  Chip,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material';
+import React from 'react';
+import type { Filters } from '../../types/filters';
 
 interface AdvancedFilterProps {
   filters: Filters;
@@ -9,7 +15,13 @@ interface AdvancedFilterProps {
   allBonuses: string[];
 }
 
-const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
+const Section = ({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) => (
   <Stack spacing={2}>
     <Typography variant="overline" color="text.secondary">
       {title}
@@ -18,7 +30,12 @@ const Section = ({ title, children }: { title: string; children: React.ReactNode
   </Stack>
 );
 
-function AdvancedFilter({ filters, handleFilterChange, allPokemon, allBonuses }: AdvancedFilterProps) {
+function AdvancedFilter({
+  filters,
+  handleFilterChange,
+  allPokemon,
+  allBonuses,
+}: AdvancedFilterProps) {
   return (
     <Stack spacing={4}>
       <Section title="Advanced Filters">
@@ -26,24 +43,50 @@ function AdvancedFilter({ filters, handleFilterChange, allPokemon, allBonuses }:
           multiple
           options={allPokemon}
           value={filters.pokemonSearch}
-          onChange={(_, newValue) => handleFilterChange("pokemonSearch", newValue)}
+          onChange={(_, newValue) =>
+            handleFilterChange('pokemonSearch', newValue)
+          }
           renderTags={(value, getTagProps) =>
-            value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
+            value.map((option, index) => (
+              <Chip
+                variant="outlined"
+                label={option}
+                {...getTagProps({ index })}
+              />
+            ))
           }
           renderInput={(params) => (
-            <TextField {...params} variant="filled" label="Filter by Pokémon" placeholder="Select Pokémon" />
+            <TextField
+              {...params}
+              variant="filled"
+              label="Filter by Pokémon"
+              placeholder="Select Pokémon"
+            />
           )}
         />
         <Autocomplete
           multiple
           options={allBonuses}
           value={filters.bonusSearch}
-          onChange={(_, newValue) => handleFilterChange("bonusSearch", newValue)}
+          onChange={(_, newValue) =>
+            handleFilterChange('bonusSearch', newValue)
+          }
           renderTags={(value, getTagProps) =>
-            value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
+            value.map((option, index) => (
+              <Chip
+                variant="outlined"
+                label={option}
+                {...getTagProps({ index })}
+              />
+            ))
           }
           renderInput={(params) => (
-            <TextField {...params} variant="filled" label="Filter by Bonus" placeholder="Select Bonuses" />
+            <TextField
+              {...params}
+              variant="filled"
+              label="Filter by Bonus"
+              placeholder="Select Bonuses"
+            />
           )}
         />
       </Section>

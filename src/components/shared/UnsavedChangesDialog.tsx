@@ -1,4 +1,11 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from '@mui/material';
 
 interface UnsavedChangesDialogProps {
   open: boolean;
@@ -12,8 +19,8 @@ export function UnsavedChangesDialog({
   open,
   onClose,
   onConfirm,
-  title = "Unsaved Changes",
-  message = "You have unsaved changes. Are you sure you want to discard them?",
+  title = 'Unsaved Changes',
+  message = 'You have unsaved changes. Are you sure you want to discard them?',
 }: UnsavedChangesDialogProps) {
   return (
     <Dialog open={open} onClose={onClose}>

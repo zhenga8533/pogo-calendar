@@ -1,7 +1,7 @@
-import FilterListIcon from "@mui/icons-material/FilterList";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
-import SyncIcon from "@mui/icons-material/Sync";
-import TuneIcon from "@mui/icons-material/Tune";
+import FilterListIcon from '@mui/icons-material/FilterList';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import SyncIcon from '@mui/icons-material/Sync';
+import TuneIcon from '@mui/icons-material/Tune';
 import {
   AppBar,
   Badge,
@@ -17,14 +17,14 @@ import {
   Typography,
   useScrollTrigger,
   useTheme,
-} from "@mui/material";
-import React, { useState } from "react";
-import { Link as RouterLink } from "react-router-dom";
-import type { CalendarEvent } from "../../types/events";
-import type { EventFilterProps } from "../../types/filters";
-import EventFilter from "../filters/EventFilter";
-import NextEventTracker from "../shared/NextEventTracker";
-import LogoIcon from "/icon.svg";
+} from '@mui/material';
+import React, { useState } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
+import type { CalendarEvent } from '../../types/events';
+import type { EventFilterProps } from '../../types/filters';
+import EventFilter from '../filters/EventFilter';
+import NextEventTracker from '../shared/NextEventTracker';
+import LogoIcon from '/icon.svg';
 
 const LastUpdatedDisplay = React.memo(function LastUpdatedDisplay({
   onRefresh,
@@ -52,9 +52,15 @@ const LastUpdatedDisplay = React.memo(function LastUpdatedDisplay({
 
   return (
     <Tooltip title="Click to refresh data">
-      <Stack direction="row" alignItems="center" spacing={1} onClick={onRefresh} sx={{ cursor: "pointer" }}>
+      <Stack
+        direction="row"
+        alignItems="center"
+        spacing={1}
+        onClick={onRefresh}
+        sx={{ cursor: 'pointer' }}
+      >
         <SyncIcon fontSize="small" />
-        <Typography variant="body2" sx={{ whiteSpace: "nowrap" }}>
+        <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
           {lastUpdated}
         </Typography>
       </Stack>
@@ -62,7 +68,7 @@ const LastUpdatedDisplay = React.memo(function LastUpdatedDisplay({
   );
 });
 
-type HeaderProps = Omit<EventFilterProps, "isMobile"> & {
+type HeaderProps = Omit<EventFilterProps, 'isMobile'> & {
   onSettingsClick: () => void;
   onRefresh: () => void;
   nextUpcomingEvent: CalendarEvent | null;
@@ -92,7 +98,8 @@ function HeaderComponent(props: HeaderProps) {
   const theme = useTheme();
   const trigger = useScrollTrigger({ disableHysteresis: true, threshold: 0 });
 
-  const [filterAnchorEl, setFilterAnchorEl] = useState<HTMLButtonElement | null>(null);
+  const [filterAnchorEl, setFilterAnchorEl] =
+    useState<HTMLButtonElement | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const handleFilterClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -119,24 +126,32 @@ function HeaderComponent(props: HeaderProps) {
         sx={{
           backgroundColor: trigger
             ? theme.palette.background.paper
-            : theme.palette.mode === "dark"
-            ? "rgba(18, 18, 18, 0.8)"
-            : "rgba(255, 255, 255, 0.8)",
-          backdropFilter: "blur(12px)",
+            : theme.palette.mode === 'dark'
+            ? 'rgba(18, 18, 18, 0.8)'
+            : 'rgba(255, 255, 255, 0.8)',
+          backdropFilter: 'blur(12px)',
           color: theme.palette.text.primary,
           borderBottom: `1px solid ${theme.palette.divider}`,
-          transition: theme.transitions.create(["background-color", "box-shadow", "color"], {
-            duration: theme.transitions.duration.short,
-          }),
+          transition: theme.transitions.create(
+            ['background-color', 'box-shadow', 'color'],
+            {
+              duration: theme.transitions.duration.short,
+            }
+          ),
         }}
       >
-        <Toolbar sx={{ justifyContent: "space-between" }}>
+        <Toolbar sx={{ justifyContent: 'space-between' }}>
           <Stack
             component={RouterLink}
             to="/"
             direction="row"
             alignItems="center"
-            sx={{ cursor: "pointer", textDecoration: "none", color: "inherit", flexShrink: 0 }}
+            sx={{
+              cursor: 'pointer',
+              textDecoration: 'none',
+              color: 'inherit',
+              flexShrink: 0,
+            }}
           >
             <Box
               component="img"
@@ -148,19 +163,26 @@ function HeaderComponent(props: HeaderProps) {
                 width: 28,
               }}
             />
-            <Typography variant="h6" component="div" sx={{ display: { xs: "none", sm: "block" } }}>
+            <Typography
+              variant="h6"
+              component="div"
+              sx={{ display: { xs: 'none', sm: 'block' } }}
+            >
               PoGo Event Calendar
             </Typography>
           </Stack>
 
           {showNextEventTracker && (
-            <Box sx={{ display: { xs: "none", lg: "block" } }}>
-              <NextEventTracker nextEvent={nextUpcomingEvent} onEventClick={onSelectEvent} />
+            <Box sx={{ display: { xs: 'none', lg: 'block' } }}>
+              <NextEventTracker
+                nextEvent={nextUpcomingEvent}
+                onEventClick={onSelectEvent}
+              />
             </Box>
           )}
 
           <Stack direction="row" alignItems="center" spacing={isMobile ? 0 : 1}>
-            <Box sx={{ display: { xs: "none", sm: "block" } }}>
+            <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
               <LastUpdatedDisplay
                 onRefresh={onRefresh}
                 lastUpdated={lastUpdated}
@@ -168,7 +190,11 @@ function HeaderComponent(props: HeaderProps) {
                 error={lastUpdatedError}
               />
             </Box>
-            <Divider orientation="vertical" flexItem sx={{ display: { xs: "none", sm: "block" }, mx: 1 }} />
+            <Divider
+              orientation="vertical"
+              flexItem
+              sx={{ display: { xs: 'none', sm: 'block' }, mx: 1 }}
+            />
             {isMobile ? (
               <Tooltip title="FAQ">
                 <IconButton component={RouterLink} to="/faq" color="inherit">
@@ -180,7 +206,7 @@ function HeaderComponent(props: HeaderProps) {
                 component={RouterLink}
                 to="/faq"
                 color="inherit"
-                sx={{ "&:hover": { backgroundColor: "action.hover" } }}
+                sx={{ '&:hover': { backgroundColor: 'action.hover' } }}
               >
                 FAQ
               </Button>
@@ -197,7 +223,7 @@ function HeaderComponent(props: HeaderProps) {
                     color="inherit"
                     startIcon={<FilterListIcon />}
                     onClick={handleFilterClick}
-                    sx={{ "&:hover": { backgroundColor: "action.hover" } }}
+                    sx={{ '&:hover': { backgroundColor: 'action.hover' } }}
                   >
                     Filters
                   </Button>
@@ -215,7 +241,7 @@ function HeaderComponent(props: HeaderProps) {
                   color="inherit"
                   startIcon={<TuneIcon />}
                   onClick={onSettingsClick}
-                  sx={{ "&:hover": { backgroundColor: "action.hover" } }}
+                  sx={{ '&:hover': { backgroundColor: 'action.hover' } }}
                 >
                   Settings
                 </Button>
@@ -234,9 +260,11 @@ function HeaderComponent(props: HeaderProps) {
           open={open}
           anchorEl={filterAnchorEl}
           onClose={handleCloseFilter}
-          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-          transformOrigin={{ vertical: "top", horizontal: "right" }}
-          slotProps={{ paper: { sx: { backgroundColor: "background.default" } } }}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+          transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+          slotProps={{
+            paper: { sx: { backgroundColor: 'background.default' } },
+          }}
         >
           {filterContent}
         </Popover>

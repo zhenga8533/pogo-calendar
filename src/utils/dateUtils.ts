@@ -1,4 +1,4 @@
-import { format } from "date-fns";
+import { format } from 'date-fns';
 
 /**
  * Safely converts a string or Date into a valid Date object, or null.
@@ -25,12 +25,18 @@ export function toDate(value: Date | string | null | undefined): Date | null {
  * @param showTime If true, includes the time in the output. Defaults to true.
  * @returns A formatted date string (e.g., "Sep 11, 2025 10:45 AM").
  */
-export function formatDateLine(dateString: string | null, hour12: boolean, showTime: boolean = true): string | null {
+export function formatDateLine(
+  dateString: string | null,
+  hour12: boolean,
+  showTime: boolean = true
+): string | null {
   if (!dateString) return null;
   const date = toDate(dateString);
   if (!date) return null;
 
-  const formatString = showTime ? `MMM d, yyyy ${hour12 ? "h:mm a" : "HH:mm"}` : "MMM d, yyyy";
+  const formatString = showTime
+    ? `MMM d, yyyy ${hour12 ? 'h:mm a' : 'HH:mm'}`
+    : 'MMM d, yyyy';
   return format(date, formatString);
 }
 
@@ -38,8 +44,8 @@ export function formatDateLine(dateString: string | null, hour12: boolean, showT
  * Formats an hour value (0-24) to a 12-hour time string with AM/PM.
  */
 export function formatHour(value: number): string {
-  if (value === 24 || value === 0) return "12 AM";
-  const ampm = value < 12 ? "AM" : "PM";
+  if (value === 24 || value === 0) return '12 AM';
+  const ampm = value < 12 ? 'AM' : 'PM';
   const hour = value % 12 === 0 ? 12 : value % 12;
   return `${hour} ${ampm}`;
 }

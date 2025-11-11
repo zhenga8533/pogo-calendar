@@ -1,8 +1,15 @@
-import UpdateIcon from "@mui/icons-material/Update";
-import { Box, Paper, Stack, Tooltip, Typography, keyframes } from "@mui/material";
-import { useEventStatus } from "../../hooks/useEventStatus";
-import type { CalendarEvent } from "../../types/events";
-import { ColorKeyLabel } from "../filters/ColorKeyLabel";
+import UpdateIcon from '@mui/icons-material/Update';
+import {
+  Box,
+  Paper,
+  Stack,
+  Tooltip,
+  Typography,
+  keyframes,
+} from '@mui/material';
+import { useEventStatus } from '../../hooks/useEventStatus';
+import type { CalendarEvent } from '../../types/events';
+import { ColorKeyLabel } from '../filters/ColorKeyLabel';
 
 interface NextEventTrackerProps {
   nextEvent: CalendarEvent | null;
@@ -16,7 +23,10 @@ const pulseAnimation = keyframes`
 `;
 
 function NextEventTracker({ nextEvent, onEventClick }: NextEventTrackerProps) {
-  const { displayTime } = useEventStatus(nextEvent?.start ?? null, nextEvent?.end ?? null);
+  const { displayTime } = useEventStatus(
+    nextEvent?.start ?? null,
+    nextEvent?.end ?? null
+  );
 
   if (!nextEvent) {
     return null;
@@ -30,41 +40,55 @@ function NextEventTracker({ nextEvent, onEventClick }: NextEventTrackerProps) {
         sx={{
           p: 1.5,
           pl: 2,
-          display: "flex",
-          alignItems: "center",
+          display: 'flex',
+          alignItems: 'center',
           borderRadius: 4,
-          cursor: "pointer",
+          cursor: 'pointer',
           animation: `${pulseAnimation} 2.5s infinite`,
           border: 1,
-          borderColor: "primary.light",
+          borderColor: 'primary.light',
           maxHeight: 44, // Constrain the height
-          "&:hover": {
-            backgroundColor: "action.hover",
+          '&:hover': {
+            backgroundColor: 'action.hover',
           },
         }}
       >
         <Stack direction="row" alignItems="center" spacing={1.5}>
           <UpdateIcon color="primary" />
           <Stack alignItems="flex-start">
-            <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.2 }}>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ lineHeight: 1.2 }}
+            >
               NEXT EVENT
             </Typography>
             <Stack direction="row" alignItems="center" spacing={1}>
-              <ColorKeyLabel category={nextEvent.extendedProps.category} showText={false} />
-              <Typography variant="body2" sx={{ fontWeight: "bold", whiteSpace: "nowrap" }}>
+              <ColorKeyLabel
+                category={nextEvent.extendedProps.category}
+                showText={false}
+              />
+              <Typography
+                variant="body2"
+                sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}
+              >
                 {nextEvent.title}
               </Typography>
             </Stack>
           </Stack>
           <Box
             sx={{
-              width: "1px",
-              height: "24px",
-              backgroundColor: "divider",
+              width: '1px',
+              height: '24px',
+              backgroundColor: 'divider',
               mx: 1,
             }}
           />
-          <Typography variant="body2" color="primary" sx={{ fontWeight: "bold", whiteSpace: "nowrap" }}>
+          <Typography
+            variant="body2"
+            color="primary"
+            sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}
+          >
             {displayTime}
           </Typography>
         </Stack>

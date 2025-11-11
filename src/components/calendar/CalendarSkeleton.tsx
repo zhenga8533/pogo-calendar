@@ -1,5 +1,5 @@
-import { Box, Divider, Paper, Skeleton, Stack } from "@mui/material";
-import React from "react";
+import { Box, Divider, Paper, Skeleton, Stack } from '@mui/material';
+import React from 'react';
 
 interface CalendarSkeletonProps {
   isMobile: boolean;
@@ -53,7 +53,7 @@ const DesktopSkeletonGrid = () => {
       {/* Calendar Day Cells Container */}
       <Box
         sx={{
-          display: "grid",
+          display: 'grid',
           gridTemplateColumns: `repeat(${SKELETON_COLS}, 1fr)`,
           gap: 1,
         }}

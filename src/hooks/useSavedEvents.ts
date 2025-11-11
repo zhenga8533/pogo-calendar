@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
-import { SAVED_EVENTS_KEY } from "../config/constants";
+import { useCallback, useEffect, useState } from 'react';
+import { SAVED_EVENTS_KEY } from '../config/constants';
 
 export function useSavedEvents() {
   const [savedEventIds, setSavedEventIds] = useState<string[]>(() => {
@@ -7,7 +7,10 @@ export function useSavedEvents() {
       const saved = localStorage.getItem(SAVED_EVENTS_KEY);
       return saved ? JSON.parse(saved) : [];
     } catch (error) {
-      console.error("Failed to parse saved event IDs from localStorage:", error);
+      console.error(
+        'Failed to parse saved event IDs from localStorage:',
+        error
+      );
       return [];
     }
   });
@@ -18,7 +21,9 @@ export function useSavedEvents() {
 
   const handleToggleSaveEvent = useCallback((eventId: string) => {
     setSavedEventIds((prevIds) =>
-      prevIds.includes(eventId) ? prevIds.filter((id) => id !== eventId) : [...prevIds, eventId]
+      prevIds.includes(eventId)
+        ? prevIds.filter((id) => id !== eventId)
+        : [...prevIds, eventId]
     );
   }, []);
 

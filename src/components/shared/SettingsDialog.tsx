@@ -1,7 +1,7 @@
-import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
-import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
-import PublicIcon from "@mui/icons-material/Public";
-import SettingsBrightnessOutlinedIcon from "@mui/icons-material/SettingsBrightnessOutlined";
+import DarkModeOutlinedIcon from '@mui/icons-material/DarkModeOutlined';
+import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined';
+import PublicIcon from '@mui/icons-material/Public';
+import SettingsBrightnessOutlinedIcon from '@mui/icons-material/SettingsBrightnessOutlined';
 import {
   Box,
   Button,
@@ -20,17 +20,21 @@ import {
   ToggleButtonGroup,
   Typography,
   useTheme,
-} from "@mui/material";
-import React, { useEffect, useState } from "react";
-import { dayOptions } from "../../config/eventFilter";
-import { useSettingsContext } from "../../contexts/SettingsContext";
-import { fetchTimezones } from "../../services/eventService";
-import type { Settings, ThemeSetting, Timezone } from "../../types/settings";
+} from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { dayOptions } from '../../config/eventFilter';
+import { useSettingsContext } from '../../contexts/SettingsContext';
+import { fetchTimezones } from '../../services/eventService';
+import type { Settings, ThemeSetting, Timezone } from '../../types/settings';
 
-const themeOptions: { value: ThemeSetting; text: string; Icon: React.ElementType }[] = [
-  { value: "light", text: "Light", Icon: LightModeOutlinedIcon },
-  { value: "dark", text: "Dark", Icon: DarkModeOutlinedIcon },
-  { value: "auto", text: "Auto", Icon: SettingsBrightnessOutlinedIcon },
+const themeOptions: {
+  value: ThemeSetting;
+  text: string;
+  Icon: React.ElementType;
+}[] = [
+  { value: 'light', text: 'Light', Icon: LightModeOutlinedIcon },
+  { value: 'dark', text: 'Dark', Icon: DarkModeOutlinedIcon },
+  { value: 'auto', text: 'Auto', Icon: SettingsBrightnessOutlinedIcon },
 ];
 
 interface SettingsDialogProps {
@@ -39,10 +43,16 @@ interface SettingsDialogProps {
   onSettingsChange: (newSettings: Partial<Settings>) => void;
 }
 
-function SettingsDialogComponent({ open, onClose, onSettingsChange }: SettingsDialogProps) {
+function SettingsDialogComponent({
+  open,
+  onClose,
+  onSettingsChange,
+}: SettingsDialogProps) {
   const theme = useTheme();
   const { settings } = useSettingsContext();
-  const [timezones, setTimezones] = useState<Timezone[]>([{ text: settings.timezone, value: settings.timezone }]);
+  const [timezones, setTimezones] = useState<Timezone[]>([
+    { text: settings.timezone, value: settings.timezone },
+  ]);
   const [loadingTimezones, setLoadingTimezones] = useState(true);
 
   useEffect(() => {
@@ -52,15 +62,20 @@ function SettingsDialogComponent({ open, onClose, onSettingsChange }: SettingsDi
         try {
           const tzData = await fetchTimezones();
           const userTimezone = settings.timezone;
-          const userTimezoneInList = tzData.some((tz) => tz.value === userTimezone);
+          const userTimezoneInList = tzData.some(
+            (tz) => tz.value === userTimezone
+          );
 
           if (!userTimezoneInList) {
-            setTimezones([{ text: userTimezone, value: userTimezone }, ...tzData]);
+            setTimezones([
+              { text: userTimezone, value: userTimezone },
+              ...tzData,
+            ]);
           } else {
             setTimezones(tzData);
           }
         } catch (error) {
-          console.error("Failed to fetch timezones:", error);
+          console.error('Failed to fetch timezones:', error);
         } finally {
           setLoadingTimezones(false);
         }
@@ -69,7 +84,10 @@ function SettingsDialogComponent({ open, onClose, onSettingsChange }: SettingsDi
     }
   }, [open, settings.timezone]);
 
-  const handleSettingChange = (field: keyof Settings, value: string | number | boolean) => {
+  const handleSettingChange = (
+    field: keyof Settings,
+    value: string | number | boolean
+  ) => {
     onSettingsChange({ [field]: value });
   };
 
@@ -82,7 +100,7 @@ function SettingsDialogComponent({ open, onClose, onSettingsChange }: SettingsDi
       PaperProps={{
         sx: {
           borderRadius: 4,
-          boxShadow: "none",
+          boxShadow: 'none',
         },
       }}
     >
@@ -100,7 +118,9 @@ function SettingsDialogComponent({ open, onClose, onSettingsChange }: SettingsDi
             <ToggleButtonGroup
               value={settings.theme}
               exclusive
-              onChange={(_, value) => value && handleSettingChange("theme", value)}
+              onChange={(_, value) =>
+                value && handleSettingChange('theme', value)
+              }
               fullWidth
             >
               {themeOptions.map(({ value, text, Icon }) => (
@@ -108,16 +128,16 @@ function SettingsDialogComponent({ open, onClose, onSettingsChange }: SettingsDi
                   key={value}
                   value={value}
                   sx={{
-                    display: "flex",
-                    flexDirection: "column",
+                    display: 'flex',
+                    flexDirection: 'column',
                     gap: 0.5,
-                    textTransform: "none",
+                    textTransform: 'none',
                     borderRadius: 2,
                     border: `1px solid ${theme.palette.divider}`,
-                    "&.Mui-selected": {
-                      bgcolor: "action.selected",
-                      "&:hover": {
-                        bgcolor: "action.selected",
+                    '&.Mui-selected': {
+                      bgcolor: 'action.selected',
+                      '&:hover': {
+                        bgcolor: 'action.selected',
                       },
                     },
                   }}
@@ -127,21 +147,33 @@ function SettingsDialogComponent({ open, onClose, onSettingsChange }: SettingsDi
                 </ToggleButton>
               ))}
             </ToggleButtonGroup>
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
               <Typography variant="body1">Upcoming Event Tracker</Typography>
               <ToggleButtonGroup
                 value={settings.showNextEvent}
                 exclusive
                 onChange={(_, value) => {
                   if (value !== null) {
-                    handleSettingChange("showNextEvent", value);
+                    handleSettingChange('showNextEvent', value);
                   }
                 }}
               >
-                <ToggleButton value={true} sx={{ textTransform: "none", px: 2, py: 0.5 }}>
+                <ToggleButton
+                  value={true}
+                  sx={{ textTransform: 'none', px: 2, py: 0.5 }}
+                >
                   Show
                 </ToggleButton>
-                <ToggleButton value={false} sx={{ textTransform: "none", px: 2, py: 0.5 }}>
+                <ToggleButton
+                  value={false}
+                  sx={{ textTransform: 'none', px: 2, py: 0.5 }}
+                >
                   Hide
                 </ToggleButton>
               </ToggleButtonGroup>
@@ -153,12 +185,16 @@ function SettingsDialogComponent({ open, onClose, onSettingsChange }: SettingsDi
               Calendar Display
             </Typography>
             <FormControl fullWidth>
-              <InputLabel id="first-day-select-label">Week Starts On</InputLabel>
+              <InputLabel id="first-day-select-label">
+                Week Starts On
+              </InputLabel>
               <Select
                 labelId="first-day-select-label"
                 value={settings.firstDay}
                 label="Week Starts On"
-                onChange={(e: SelectChangeEvent<number>) => handleSettingChange("firstDay", e.target.value)}
+                onChange={(e: SelectChangeEvent<number>) =>
+                  handleSettingChange('firstDay', e.target.value)
+                }
                 sx={{ borderRadius: 2 }}
               >
                 {dayOptions.map((day) => (
@@ -180,7 +216,9 @@ function SettingsDialogComponent({ open, onClose, onSettingsChange }: SettingsDi
                 labelId="timezone-select-label"
                 value={settings.timezone}
                 label="Time Zone"
-                onChange={(e: SelectChangeEvent<string>) => handleSettingChange("timezone", e.target.value)}
+                onChange={(e: SelectChangeEvent<string>) =>
+                  handleSettingChange('timezone', e.target.value)
+                }
                 sx={{ borderRadius: 2 }}
                 MenuProps={{
                   PaperProps: {
@@ -190,8 +228,14 @@ function SettingsDialogComponent({ open, onClose, onSettingsChange }: SettingsDi
                   },
                 }}
                 renderValue={(selectedValue) => {
-                  const selectedTimezone = timezones.find((tz) => tz.value === selectedValue);
-                  return <Typography noWrap>{selectedTimezone ? selectedTimezone.text : selectedValue}</Typography>;
+                  const selectedTimezone = timezones.find(
+                    (tz) => tz.value === selectedValue
+                  );
+                  return (
+                    <Typography noWrap>
+                      {selectedTimezone ? selectedTimezone.text : selectedValue}
+                    </Typography>
+                  );
                 }}
               >
                 {loadingTimezones && timezones.length === 1 && (
@@ -204,8 +248,16 @@ function SettingsDialogComponent({ open, onClose, onSettingsChange }: SettingsDi
                 )}
                 {timezones.map((tz, index) => (
                   <MenuItem key={`${tz.value}-${index}`} value={tz.value}>
-                    <Stack direction="row" spacing={1.5} alignItems="center" sx={{ overflow: "hidden" }}>
-                      <PublicIcon fontSize="small" sx={{ opacity: 0.6, flexShrink: 0 }} />
+                    <Stack
+                      direction="row"
+                      spacing={1.5}
+                      alignItems="center"
+                      sx={{ overflow: 'hidden' }}
+                    >
+                      <PublicIcon
+                        fontSize="small"
+                        sx={{ opacity: 0.6, flexShrink: 0 }}
+                      />
                       <Typography noWrap sx={{ flex: 1 }}>
                         {tz.text}
                       </Typography>
@@ -220,15 +272,15 @@ function SettingsDialogComponent({ open, onClose, onSettingsChange }: SettingsDi
                 exclusive
                 onChange={(_, value) => {
                   if (value !== null) {
-                    handleSettingChange("hour12", value);
+                    handleSettingChange('hour12', value);
                   }
                 }}
                 fullWidth
               >
-                <ToggleButton value={true} sx={{ textTransform: "none" }}>
+                <ToggleButton value={true} sx={{ textTransform: 'none' }}>
                   12-hour
                 </ToggleButton>
-                <ToggleButton value={false} sx={{ textTransform: "none" }}>
+                <ToggleButton value={false} sx={{ textTransform: 'none' }}>
                   24-hour
                 </ToggleButton>
               </ToggleButtonGroup>

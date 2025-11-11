@@ -1,32 +1,43 @@
-import { Alert, Box, Container, CssBaseline, Snackbar, ThemeProvider, useMediaQuery } from "@mui/material";
-import { lazy, Suspense, useCallback, useMemo, useState } from "react";
-import { Route, Routes } from "react-router-dom";
-import CreateEventDialog from "./components/events/CreateEventDialog";
-import { ExportEventDialog } from "./components/events/ExportEventDialog";
-import Footer from "./components/layout/Footer";
-import Header from "./components/layout/Header";
-import ScrollToTop from "./components/shared/ScrollToTop";
-import { SettingsDialog } from "./components/shared/SettingsDialog";
-import { useCalendarContext } from "./contexts/CalendarContext";
-import { useSettingsContext } from "./contexts/SettingsContext";
-import { useDialogs } from "./hooks/useDialogs";
-import { useLastUpdated } from "./hooks/useLastUpdated";
-import { useNextUpcomingEvent } from "./hooks/useNextUpcomingEvent";
-import { useToast } from "./hooks/useToast";
-import { CalendarDarkStyles } from "./styles/calendarDarkStyles";
-import { getTheme } from "./theme";
-import type { CalendarEvent, NewEventData } from "./types/events";
-import type { Settings } from "./types/settings";
-import { downloadIcsForEvents } from "./utils/calendarUtils";
+import {
+  Alert,
+  Box,
+  Container,
+  CssBaseline,
+  Snackbar,
+  ThemeProvider,
+  useMediaQuery,
+} from '@mui/material';
+import { lazy, Suspense, useCallback, useMemo, useState } from 'react';
+import { Route, Routes } from 'react-router-dom';
+import CreateEventDialog from './components/events/CreateEventDialog';
+import { ExportEventDialog } from './components/events/ExportEventDialog';
+import Footer from './components/layout/Footer';
+import Header from './components/layout/Header';
+import ScrollToTop from './components/shared/ScrollToTop';
+import { SettingsDialog } from './components/shared/SettingsDialog';
+import { useCalendarContext } from './contexts/CalendarContext';
+import { useSettingsContext } from './contexts/SettingsContext';
+import { useDialogs } from './hooks/useDialogs';
+import { useLastUpdated } from './hooks/useLastUpdated';
+import { useNextUpcomingEvent } from './hooks/useNextUpcomingEvent';
+import { useToast } from './hooks/useToast';
+import { CalendarDarkStyles } from './styles/calendarDarkStyles';
+import { getTheme } from './theme';
+import type { CalendarEvent, NewEventData } from './types/events';
+import type { Settings } from './types/settings';
+import { downloadIcsForEvents } from './utils/calendarUtils';
 
 // Lazy load page components
-const CalendarPage = lazy(() => import("./pages/Calendar"));
-const FaqPage = lazy(() => import("./pages/Faq"));
+const CalendarPage = lazy(() => import('./pages/Calendar'));
+const FaqPage = lazy(() => import('./pages/Faq'));
 
 function App() {
   const { settings, setSettings } = useSettingsContext();
-  const muiTheme = useMemo(() => getTheme(settings.theme === "auto" ? "light" : settings.theme), [settings.theme]);
-  const isMobile = useMediaQuery(muiTheme.breakpoints.down("md"));
+  const muiTheme = useMemo(
+    () => getTheme(settings.theme === 'auto' ? 'light' : settings.theme),
+    [settings.theme]
+  );
+  const isMobile = useMediaQuery(muiTheme.breakpoints.down('md'));
   const { activeDialog, openDialog, closeDialog } = useDialogs();
   const { toast, showToast, handleCloseToast } = useToast();
   const [eventToEdit, setEventToEdit] = useState<CalendarEvent | null>(null);
@@ -49,7 +60,12 @@ function App() {
     setSelectedEvent,
   } = useCalendarContext();
 
-  const { lastUpdated, loading: lastUpdatedLoading, error, refetch: refetchLastUpdated } = useLastUpdated();
+  const {
+    lastUpdated,
+    loading: lastUpdatedLoading,
+    error,
+    refetch: refetchLastUpdated,
+  } = useLastUpdated();
   const nextUpcomingEvent = useNextUpcomingEvent(filteredEvents);
 
   const activeFilterCount = useMemo(() => {
@@ -73,16 +89,16 @@ function App() {
   const handleRefresh = useCallback(async () => {
     try {
       await Promise.all([refetchEvents(), refetchLastUpdated()]);
-      showToast("Data refreshed successfully!", "success");
+      showToast('Data refreshed successfully!', 'success');
     } catch (error) {
-      showToast("Failed to refresh data.", "error");
+      showToast('Failed to refresh data.', 'error');
     }
   }, [refetchEvents, refetchLastUpdated, showToast]);
 
   const handleOpenEditDialog = useCallback(
     (event: CalendarEvent) => {
       setEventToEdit(event);
-      openDialog("create");
+      openDialog('create');
     },
     [openDialog]
   );
@@ -96,10 +112,10 @@ function App() {
     (eventData: NewEventData, eventId?: string) => {
       if (eventId) {
         updateEvent(eventId, eventData);
-        showToast("Event updated successfully!", "success");
+        showToast('Event updated successfully!', 'success');
       } else {
         addEvent(eventData);
-        showToast("Event created successfully!", "success");
+        showToast('Event created successfully!', 'success');
       }
       handleCloseCreateDialog();
     },
@@ -109,7 +125,7 @@ function App() {
   const handleDeleteEvent = useCallback(
     (eventId: string) => {
       deleteEvent(eventId);
-      showToast("Event deleted successfully", "success");
+      showToast('Event deleted successfully', 'success');
     },
     [deleteEvent, showToast]
   );
@@ -117,7 +133,7 @@ function App() {
   const handleExport = useCallback(
     (eventsToExport: CalendarEvent[]) => {
       downloadIcsForEvents(eventsToExport);
-      showToast(`Exported ${eventsToExport.length} events!`, "success");
+      showToast(`Exported ${eventsToExport.length} events!`, 'success');
     },
     [showToast]
   );
@@ -126,15 +142,17 @@ function App() {
     <ThemeProvider theme={muiTheme}>
       <CssBaseline />
       <CalendarDarkStyles />
-      <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+      <Box
+        sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}
+      >
         <Header
-          onSettingsClick={() => openDialog("settings")}
+          onSettingsClick={() => openDialog('settings')}
           onRefresh={handleRefresh}
           filters={filters}
           onFilterChange={setFilters}
           onResetFilters={handleResetFilters}
-          onNewEventClick={() => openDialog("create")}
-          onOpenExportDialog={() => openDialog("export")}
+          onNewEventClick={() => openDialog('create')}
+          onOpenExportDialog={() => openDialog('export')}
           allCategories={allCategories}
           allPokemon={allPokemon}
           allBonuses={allBonuses}
@@ -147,8 +165,17 @@ function App() {
           activeFilterCount={activeFilterCount}
           isMobile={isMobile}
         />
-        <Box component="main" sx={{ flexGrow: 1, p: 3, backgroundColor: "background.default" }}>
-          <Suspense fallback={<Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>Loading...</Box>}>
+        <Box
+          component="main"
+          sx={{ flexGrow: 1, p: 3, backgroundColor: 'background.default' }}
+        >
+          <Suspense
+            fallback={
+              <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+                Loading...
+              </Box>
+            }
+          >
             <Routes>
               <Route
                 path="/"
@@ -172,26 +199,34 @@ function App() {
       </Box>
 
       <SettingsDialog
-        open={activeDialog === "settings"}
+        open={activeDialog === 'settings'}
         onClose={closeDialog}
         onSettingsChange={handleSettingsChange}
       />
       <CreateEventDialog
-        open={activeDialog === "create"}
+        open={activeDialog === 'create'}
         onClose={handleCloseCreateDialog}
         onSave={handleSaveEvent}
         eventToEdit={eventToEdit}
       />
       <ExportEventDialog
-        open={activeDialog === "export"}
+        open={activeDialog === 'export'}
         onClose={closeDialog}
         onExport={handleExport}
         allEvents={allEvents}
         filteredEvents={filteredEvents}
         savedEventIds={savedEventIds}
       />
-      <Snackbar open={toast.open} autoHideDuration={6000} onClose={handleCloseToast}>
-        <Alert onClose={handleCloseToast} severity={toast.severity} sx={{ width: "100%" }}>
+      <Snackbar
+        open={toast.open}
+        autoHideDuration={6000}
+        onClose={handleCloseToast}
+      >
+        <Alert
+          onClose={handleCloseToast}
+          severity={toast.severity}
+          sx={{ width: '100%' }}
+        >
           {toast.message}
         </Alert>
       </Snackbar>

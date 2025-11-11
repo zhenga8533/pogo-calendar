@@ -31,8 +31,6 @@ export const categoryGroups = {
   'Major Events': [
     'City Safari',
     'Community Day',
-    'GO Fest',
-    'GO Tour',
     'Max Battles',
     'Pokémon GO Fest',
     'Pokémon GO Tour',

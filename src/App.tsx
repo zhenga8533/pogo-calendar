@@ -75,7 +75,9 @@ function App() {
       (filters.startDate ? 1 : 0) +
       (filters.endDate ? 1 : 0) +
       (filters.showActiveOnly ? 1 : 0) +
-      (filters.timeRange[0] > 0 || filters.timeRange[1] < 24 ? 1 : 0)
+      (filters.timeRange[0] > 0 || filters.timeRange[1] < 24 ? 1 : 0) +
+      filters.pokemonSearch.length +
+      filters.bonusSearch.length
     );
   }, [filters]);
 

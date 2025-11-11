@@ -1,10 +1,10 @@
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
-import AddToCalendarIcon from "@mui/icons-material/Event";
-import OpenInNewIcon from "@mui/icons-material/OpenInNew";
-import StarIcon from "@mui/icons-material/Star";
-import StarBorderIcon from "@mui/icons-material/StarBorder";
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import AddToCalendarIcon from '@mui/icons-material/Event';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import StarIcon from '@mui/icons-material/Star';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
 import {
   Box,
   Button,
@@ -18,19 +18,19 @@ import {
   Stack,
   TextField,
   Typography,
-} from "@mui/material";
-import { useCallback, useMemo, useState } from "react";
-import { CUSTOM_EVENT_CATEGORY } from "../../config/constants";
-import { useSettingsContext } from "../../contexts/SettingsContext";
-import { useNoteEditor } from "../../hooks/useNoteEditor";
-import type { ToastSeverity } from "../../hooks/useToast";
-import type { CalendarEvent } from "../../types/events";
-import { downloadIcsFile } from "../../utils/calendarUtils";
-import { formatDateLine } from "../../utils/dateUtils";
-import { CategoryTag } from "../shared/CategoryTag";
-import { DeleteConfirmationDialog } from "../shared/DeleteConfirmationDialog";
-import { EventStatusTag } from "../shared/EventStatusTag";
-import { UnsavedChangesDialog } from "../shared/UnsavedChangesDialog";
+} from '@mui/material';
+import { useCallback, useMemo, useState } from 'react';
+import { CUSTOM_EVENT_CATEGORY } from '../../config/constants';
+import { useSettingsContext } from '../../contexts/SettingsContext';
+import { useNoteEditor } from '../../hooks/useNoteEditor';
+import type { ToastSeverity } from '../../hooks/useToast';
+import type { CalendarEvent } from '../../types/events';
+import { downloadIcsFile } from '../../utils/calendarUtils';
+import { formatDateLine } from '../../utils/dateUtils';
+import { CategoryTag } from '../shared/CategoryTag';
+import { DeleteConfirmationDialog } from '../shared/DeleteConfirmationDialog';
+import { EventStatusTag } from '../shared/EventStatusTag';
+import { UnsavedChangesDialog } from '../shared/UnsavedChangesDialog';
 
 // Merged DetailSection Component
 interface DetailSectionProps {
@@ -62,7 +62,7 @@ interface EventDetailDialogProps {
 }
 
 const ChipList = ({ items }: { items: string[] }) => (
-  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
     {items.map((item) => (
       <Chip key={item} label={item} />
     ))}
@@ -71,13 +71,13 @@ const ChipList = ({ items }: { items: string[] }) => (
 
 // Field name to display title mapping (optional custom titles)
 const POKEMON_FIELD_TITLES: Record<string, string> = {
-  features: "Featured Pokémon",
-  spawns: "Wild Encounters",
-  raids: "Raids",
-  eggs: "Eggs",
-  shiny: "Shiny Debuts",
-  shadow: "New Shadow Pokémon",
-  moves: "Pokémon with Special Moves",
+  features: 'Featured Pokémon',
+  spawns: 'Wild Encounters',
+  raids: 'Raid Battles',
+  eggs: 'Egg Hatches',
+  shiny: 'Available Shinies',
+  shadow: 'Available Shadows',
+  moves: 'Special Moves',
 };
 
 /**
@@ -93,7 +93,7 @@ function getPokemonFieldTitle(fieldName: string): string {
   // Auto-generate title: capitalize first letter and replace underscores with spaces
   return fieldName
     .split('_')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
 }
 
@@ -129,7 +129,7 @@ function EventDetailDialog({
     (noteText: string) => {
       if (!eventDetails) return;
       onUpdateNote(eventDetails.id, noteText);
-      showToast("Note saved successfully!", "success");
+      showToast('Note saved successfully!', 'success');
     },
     [eventDetails, onUpdateNote, showToast]
   );
@@ -143,7 +143,11 @@ function EventDetailDialog({
     handleClose,
     handleConfirmClose,
     closeUnsavedDialog,
-  } = useNoteEditor(eventDetails ? eventNotes[eventDetails.id] || "" : "", onSaveNote, onClose);
+  } = useNoteEditor(
+    eventDetails ? eventNotes[eventDetails.id] || '' : '',
+    onSaveNote,
+    onClose
+  );
 
   const handleDelete = useCallback(() => {
     if (!eventDetails) return;
@@ -156,7 +160,13 @@ function EventDetailDialog({
     return null;
   }
 
-  const { id, title, banner_url: bannerUrl, isCustomEvent, isSaved } = eventDetails;
+  const {
+    id,
+    title,
+    banner_url: bannerUrl,
+    isCustomEvent,
+    isSaved,
+  } = eventDetails;
 
   return (
     <>
@@ -168,17 +178,17 @@ function EventDetailDialog({
         disableRestoreFocus
         PaperProps={{ sx: { borderRadius: 4 } }}
       >
-        <DialogContent sx={{ p: 0, position: "relative" }}>
+        <DialogContent sx={{ p: 0, position: 'relative' }}>
           <IconButton
-            aria-label={isSaved ? "Unsave event" : "Save event"}
+            aria-label={isSaved ? 'Unsave event' : 'Save event'}
             onClick={() => onToggleSaveEvent(id)}
             sx={{
-              position: "absolute",
+              position: 'absolute',
               top: 8,
               right: 8,
-              backgroundColor: "rgba(0, 0, 0, 0.4)",
-              color: "white",
-              "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.6)" },
+              backgroundColor: 'rgba(0, 0, 0, 0.4)',
+              color: 'white',
+              '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.6)' },
               zIndex: 2,
             }}
           >
@@ -189,25 +199,42 @@ function EventDetailDialog({
             component="img"
             src={bannerUrl}
             alt={`${title} banner`}
-            sx={{ width: "100%", aspectRatio: "16 / 9", objectFit: "cover" }}
+            sx={{ width: '100%', aspectRatio: '16 / 9', objectFit: 'cover' }}
           />
 
-          <Box sx={{ p: 3, position: "relative", zIndex: 1, backgroundColor: "background.paper" }}>
+          <Box
+            sx={{
+              p: 3,
+              position: 'relative',
+              zIndex: 1,
+              backgroundColor: 'background.paper',
+            }}
+          >
             <Stack
               direction="row"
               justifyContent="space-between"
               alignItems="center"
-              sx={{ mb: 2, flexWrap: "wrap", gap: 1 }}
+              sx={{ mb: 2, flexWrap: 'wrap', gap: 1 }}
             >
               <CategoryTag category={eventDetails.category} />
               <EventStatusTag start={event.start} end={event.end} />
             </Stack>
 
-            <Typography variant="h5" component="h2" gutterBottom sx={{ fontWeight: "bold" }}>
+            <Typography
+              variant="h5"
+              component="h2"
+              gutterBottom
+              sx={{ fontWeight: 'bold' }}
+            >
               {title}
             </Typography>
 
-            <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 2 }}>
+            <Stack
+              direction="row"
+              spacing={1.5}
+              alignItems="center"
+              sx={{ mb: 2 }}
+            >
               <CalendarTodayIcon color="action" />
               <Typography variant="body1">
                 {eventDetails.start} - {eventDetails.end}
@@ -218,7 +245,9 @@ function EventDetailDialog({
             <Stack spacing={3}>
               {eventDetails.description && (
                 <DetailSection title="Description">
-                  <Typography variant="body1">{eventDetails.description}</Typography>
+                  <Typography variant="body1">
+                    {eventDetails.description}
+                  </Typography>
                 </DetailSection>
               )}
 
@@ -238,8 +267,24 @@ function EventDetailDialog({
               {Object.entries(eventDetails)
                 .filter(([key, value]) => {
                   // Exclude known non-Pokemon fields and only show arrays with content
-                  const nonPokemonFields = ['category', 'article_url', 'banner_url', 'description', 'bonuses', 'id', 'title', 'isCustomEvent', 'isSaved', 'start', 'end'];
-                  return !nonPokemonFields.includes(key) && Array.isArray(value) && value.length > 0;
+                  const nonPokemonFields = [
+                    'category',
+                    'article_url',
+                    'banner_url',
+                    'description',
+                    'bonuses',
+                    'id',
+                    'title',
+                    'isCustomEvent',
+                    'isSaved',
+                    'start',
+                    'end',
+                  ];
+                  return (
+                    !nonPokemonFields.includes(key) &&
+                    Array.isArray(value) &&
+                    value.length > 0
+                  );
                 })
                 .map(([key, value]) => (
                   <DetailSection key={key} title={getPokemonFieldTitle(key)}>
@@ -264,13 +309,18 @@ function EventDetailDialog({
         <DialogActions
           sx={{
             p: 2,
-            flexDirection: { xs: "column-reverse", sm: "row" },
-            justifyContent: "space-between",
-            alignItems: "center",
+            flexDirection: { xs: 'column-reverse', sm: 'row' },
+            justifyContent: 'space-between',
+            alignItems: 'center',
             gap: 2,
           }}
         >
-          <Stack direction="row" gap={1} flexWrap="wrap" justifyContent={{ xs: "center", sm: "flex-start" }}>
+          <Stack
+            direction="row"
+            gap={1}
+            flexWrap="wrap"
+            justifyContent={{ xs: 'center', sm: 'flex-start' }}
+          >
             {!isCustomEvent && (
               <Button
                 component={Link}
@@ -283,22 +333,42 @@ function EventDetailDialog({
                 Learn More
               </Button>
             )}
-            <Button variant="outlined" startIcon={<AddToCalendarIcon />} onClick={() => downloadIcsFile(event)}>
+            <Button
+              variant="outlined"
+              startIcon={<AddToCalendarIcon />}
+              onClick={() => downloadIcsFile(event)}
+            >
               Add to Calendar
             </Button>
           </Stack>
-          <Stack direction="row" gap={1} flexWrap="wrap" justifyContent={{ xs: "center", sm: "flex-end" }}>
+          <Stack
+            direction="row"
+            gap={1}
+            flexWrap="wrap"
+            justifyContent={{ xs: 'center', sm: 'flex-end' }}
+          >
             {isCustomEvent && (
               <>
-                <Button onClick={() => onEditEvent(event)} startIcon={<EditIcon />}>
+                <Button
+                  onClick={() => onEditEvent(event)}
+                  startIcon={<EditIcon />}
+                >
                   Edit
                 </Button>
-                <Button onClick={() => setConfirmDeleteOpen(true)} color="error" startIcon={<DeleteIcon />}>
+                <Button
+                  onClick={() => setConfirmDeleteOpen(true)}
+                  color="error"
+                  startIcon={<DeleteIcon />}
+                >
                   Delete
                 </Button>
               </>
             )}
-            <Button variant="contained" onClick={handleSave} disabled={!isDirty}>
+            <Button
+              variant="contained"
+              onClick={handleSave}
+              disabled={!isDirty}
+            >
               Save
             </Button>
             <Button onClick={handleClose}>Close</Button>

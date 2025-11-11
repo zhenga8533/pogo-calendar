@@ -210,31 +210,6 @@ function EventFilter(props: EventFilterProps) {
                 </Stack>
               </Stack>
               <Stack spacing={1}>
-                <Accordion defaultExpanded={false}>
-                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    <Typography variant="body1" fontWeight="bold">
-                      Saved Events
-                    </Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <FormGroup>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            checked={filters.selectedCategories.includes(
-                              SAVED_EVENTS_CATEGORY
-                            )}
-                            onChange={handleCategoryChange}
-                            name={SAVED_EVENTS_CATEGORY}
-                            icon={<StarBorderIcon />}
-                            checkedIcon={<StarIcon />}
-                          />
-                        }
-                        label={<ColorKeyLabel category="Saved Events" />}
-                      />
-                    </FormGroup>
-                  </AccordionDetails>
-                </Accordion>
                 {Object.entries(categoryGroups).map(
                   ([groupName, categories]) => {
                     const groupCategories = categories.filter((c) =>
@@ -252,6 +227,24 @@ function EventFilter(props: EventFilterProps) {
                         </AccordionSummary>
                         <AccordionDetails>
                           <FormGroup>
+                            {groupName === 'Major Events' && (
+                              <FormControlLabel
+                                control={
+                                  <Checkbox
+                                    checked={filters.selectedCategories.includes(
+                                      SAVED_EVENTS_CATEGORY
+                                    )}
+                                    onChange={handleCategoryChange}
+                                    name={SAVED_EVENTS_CATEGORY}
+                                    icon={<StarBorderIcon />}
+                                    checkedIcon={<StarIcon />}
+                                  />
+                                }
+                                label={
+                                  <ColorKeyLabel category="Saved Events" />
+                                }
+                              />
+                            )}
                             {groupCategories.map((category) => (
                               <CategoryCheckbox
                                 key={category}

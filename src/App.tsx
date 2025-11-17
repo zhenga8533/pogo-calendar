@@ -14,6 +14,7 @@ import { ExportEventDialog } from './components/events/ExportEventDialog';
 import Footer from './components/layout/Footer';
 import Header from './components/layout/Header';
 import ErrorBoundary from './components/shared/ErrorBoundary';
+import { PageLoader } from './components/shared/PageLoader';
 import ScrollToTop from './components/shared/ScrollToTop';
 import { SettingsDialog } from './components/shared/SettingsDialog';
 import { useCalendarContext } from './contexts/CalendarContext';
@@ -175,13 +176,7 @@ function App() {
           sx={{ flexGrow: 1, p: 3, backgroundColor: 'background.default' }}
         >
           <ErrorBoundary>
-            <Suspense
-              fallback={
-                <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-                  Loading...
-                </Box>
-              }
-            >
+            <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route
                   path="/"

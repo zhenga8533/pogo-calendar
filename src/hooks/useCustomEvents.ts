@@ -4,23 +4,15 @@ import defaultBanner from '../assets/images/default-banner.jpg';
 import { CUSTOM_EVENT_CATEGORY, CUSTOM_EVENTS_KEY } from '../config/constants';
 import type { CalendarEvent, NewEventData } from '../types/events';
 import { formatToLocalTime } from '../utils/dateUtils';
+import { safeGetJSON, safeSetJSON } from '../utils/storageUtils';
 
 export function useCustomEvents() {
   const [customEvents, setCustomEvents] = useState<CalendarEvent[]>(() => {
-    try {
-      const saved = localStorage.getItem(CUSTOM_EVENTS_KEY);
-      if (saved) {
-        return JSON.parse(saved);
-      }
-    } catch (error) {
-      console.error('Failed to parse custom events from localStorage:', error);
-    }
-
-    return [];
+    return safeGetJSON<CalendarEvent[]>(CUSTOM_EVENTS_KEY, []);
   });
 
   useEffect(() => {
-    localStorage.setItem(CUSTOM_EVENTS_KEY, JSON.stringify(customEvents));
+    safeSetJSON(CUSTOM_EVENTS_KEY, customEvents);
   }, [customEvents]);
 
   const addEvent = useCallback((eventData: NewEventData) => {

@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { SETTINGS_KEY } from '../config/constants';
 import type { Settings, ThemeSetting } from '../types/settings';
+import { safeGetJSON, safeSetJSON } from '../utils/storageUtils';
 
 interface SettingsContextType {
   settings: Settings;
@@ -22,19 +23,12 @@ const initialSettings: Settings = {
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<Settings>(() => {
-    try {
-      const saved = localStorage.getItem(SETTINGS_KEY);
-      if (saved) {
-        return { ...initialSettings, ...JSON.parse(saved) };
-      }
-    } catch (error) {
-      console.error('Failed to parse settings from localStorage:', error);
-    }
-    return initialSettings;
+    const saved = safeGetJSON<Partial<Settings>>(SETTINGS_KEY, {});
+    return { ...initialSettings, ...saved };
   });
 
   useEffect(() => {
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    safeSetJSON(SETTINGS_KEY, settings);
   }, [settings]);
 
   const changeTheme = (theme: ThemeSetting) => {

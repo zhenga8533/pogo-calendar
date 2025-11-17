@@ -237,33 +237,11 @@ function EventCalendar({
           unselectAuto={false}
           eventTimeFormat={eventTimeFormat}
           timeZone={timezone}
-          eventDidMount={(arg) => {
-            arg.el.setAttribute(
-              'data-event-id',
-              arg.event.extendedProps.article_url
-            );
-          }}
-          eventMouseEnter={(arg) => {
-            const eventId = arg.event.extendedProps.article_url;
-            const eventElements = document.querySelectorAll<HTMLElement>(
-              `[data-event-id="${eventId}"]`
-            );
-            eventElements.forEach((el) => {
-              el.style.filter = 'brightness(1.3)';
-              el.style.boxShadow = '0 0 8px rgba(0, 0, 0, 0.5)';
-              el.style.zIndex = '10';
-            });
-          }}
-          eventMouseLeave={(arg) => {
-            const eventId = arg.event.extendedProps.article_url;
-            const eventElements = document.querySelectorAll<HTMLElement>(
-              `[data-event-id="${eventId}"]`
-            );
-            eventElements.forEach((el) => {
-              el.style.filter = '';
-              el.style.boxShadow = '';
-              el.style.zIndex = '';
-            });
+          eventClassNames={(arg) => {
+            return `event-${arg.event.extendedProps.article_url.replace(
+              /[^a-zA-Z0-9]/g,
+              '_'
+            )}`;
           }}
         />
       </Paper>

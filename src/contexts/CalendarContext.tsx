@@ -12,13 +12,14 @@ import { useEventNotes } from '../hooks/useEventNotes';
 import { useFilters } from '../hooks/useFilters';
 import { useSavedEvents } from '../hooks/useSavedEvents';
 import type { CalendarEvent, NewEventData } from '../types/events';
+import type { Filters } from '../types/filters';
 import { useSettingsContext } from './SettingsContext';
 
 interface CalendarContextType {
   loading: boolean;
   error: string | null;
-  filters: any;
-  setFilters: (filters: any) => void;
+  filters: Filters;
+  setFilters: (filters: Filters | ((prev: Filters) => Filters)) => void;
   handleResetFilters: () => void;
   setCurrentView: (view: string) => void;
   filteredEvents: CalendarEvent[];
@@ -110,7 +111,7 @@ export function CalendarProvider({ children }: { children: React.ReactNode }) {
     (eventData: NewEventData) => {
       addEvent(eventData);
       if (filters.selectedCategories.length > 0) {
-        setFilters((prev: any) => ({
+        setFilters((prev) => ({
           ...prev,
           selectedCategories: [
             ...new Set([...prev.selectedCategories, CUSTOM_EVENT_CATEGORY]),

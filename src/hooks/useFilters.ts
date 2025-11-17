@@ -8,8 +8,13 @@ import {
 } from 'react';
 import { ALL_FILTERS_KEY, SAVED_EVENTS_CATEGORY } from '../config/constants';
 import { initialFilters } from '../config/eventFilter';
+import {
+  ALL_DAY_EVENT_THRESHOLD_HOURS,
+  MS_PER_HOUR,
+} from '../config/timeConstants';
 import type { CalendarEvent } from '../types/events';
 import type { Filters } from '../types/filters';
+import { safeGetJSON, safeSetJSON } from '../utils/storageUtils';
 
 type SetFilters = Dispatch<SetStateAction<Filters>>;
 
@@ -37,15 +42,21 @@ const passesCategoryFilter = (
   otherSelectedCategories.includes(event.extendedProps.category);
 
 const passesSearchFilter = (event: CalendarEvent, searchTerm: string) =>
-  event.title.toLowerCase().includes(searchTerm.toLowerCase());
+  event.title?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false;
 
 const passesDateFilter = (
   event: CalendarEvent,
   startDate: Date | null,
   endDate: Date | null
 ) => {
-  const eventStart = new Date(event.start!);
-  const eventEnd = new Date(event.end!);
+  if (!event.start || !event.end) return false;
+
+  const eventStart = new Date(event.start);
+  const eventEnd = new Date(event.end);
+
+  // Check for invalid dates
+  if (isNaN(eventStart.getTime()) || isNaN(eventEnd.getTime())) return false;
+
   return !(
     (startDate && eventEnd < startDate) ||
     (endDate && eventStart > endDate)
@@ -53,12 +64,18 @@ const passesDateFilter = (
 };
 
 const passesTimeFilter = (event: CalendarEvent, timeRange: number[]) => {
-  const eventStart = new Date(event.start!);
-  const eventEnd = new Date(event.end!);
+  if (!event.start || !event.end) return false;
+
+  const eventStart = new Date(event.start);
+  const eventEnd = new Date(event.end);
+
+  // Check for invalid dates
+  if (isNaN(eventStart.getTime()) || isNaN(eventEnd.getTime())) return false;
+
   const [startHour, endHour] = timeRange;
   const eventDurationHours =
-    (eventEnd.getTime() - eventStart.getTime()) / (1000 * 60 * 60);
-  const isAllDayEvent = eventDurationHours >= 24;
+    (eventEnd.getTime() - eventStart.getTime()) / MS_PER_HOUR;
+  const isAllDayEvent = eventDurationHours >= ALL_DAY_EVENT_THRESHOLD_HOURS;
   const eventStartHour = eventStart.getHours();
   return (
     isAllDayEvent || (eventStartHour >= startHour && eventStartHour < endHour)
@@ -70,9 +87,15 @@ const passesActiveOnlyFilter = (
   showActiveOnly: boolean
 ) => {
   if (!showActiveOnly) return true;
+  if (!event.start || !event.end) return false;
+
   const now = new Date();
-  const eventStart = new Date(event.start!);
-  const eventEnd = new Date(event.end!);
+  const eventStart = new Date(event.start);
+  const eventEnd = new Date(event.end);
+
+  // Check for invalid dates
+  if (isNaN(eventStart.getTime()) || isNaN(eventEnd.getTime())) return false;
+
   return now >= eventStart && now <= eventEnd;
 };
 
@@ -114,28 +137,23 @@ export function useFilters(
   const [currentView, setCurrentView] = useState('dayGridMonth');
 
   const [allFilters, setAllFilters] = useState(() => {
-    try {
-      const saved = localStorage.getItem(ALL_FILTERS_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        Object.keys(defaultAllFilters).forEach((view) => {
-          parsed[view] = { ...initialFilters, ...parsed[view] };
-          if (parsed[view].startDate)
-            parsed[view].startDate = new Date(parsed[view].startDate);
-          if (parsed[view].endDate)
-            parsed[view].endDate = new Date(parsed[view].endDate);
-        });
-        return parsed;
-      }
-    } catch (error) {
-      console.error('Failed to parse filters from localStorage:', error);
-    }
+    const saved = safeGetJSON<Record<string, Filters>>(ALL_FILTERS_KEY, {});
 
-    return defaultAllFilters;
+    // Merge with defaults and parse dates
+    const merged: Record<string, Filters> = {};
+    Object.keys(defaultAllFilters).forEach((view) => {
+      merged[view] = { ...initialFilters, ...saved[view] };
+      if (merged[view].startDate)
+        merged[view].startDate = new Date(merged[view].startDate);
+      if (merged[view].endDate)
+        merged[view].endDate = new Date(merged[view].endDate);
+    });
+
+    return Object.keys(saved).length > 0 ? merged : defaultAllFilters;
   });
 
   useEffect(() => {
-    localStorage.setItem(ALL_FILTERS_KEY, JSON.stringify(allFilters));
+    safeSetJSON(ALL_FILTERS_KEY, allFilters);
   }, [allFilters]);
 
   const filtersForCurrentView = allFilters[currentView] || initialFilters;

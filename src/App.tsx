@@ -13,6 +13,7 @@ import CreateEventDialog from './components/events/CreateEventDialog';
 import { ExportEventDialog } from './components/events/ExportEventDialog';
 import Footer from './components/layout/Footer';
 import Header from './components/layout/Header';
+import ErrorBoundary from './components/shared/ErrorBoundary';
 import ScrollToTop from './components/shared/ScrollToTop';
 import { SettingsDialog } from './components/shared/SettingsDialog';
 import { useCalendarContext } from './contexts/CalendarContext';
@@ -171,31 +172,33 @@ function App() {
           component="main"
           sx={{ flexGrow: 1, p: 3, backgroundColor: 'background.default' }}
         >
-          <Suspense
-            fallback={
-              <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-                Loading...
-              </Box>
-            }
-          >
-            <Routes>
-              <Route
-                path="/"
-                element={
-                  <Container maxWidth="xl">
-                    <CalendarPage
-                      isLoading={eventsLoading}
-                      onEditEvent={handleOpenEditDialog}
-                      onDeleteEvent={handleDeleteEvent}
-                      showToast={showToast}
-                      isMobile={isMobile}
-                    />
-                  </Container>
-                }
-              />
-              <Route path="/faq" element={<FaqPage />} />
-            </Routes>
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense
+              fallback={
+                <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+                  Loading...
+                </Box>
+              }
+            >
+              <Routes>
+                <Route
+                  path="/"
+                  element={
+                    <Container maxWidth="xl">
+                      <CalendarPage
+                        isLoading={eventsLoading}
+                        onEditEvent={handleOpenEditDialog}
+                        onDeleteEvent={handleDeleteEvent}
+                        showToast={showToast}
+                        isMobile={isMobile}
+                      />
+                    </Container>
+                  }
+                />
+                <Route path="/faq" element={<FaqPage />} />
+              </Routes>
+            </Suspense>
+          </ErrorBoundary>
         </Box>
         <Footer />
       </Box>

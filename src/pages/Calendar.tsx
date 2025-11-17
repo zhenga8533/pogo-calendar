@@ -37,22 +37,21 @@ function CalendarPage(props: CalendarPageProps) {
   if (error) {
     return (
       <Paper
-        elevation={3}
+        elevation={0}
         sx={{
-          p: { xs: 2, md: 4 },
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '60vh',
+          p: 4,
           textAlign: 'center',
+          backgroundColor: 'background.paper',
+          borderRadius: 2,
         }}
       >
-        <ErrorOutlineIcon sx={{ fontSize: 60, color: 'error.main', mb: 2 }} />
-        <Typography variant="h5" component="p" color="error.main" gutterBottom>
+        <ErrorOutlineIcon sx={{ fontSize: 64, color: 'error.main', mb: 2 }} />
+        <Typography variant="h5" color="text.primary" gutterBottom>
           Failed to Load Events
         </Typography>
-        <Typography color="text.secondary">{error}</Typography>
+        <Typography variant="body2" color="text.secondary">
+          {error}
+        </Typography>
       </Paper>
     );
   }
@@ -74,7 +73,7 @@ function CalendarPage(props: CalendarPageProps) {
         onDeleteEvent={onDeleteEvent}
         onEditEvent={onEditEvent}
         onDateSelect={(selection) =>
-          setFilters((prev: any) => ({
+          setFilters((prev) => ({
             ...prev,
             startDate: selection.start,
             endDate: selection.end,

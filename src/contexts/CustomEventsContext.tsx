@@ -1,5 +1,4 @@
-import { createContext, useCallback, useContext, useMemo } from 'react';
-import { CUSTOM_EVENT_CATEGORY } from '../config/constants';
+import { createContext, useContext, useMemo } from 'react';
 import { useCustomEvents } from '../hooks/useCustomEvents';
 import { useSavedEvents } from '../hooks/useSavedEvents';
 import type { CalendarEvent, NewEventData } from '../types/events';

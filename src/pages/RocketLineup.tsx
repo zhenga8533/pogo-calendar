@@ -1,90 +1,47 @@
-import { useState, useEffect } from 'react';
 import {
+  Alert,
   Box,
-  Typography,
-  Paper,
-  Chip,
   Card,
   CardContent,
-  Skeleton,
-  Alert,
-  useTheme,
+  Chip,
+  Divider,
   Grid,
   Stack,
-  Divider,
+  Typography,
 } from '@mui/material';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import React from 'react';
+import { DataErrorDisplay } from '../components/shared/DataErrorDisplay';
+import { DataLoadingSkeleton } from '../components/shared/DataLoadingSkeleton';
+import {
+  ROCKET_LEADER_COLORS,
+  ROCKET_LEADER_DESCRIPTIONS,
+  SHINY_COLOR,
+} from '../config/colorMapping';
+import { usePageData } from '../hooks/usePageData';
 import { fetchRocketLineup } from '../services/dataService';
-import type { RocketLineupData, RocketSlot, RocketPokemon } from '../types/rocketLineup';
-
-const LEADER_COLORS: Record<string, string> = {
-  Giovanni: '#8B4513',
-  Cliff: '#FF6B35',
-  Sierra: '#9B59B6',
-  Arlo: '#3498DB',
-};
-
-const LEADER_DESCRIPTIONS: Record<string, string> = {
-  Giovanni: 'Team Rocket Boss',
-  Cliff: 'Team Rocket Leader',
-  Sierra: 'Team Rocket Leader',
-  Arlo: 'Team Rocket Leader',
-};
+import type {
+  RocketLineupData,
+  RocketPokemon,
+  RocketSlot,
+} from '../types/rocketLineup';
 
 function RocketLineupPage() {
-  const [data, setData] = useState<RocketLineupData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const theme = useTheme();
-
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const rocketData = await fetchRocketLineup();
-        setData(rocketData);
-      } catch (err) {
-        setError('Failed to load Team GO Rocket lineup data. Please try again later.');
-        console.error('Error loading rocket lineup:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadData();
-  }, []);
+  const { data, loading, error, refetch } = usePageData<RocketLineupData>(
+    fetchRocketLineup,
+    'Failed to load Team GO Rocket lineup data. Please try again later.'
+  );
 
   if (loading) {
-    return (
-      <Box sx={{ py: 4 }}>
-        <Skeleton variant="text" width={300} height={60} sx={{ mb: 3 }} />
-        {[1, 2, 3].map((i) => (
-          <Skeleton key={i} variant="rectangular" height={300} sx={{ mb: 3, borderRadius: 2 }} />
-        ))}
-      </Box>
-    );
+    return <DataLoadingSkeleton itemCount={4} gridSize={{ xs: 12 }} />;
   }
 
   if (error || !data) {
     return (
-      <Paper
-        elevation={0}
-        sx={{
-          p: 4,
-          textAlign: 'center',
-          backgroundColor: 'background.paper',
-          borderRadius: 2,
-        }}
-      >
-        <ErrorOutlineIcon sx={{ fontSize: 64, color: 'error.main', mb: 2 }} />
-        <Typography variant="h5" color="text.primary" gutterBottom>
-          Failed to Load Team GO Rocket Lineup
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          {error || 'An unexpected error occurred'}
-        </Typography>
-      </Paper>
+      <DataErrorDisplay
+        title="Failed to Load Team GO Rocket Lineup"
+        message={error || undefined}
+        onRetry={refetch}
+      />
     );
   }
 
@@ -134,7 +91,7 @@ function RocketLineupPage() {
             sx={{
               height: 18,
               fontSize: '0.65rem',
-              backgroundColor: '#FFD700',
+              backgroundColor: SHINY_COLOR,
               color: '#000',
               fontWeight: 600,
               mt: 0.5,
@@ -152,7 +109,7 @@ function RocketLineupPage() {
           label={`Slot ${slot.slot}`}
           size="small"
           sx={{
-            backgroundColor: theme.palette.primary.main,
+            backgroundColor: 'primary.main',
             color: '#fff',
             fontWeight: 600,
           }}
@@ -171,7 +128,7 @@ function RocketLineupPage() {
       </Box>
       <Grid container spacing={1}>
         {slot.pokemons.map((pokemon, idx) => (
-          <Grid key={idx} item xs={12} sm={6} md={4}>
+          <Grid key={idx} size={{ xs: 12, sm: 6, md: 4 }}>
             {renderPokemon(pokemon)}
           </Grid>
         ))}
@@ -190,9 +147,12 @@ function RocketLineupPage() {
     >
       <Box
         sx={{
-          background: `linear-gradient(135deg, ${LEADER_COLORS[leader] || theme.palette.primary.main} 0%, ${
-            LEADER_COLORS[leader] || theme.palette.primary.main
-          }dd 100%)`,
+          background: (theme) =>
+            `linear-gradient(135deg, ${
+              ROCKET_LEADER_COLORS[leader] || theme.palette.primary.main
+            } 0%, ${
+              ROCKET_LEADER_COLORS[leader] || theme.palette.primary.main
+            }dd 100%)`,
           p: 3,
           color: '#fff',
         }}
@@ -201,7 +161,7 @@ function RocketLineupPage() {
           {leader}
         </Typography>
         <Typography variant="body2" sx={{ opacity: 0.9 }}>
-          {LEADER_DESCRIPTIONS[leader] || 'Team GO Rocket'}
+          {ROCKET_LEADER_DESCRIPTIONS[leader] || 'Team GO Rocket'}
         </Typography>
       </Box>
       <CardContent sx={{ p: 3 }}>
@@ -233,8 +193,9 @@ function RocketLineupPage() {
       </Box>
 
       <Alert severity="info" sx={{ mb: 3 }}>
-        Team GO Rocket leaders use one Pokémon from each slot. Defeating the leader gives you a
-        chance to catch the encounter Pokémon (usually from slot 3).
+        Team GO Rocket leaders use one Pokémon from each slot. Defeating the
+        leader gives you a chance to catch the encounter Pokémon (usually from
+        slot 3).
       </Alert>
 
       {orderedLeaders.map((leader) => {
@@ -246,4 +207,4 @@ function RocketLineupPage() {
   );
 }
 
-export default RocketLineupPage;
+export default React.memo(RocketLineupPage);

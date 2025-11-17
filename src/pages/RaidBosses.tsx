@@ -1,115 +1,52 @@
-import { useState, useEffect } from 'react';
 import {
+  Alert,
   Box,
-  Typography,
-  Paper,
-  Grid,
-  Chip,
   Card,
   CardContent,
   CardMedia,
-  Skeleton,
-  Alert,
-  useTheme,
-  useMediaQuery,
+  Chip,
+  Grid,
   Stack,
+  Typography,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import React from 'react';
+import { DataErrorDisplay } from '../components/shared/DataErrorDisplay';
+import { DataLoadingSkeleton } from '../components/shared/DataLoadingSkeleton';
+import {
+  POKEMON_TYPE_COLORS,
+  RAID_TIER_COLORS,
+  SHINY_COLOR,
+} from '../config/colorMapping';
+import { usePageData } from '../hooks/usePageData';
 import { fetchRaidBosses } from '../services/dataService';
-import type { RaidBossData, RaidBoss } from '../types/raidBosses';
-
-const TIER_COLORS: Record<string, string> = {
-  'Tier 1': '#F48FB1',
-  'Tier 3': '#FFB74D',
-  'Tier 5': '#BA68C8',
-  'Mega Raids': '#4FC3F7',
-};
-
-const TYPE_COLORS: Record<string, string> = {
-  Normal: '#A8A77A',
-  Fire: '#EE8130',
-  Water: '#6390F0',
-  Electric: '#F7D02C',
-  Grass: '#7AC74C',
-  Ice: '#96D9D6',
-  Fighting: '#C22E28',
-  Poison: '#A33EA1',
-  Ground: '#E2BF65',
-  Flying: '#A98FF3',
-  Psychic: '#F95587',
-  Bug: '#A6B91A',
-  Rock: '#B6A136',
-  Ghost: '#735797',
-  Dragon: '#6F35FC',
-  Dark: '#705746',
-  Steel: '#B7B7CE',
-  Fairy: '#D685AD',
-};
+import type { RaidBoss, RaidBossData } from '../types/raidBosses';
 
 function RaidBossesPage() {
-  const [data, setData] = useState<RaidBossData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data, loading, error, refetch } = usePageData<RaidBossData>(
+    fetchRaidBosses,
+    'Failed to load raid boss data. Please try again later.'
+  );
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const raidData = await fetchRaidBosses();
-        setData(raidData);
-      } catch (err) {
-        setError('Failed to load raid boss data. Please try again later.');
-        console.error('Error loading raid bosses:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadData();
-  }, []);
-
   if (loading) {
     return (
-      <Box sx={{ py: 4 }}>
-        <Skeleton variant="text" width={200} height={60} sx={{ mb: 3 }} />
-        {[1, 2, 3].map((i) => (
-          <Box key={i} sx={{ mb: 4 }}>
-            <Skeleton variant="text" width={150} height={40} sx={{ mb: 2 }} />
-            <Grid container spacing={2}>
-              {[1, 2, 3, 4].map((j) => (
-                <Grid key={j} item xs={12} sm={6} md={4}>
-                  <Skeleton variant="rectangular" height={250} sx={{ borderRadius: 2 }} />
-                </Grid>
-              ))}
-            </Grid>
-          </Box>
-        ))}
-      </Box>
+      <DataLoadingSkeleton
+        itemCount={8}
+        gridSize={{ xs: 12, sm: 6, md: 4, lg: 3 }}
+      />
     );
   }
 
   if (error || !data) {
     return (
-      <Paper
-        elevation={0}
-        sx={{
-          p: 4,
-          textAlign: 'center',
-          backgroundColor: 'background.paper',
-          borderRadius: 2,
-        }}
-      >
-        <ErrorOutlineIcon sx={{ fontSize: 64, color: 'error.main', mb: 2 }} />
-        <Typography variant="h5" color="text.primary" gutterBottom>
-          Failed to Load Raid Boss Data
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          {error || 'An unexpected error occurred'}
-        </Typography>
-      </Paper>
+      <DataErrorDisplay
+        title="Failed to Load Raid Boss Data"
+        message={error || undefined}
+        onRetry={refetch}
+      />
     );
   }
 
@@ -122,7 +59,7 @@ function RaidBossesPage() {
         transition: 'transform 0.2s, box-shadow 0.2s',
         '&:hover': {
           transform: 'translateY(-4px)',
-          boxShadow: theme.shadows[8],
+          boxShadow: (theme) => theme.shadows[8],
         },
       }}
     >
@@ -149,14 +86,21 @@ function RaidBossesPage() {
         </Typography>
 
         <Stack spacing={1} sx={{ mb: 2 }}>
-          <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              gap: 0.5,
+              justifyContent: 'center',
+              flexWrap: 'wrap',
+            }}
+          >
             {boss.types.map((type) => (
               <Chip
                 key={type}
                 label={type}
                 size="small"
                 sx={{
-                  backgroundColor: TYPE_COLORS[type] || '#999',
+                  backgroundColor: POKEMON_TYPE_COLORS[type] || '#999',
                   color: '#fff',
                   fontWeight: 600,
                   fontSize: '0.75rem',
@@ -168,7 +112,7 @@ function RaidBossesPage() {
                 label="✨ Shiny"
                 size="small"
                 sx={{
-                  backgroundColor: '#FFD700',
+                  backgroundColor: SHINY_COLOR,
                   color: '#000',
                   fontWeight: 600,
                   fontSize: '0.75rem',
@@ -184,11 +128,16 @@ function RaidBossesPage() {
               p: 1.5,
             }}
           >
-            <Typography variant="caption" color="text.secondary" display="block">
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              display="block"
+            >
               Normal CP Range
             </Typography>
             <Typography variant="body2" fontWeight={600}>
-              {boss.cp_range.min.toLocaleString()} - {boss.cp_range.max.toLocaleString()}
+              {boss.cp_range.min.toLocaleString()} -{' '}
+              {boss.cp_range.max.toLocaleString()}
             </Typography>
           </Box>
 
@@ -199,7 +148,11 @@ function RaidBossesPage() {
               p: 1.5,
             }}
           >
-            <Typography variant="caption" color="text.secondary" display="block">
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              display="block"
+            >
               Weather Boosted CP
             </Typography>
             <Typography variant="body2" fontWeight={600}>
@@ -224,8 +177,8 @@ function RaidBossesPage() {
       </Box>
 
       <Alert severity="info" sx={{ mb: 3 }}>
-        CP ranges help you identify perfect IV catches. Weather boosted ranges indicate the Pokémon
-        is level 25 instead of level 20.
+        CP ranges help you identify perfect IV catches. Weather boosted ranges
+        indicate the Pokémon is level 25 instead of level 20.
       </Alert>
 
       {Object.entries(data).map(([tier, bosses]) => {
@@ -238,10 +191,13 @@ function RaidBossesPage() {
                 {tier}
               </Typography>
               <Chip
-                label={`${bosses.length} Boss${bosses.length !== 1 ? 'es' : ''}`}
+                label={`${bosses.length} Boss${
+                  bosses.length !== 1 ? 'es' : ''
+                }`}
                 size="small"
                 sx={{
-                  backgroundColor: TIER_COLORS[tier] || theme.palette.primary.main,
+                  backgroundColor: (theme) =>
+                    RAID_TIER_COLORS[tier] || theme.palette.primary.main,
                   color: '#fff',
                   fontWeight: 600,
                 }}
@@ -249,7 +205,7 @@ function RaidBossesPage() {
             </Box>
             <Grid container spacing={2}>
               {bosses.map((boss) => (
-                <Grid key={boss.name} item xs={12} sm={6} md={4} lg={3}>
+                <Grid key={boss.name} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
                   {renderRaidBossCard(boss)}
                 </Grid>
               ))}
@@ -261,4 +217,4 @@ function RaidBossesPage() {
   );
 }
 
-export default RaidBossesPage;
+export default React.memo(RaidBossesPage);

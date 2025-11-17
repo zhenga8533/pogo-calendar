@@ -1,10 +1,4 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-} from 'react';
+import { createContext, useContext, useMemo, useState } from 'react';
 import { useEventData } from '../hooks/useEventData';
 import { useEventNotes } from '../hooks/useEventNotes';
 import type { CalendarEvent } from '../types/events';

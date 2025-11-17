@@ -6,8 +6,6 @@ import {
   AccordionSummary,
   Box,
   Button,
-  Container,
-  Divider,
   Stack,
   Typography,
 } from '@mui/material';
@@ -66,6 +64,16 @@ const faqData: FaqDataItem[] = [
     ],
   },
   {
+    question: 'Is this an official Pokémon GO app?',
+    answer: [
+      {
+        type: 'text',
+        content:
+          'No, this is a free, open-source, fan-made project created to help players track events. It is not affiliated with Niantic, Inc. or The Pokémon Company.',
+      },
+    ],
+  },
+  {
     question: 'Where does the event data come from?',
     answer: [
       {
@@ -95,12 +103,53 @@ const faqData: FaqDataItem[] = [
     ],
   },
   {
+    question:
+      'What are the Egg Pool, Raid Bosses, Research Tasks, and Rocket Lineup pages?',
+    answer: [
+      {
+        type: 'text',
+        content:
+          'These pages display current game data sourced from LeekDuck.com. The Egg Pool shows which Pokémon can hatch from different egg types with rarity tiers. Raid Bosses lists current raid encounters with CP ranges for perfect IV catches. Research Tasks shows field research rewards from PokéStops. Rocket Lineup displays Team GO Rocket leader battle lineups with possible encounter Pokémon.',
+      },
+    ],
+  },
+  {
+    question: 'Can I create my own custom events?',
+    answer: [
+      {
+        type: 'text',
+        content:
+          "Yes! Click the 'Create Event' button in the header to add your own custom events to the calendar. These could be local community events, raid hours with friends, or personal reminders. Custom events are stored locally in your browser and will appear on the calendar alongside official Pokémon GO events.",
+      },
+    ],
+  },
+  {
+    question: 'What does the "Save Event" feature do?',
+    answer: [
+      {
+        type: 'text',
+        content:
+          "You can save (bookmark) events you're interested in by clicking the star icon in the event details. Saved events appear with a filled star and can be filtered using the 'Saved Only' toggle in the filters menu. This makes it easy to track events you plan to attend.",
+      },
+    ],
+  },
+  {
     question: 'How do the date and time filters work?',
     answer: [
       {
         type: 'text',
         content:
           "The date pickers allow you to set a start and end date for the events you want to see. The 'Time of Day' slider filters events based on their start time. For example, setting the slider from 6 PM (18:00) to 11 PM (23:00) will only show events that begin within that window.",
+      },
+    ],
+  },
+  {
+    question: 'How does the "Active Only" filter work?',
+    answer: [
+      {
+        type: 'text',
+        content:
+          'When you enable the "Active Only" switch, the calendar will only display events that are currently in progress at this very moment (i.e., the current time is between the event\'s start and end times).',
       },
     ],
   },
@@ -117,12 +166,18 @@ const faqData: FaqDataItem[] = [
     ],
   },
   {
-    question: 'How does the "Active Only" filter work?',
+    question: 'Can I export multiple events at once?',
     answer: [
       {
         type: 'text',
         content:
-          'When you enable the "Active Only" switch, the calendar will only display events that are currently in progress at this very moment (i.e., the current time is between the event\'s start and end times).',
+          'Yes! Use the export button in the header to select and export multiple events to a single ',
+      },
+      { type: 'code', content: '.ics' },
+      {
+        type: 'text',
+        content:
+          ' file. This allows you to add several Pokémon GO events to your personal calendar at once, saving time when planning your gameplay schedule.',
       },
     ],
   },
@@ -142,16 +197,6 @@ const faqData: FaqDataItem[] = [
         },
       },
       { type: 'text', content: ' to report a bug or suggest a new feature.' },
-    ],
-  },
-  {
-    question: 'Is this an official Pokémon GO app?',
-    answer: [
-      {
-        type: 'text',
-        content:
-          'No, this is a free, open-source, fan-made project created to help players track events. It is not affiliated with Niantic, Inc. or The Pokémon Company.',
-      },
     ],
   },
 ];
@@ -221,39 +266,37 @@ FaqItem.displayName = 'FaqItem';
 
 function FaqPage() {
   return (
-    <Container maxWidth="md">
-      <Stack spacing={4}>
-        <Box sx={{ textAlign: 'center' }}>
-          <Typography variant="h3" component="h1" gutterBottom>
-            Frequently Asked Questions
-          </Typography>
-          <Typography variant="h6" color="text.secondary">
-            Here are answers to some common questions about the PoGo Event
-            Calendar.
-          </Typography>
-        </Box>
-        <Divider />
-        <Stack spacing={2}>
-          {faqData.map((item) => (
-            <FaqItem
-              key={item.question}
-              question={item.question}
-              answer={item.answer}
-            />
-          ))}
-        </Stack>
-        <Box sx={{ textAlign: 'center', pt: 2 }}>
-          <Button
-            component={RouterLink}
-            to="/"
-            variant="contained"
-            startIcon={<ArrowBackIcon />}
-          >
-            Back to Calendar
-          </Button>
-        </Box>
+    <Box sx={{ py: 4 }}>
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h3" fontWeight={700} gutterBottom>
+          Frequently Asked Questions
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Here are answers to some common questions about the PoGo Event
+          Calendar.
+        </Typography>
+      </Box>
+      <Stack spacing={2} sx={{ mb: 4 }}>
+        {faqData.map((item) => (
+          <FaqItem
+            key={item.question}
+            question={item.question}
+            answer={item.answer}
+          />
+        ))}
       </Stack>
-    </Container>
+
+      <Box sx={{ textAlign: 'center', pt: 2 }}>
+        <Button
+          component={RouterLink}
+          to="/"
+          variant="contained"
+          startIcon={<ArrowBackIcon />}
+        >
+          Back to Calendar
+        </Button>
+      </Box>
+    </Box>
   );
 }
 

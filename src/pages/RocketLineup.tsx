@@ -184,7 +184,8 @@ function RocketLineupPage() {
       key={leader}
       sx={{
         mb: 3,
-        overflow: 'visible',
+        overflow: 'hidden',
+        borderRadius: 3,
       }}
     >
       <Box

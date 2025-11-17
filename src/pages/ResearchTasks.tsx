@@ -13,7 +13,6 @@ import {
   AccordionSummary,
   AccordionDetails,
   Grid,
-  Avatar,
   Stack,
 } from '@mui/material';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
@@ -89,18 +88,33 @@ function ResearchTasksPage() {
         minHeight: 80,
       }}
     >
-      <Avatar
-        src={reward.asset_url}
-        alt={reward.name}
-        variant="square"
+      <Box
         sx={{
-          width: 56,
-          height: 56,
+          width: 64,
+          height: 64,
+          minWidth: 64,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
           mr: 2,
+          backgroundColor: 'background.paper',
+          borderRadius: 1,
+          overflow: 'hidden',
         }}
-      />
-      <Box sx={{ flexGrow: 1 }}>
-        <Typography variant="subtitle2" fontWeight={600}>
+      >
+        <Box
+          component="img"
+          src={reward.asset_url}
+          alt={reward.name}
+          sx={{
+            maxWidth: '100%',
+            maxHeight: '100%',
+            objectFit: 'contain',
+          }}
+        />
+      </Box>
+      <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+        <Typography variant="subtitle2" fontWeight={600} noWrap>
           {reward.name}
           {reward.quantity && reward.quantity > 1 && ` x${reward.quantity}`}
         </Typography>

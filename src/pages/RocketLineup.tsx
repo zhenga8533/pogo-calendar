@@ -10,7 +10,6 @@ import {
   Alert,
   useTheme,
   Grid,
-  Avatar,
   Stack,
   Divider,
 } from '@mui/material';
@@ -100,14 +99,32 @@ function RocketLineupPage() {
         borderRadius: 1,
       }}
     >
-      <Avatar
-        src={pokemon.asset_url}
-        alt={pokemon.name}
-        variant="square"
-        sx={{ width: 48, height: 48 }}
-      />
-      <Box sx={{ flexGrow: 1 }}>
-        <Typography variant="body2" fontWeight={600}>
+      <Box
+        sx={{
+          width: 56,
+          height: 56,
+          minWidth: 56,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: 'background.paper',
+          borderRadius: 1,
+          overflow: 'hidden',
+        }}
+      >
+        <Box
+          component="img"
+          src={pokemon.asset_url}
+          alt={pokemon.name}
+          sx={{
+            maxWidth: '100%',
+            maxHeight: '100%',
+            objectFit: 'contain',
+          }}
+        />
+      </Box>
+      <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+        <Typography variant="body2" fontWeight={600} noWrap>
           {pokemon.name}
         </Typography>
         {pokemon.shiny_available && (

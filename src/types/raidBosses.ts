@@ -14,11 +14,7 @@ export interface RaidBoss {
   asset_url: string;
 }
 
+// Using index signature to support any raid tier (Tier 1, Tier 3, Tier 5, Mega Raids, Shadow Raids, etc.)
 export interface RaidBossData {
-  'Tier 1': RaidBoss[];
-  'Tier 3': RaidBoss[];
-  'Tier 5': RaidBoss[];
-  'Mega Raids': RaidBoss[];
+  [tier: string]: RaidBoss[];
 }
-
-export type RaidTier = keyof RaidBossData;

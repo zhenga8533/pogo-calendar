@@ -6,12 +6,7 @@ export interface EggPokemon {
   rarity_tier: number;
 }
 
+// Using index signature to support any egg distance (2km, 5km, 7km, 10km, 12km, 15km, etc.)
 export interface EggPoolData {
-  '2 km Eggs': EggPokemon[];
-  '5 km Eggs': EggPokemon[];
-  '7 km Eggs': EggPokemon[];
-  '10 km Eggs': EggPokemon[];
-  '12 km Eggs': EggPokemon[];
+  [tier: string]: EggPokemon[];
 }
-
-export type EggTier = keyof EggPoolData;

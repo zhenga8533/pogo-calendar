@@ -1,3 +1,4 @@
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
@@ -36,15 +37,26 @@ import { UnsavedChangesDialog } from '../shared/UnsavedChangesDialog';
 interface DetailSectionProps {
   title: string;
   children: React.ReactNode;
+  icon?: React.ReactNode;
 }
-function DetailSection({ title, children }: DetailSectionProps) {
+function DetailSection({ title, children, icon }: DetailSectionProps) {
   return (
     <Stack spacing={1.5}>
-      <Typography variant="h6" component="h3" fontWeight="bold">
-        {title}
-      </Typography>
+      <Stack direction="row" spacing={1} alignItems="center">
+        {icon}
+        <Typography
+          variant="h6"
+          component="h3"
+          sx={{
+            fontWeight: 700,
+            fontSize: '1rem',
+            color: 'text.primary',
+          }}
+        >
+          {title}
+        </Typography>
+      </Stack>
       {children}
-      <Divider sx={{ pt: 1 }} />
     </Stack>
   );
 }
@@ -64,7 +76,16 @@ interface EventDetailDialogProps {
 const ChipList = ({ items }: { items: string[] }) => (
   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
     {items.map((item) => (
-      <Chip key={item} label={item} />
+      <Chip
+        key={item}
+        label={item}
+        size="small"
+        sx={{
+          borderRadius: '8px',
+          fontWeight: 500,
+          fontSize: '0.8125rem',
+        }}
+      />
     ))}
   </Box>
 );
@@ -176,7 +197,14 @@ function EventDetailDialog({
         maxWidth="sm"
         fullWidth
         disableRestoreFocus
-        PaperProps={{ sx: { borderRadius: 4 } }}
+        slotProps={{
+          paper: {
+            sx: {
+              borderRadius: 3,
+              boxShadow: (theme) => theme.shadows[12],
+            },
+          },
+        }}
       >
         <DialogContent sx={{ p: 0, position: 'relative' }}>
           <IconButton
@@ -199,63 +227,142 @@ function EventDetailDialog({
             component="img"
             src={bannerUrl}
             alt={`Event banner for ${title} - ${eventDetails.category} event`}
-            sx={{ width: '100%', aspectRatio: '16 / 9', objectFit: 'cover' }}
+            sx={{
+              width: '100%',
+              aspectRatio: '16 / 9',
+              objectFit: 'cover',
+              maxHeight: '280px',
+            }}
           />
 
+          {/* Header section */}
           <Box
-            sx={{
+            sx={(theme) => ({
+              borderBottom: `1px solid ${theme.palette.divider}`,
               p: 3,
-              position: 'relative',
-              zIndex: 1,
-              backgroundColor: 'background.paper',
-            }}
+              pb: 2.5,
+            })}
           >
-            <Stack
-              direction="row"
-              justifyContent="space-between"
-              alignItems="center"
-              sx={{ mb: 2, flexWrap: 'wrap', gap: 1 }}
-            >
-              <CategoryTag category={eventDetails.category} />
-              <EventStatusTag start={event.start} end={event.end} />
-            </Stack>
+            <Stack spacing={2}>
+              <Stack
+                direction="row"
+                justifyContent="space-between"
+                alignItems="center"
+                flexWrap="wrap"
+                gap={1}
+              >
+                <CategoryTag category={eventDetails.category} />
+                <EventStatusTag start={event.start} end={event.end} />
+              </Stack>
 
-            <Typography
-              variant="h5"
-              component="h2"
-              gutterBottom
-              sx={{ fontWeight: 'bold' }}
-            >
-              {title}
-            </Typography>
-
-            <Stack
-              direction="row"
-              spacing={1.5}
-              alignItems="center"
-              sx={{ mb: 2 }}
-            >
-              <CalendarTodayIcon color="action" />
-              <Typography variant="body1">
-                {eventDetails.start} - {eventDetails.end}
+              <Typography
+                variant="h5"
+                component="h2"
+                sx={{
+                  fontWeight: 700,
+                  fontSize: '1.5rem',
+                  lineHeight: 1.3,
+                }}
+              >
+                {title}
               </Typography>
-            </Stack>
-            <Divider sx={{ my: 2 }} />
 
-            <Stack spacing={3}>
+              <Stack spacing={1.5}>
+                <Stack direction="row" spacing={1.5} alignItems="center">
+                  <CalendarTodayIcon
+                    sx={{ fontSize: 20, color: 'primary.main' }}
+                  />
+                  <Box>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        fontWeight: 600,
+                        color: 'text.secondary',
+                        textTransform: 'uppercase',
+                        letterSpacing: 0.5,
+                        fontSize: '0.7rem',
+                        display: 'block',
+                      }}
+                    >
+                      Start Time
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{ fontWeight: 500, color: 'text.primary' }}
+                    >
+                      {eventDetails.start}
+                    </Typography>
+                  </Box>
+                </Stack>
+
+                {eventDetails.end && (
+                  <Stack direction="row" spacing={1.5} alignItems="center">
+                    <AccessTimeIcon
+                      sx={{ fontSize: 20, color: 'secondary.main' }}
+                    />
+                    <Box>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          fontWeight: 600,
+                          color: 'text.secondary',
+                          textTransform: 'uppercase',
+                          letterSpacing: 0.5,
+                          fontSize: '0.7rem',
+                          display: 'block',
+                        }}
+                      >
+                        End Time
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{ fontWeight: 500, color: 'text.primary' }}
+                      >
+                        {eventDetails.end}
+                      </Typography>
+                    </Box>
+                  </Stack>
+                )}
+              </Stack>
+            </Stack>
+          </Box>
+
+          {/* Content section */}
+          <Box sx={{ p: 3 }}>
+            <Stack spacing={3} divider={<Divider />}>
               {eventDetails.description && (
                 <DetailSection title="Description">
-                  <Typography variant="body1">
-                    {eventDetails.description}
-                  </Typography>
+                  <Stack spacing={0.75}>
+                    {eventDetails.description.split('\n').map((line, index) => {
+                      const trimmedLine = line.trim();
+                      if (!trimmedLine) return null;
+                      // Replace "- " with "• " for list items
+                      const displayText = trimmedLine.startsWith('- ')
+                        ? '• ' + trimmedLine.substring(2)
+                        : trimmedLine;
+                      return (
+                        <Typography
+                          key={index}
+                          variant="body1"
+                          sx={{ lineHeight: 1.7 }}
+                        >
+                          {displayText}
+                        </Typography>
+                      );
+                    })}
+                  </Stack>
                 </DetailSection>
               )}
 
               {eventDetails.bonuses && eventDetails.bonuses.length > 0 && (
                 <DetailSection title="Event Bonuses">
-                  <Stack spacing={1}>
+                  <Stack spacing={0.75}>
                     {eventDetails.bonuses.map((bonus) => (
-                      <Typography key={bonus} variant="body1">
+                      <Typography
+                        key={bonus}
+                        variant="body2"
+                        sx={{ lineHeight: 1.6, pl: 1 }}
+                      >
                         • {bonus}
                       </Typography>
                     ))}
@@ -301,6 +408,11 @@ function EventDetailDialog({
                   placeholder="Add your personal notes here..."
                   value={noteText}
                   onChange={(e) => handleNoteChange(e.target.value)}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 2,
+                    },
+                  }}
                 />
               </DetailSection>
             </Stack>

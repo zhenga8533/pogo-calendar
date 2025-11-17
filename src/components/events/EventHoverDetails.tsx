@@ -1,4 +1,5 @@
-import { Box, Divider, Popover, Typography } from '@mui/material';
+import { AccessTime, CalendarMonth } from '@mui/icons-material';
+import { Box, Popover, Stack, Typography } from '@mui/material';
 import { useMemo } from 'react';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import type { CalendarEvent } from '../../types/events';
@@ -66,56 +67,122 @@ function EventHoverDetails({
         paper: {
           sx: (theme) => ({
             backgroundColor: theme.palette.background.paper,
-            boxShadow: theme.shadows[8],
-            borderRadius: 2,
-            maxWidth: '300px',
+            boxShadow: theme.shadows[12],
+            borderRadius: 3,
+            maxWidth: '340px',
             p: 0,
             overflow: 'hidden',
             border: `1px solid ${theme.palette.divider}`,
+            backdropFilter: 'blur(10px)',
           }),
         },
       }}
     >
-      <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
-        <Typography
-          variant="h6"
-          component="h3"
-          sx={{ fontWeight: 'bold', lineHeight: 1.3 }}
-        >
-          {event.title}
-        </Typography>
-
-        <Divider sx={{ my: 0.5 }} />
-
-        <Box
-          sx={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            gap: 1,
-          }}
-        >
-          <CategoryTag category={event.extendedProps.category} />
-          <EventStatusTag start={event.start} end={event.end} />
-        </Box>
-
-        {event.start && (
-          <Typography variant="body2" color="text.secondary">
-            <Box component="span" sx={{ fontWeight: 'bold' }}>
-              Start:
-            </Box>{' '}
-            {formattedStart}
+      {/* Header */}
+      <Box
+        sx={(theme) => ({
+          borderBottom: `1px solid ${theme.palette.divider}`,
+          p: 2.5,
+          pb: 2,
+        })}
+      >
+        <Stack spacing={1.5}>
+          <Typography
+            variant="h6"
+            component="h3"
+            sx={{
+              fontWeight: 700,
+              lineHeight: 1.3,
+              fontSize: '1.1rem',
+            }}
+          >
+            {event.title}
           </Typography>
-        )}
-        {event.end && (
-          <Typography variant="body2" color="text.secondary">
-            <Box component="span" sx={{ fontWeight: 'bold' }}>
-              End:
-            </Box>{' '}
-            {formattedEnd}
-          </Typography>
-        )}
+
+          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+            <CategoryTag category={event.extendedProps.category} />
+            <EventStatusTag start={event.start} end={event.end} />
+          </Stack>
+        </Stack>
+      </Box>
+
+      {/* Content section */}
+      <Box sx={{ p: 2.5, pt: 2 }}>
+        <Stack spacing={1.5}>
+          {event.start && (
+            <Stack direction="row" spacing={1.5} alignItems="flex-start">
+              <CalendarMonth
+                sx={{
+                  fontSize: 20,
+                  color: 'primary.main',
+                  mt: 0.25,
+                  flexShrink: 0,
+                }}
+              />
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    fontWeight: 600,
+                    color: 'text.secondary',
+                    textTransform: 'uppercase',
+                    letterSpacing: 0.5,
+                    fontSize: '0.7rem',
+                  }}
+                >
+                  Start Time
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontWeight: 500,
+                    color: 'text.primary',
+                    mt: 0.25,
+                  }}
+                >
+                  {formattedStart}
+                </Typography>
+              </Box>
+            </Stack>
+          )}
+
+          {event.end && (
+            <Stack direction="row" spacing={1.5} alignItems="flex-start">
+              <AccessTime
+                sx={{
+                  fontSize: 20,
+                  color: 'secondary.main',
+                  mt: 0.25,
+                  flexShrink: 0,
+                }}
+              />
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    fontWeight: 600,
+                    color: 'text.secondary',
+                    textTransform: 'uppercase',
+                    letterSpacing: 0.5,
+                    fontSize: '0.7rem',
+                  }}
+                >
+                  End Time
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontWeight: 500,
+                    color: 'text.primary',
+                    mt: 0.25,
+                  }}
+                >
+                  {formattedEnd}
+                </Typography>
+              </Box>
+            </Stack>
+          )}
+        </Stack>
       </Box>
     </Popover>
   );

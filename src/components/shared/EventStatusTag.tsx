@@ -31,12 +31,15 @@ function EventStatusTagComponent({ start, end }: EventStatusTagProps) {
       sx={{
         backgroundColor: currentStatusInfo.color,
         color: theme.palette.getContrastText(currentStatusInfo.color),
-        borderRadius: '4px',
+        borderRadius: '6px',
         px: 1.5,
         py: 0.5,
-        fontSize: '0.875rem',
-        fontWeight: 'bold',
+        fontSize: '0.75rem',
+        fontWeight: 600,
         whiteSpace: 'nowrap',
+        height: '24px',
+        display: 'inline-flex',
+        alignItems: 'center',
       }}
     >
       {status === 'finished'

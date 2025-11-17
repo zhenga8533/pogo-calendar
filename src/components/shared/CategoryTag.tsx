@@ -21,7 +21,10 @@ function CategoryTagComponent({ category }: CategoryTagProps) {
       sx={{
         backgroundColor: categoryColor,
         color: theme.palette.getContrastText(categoryColor),
-        fontWeight: 'bold',
+        fontWeight: 600,
+        fontSize: '0.75rem',
+        height: '24px',
+        borderRadius: '6px',
       }}
     />
   );

@@ -47,3 +47,4 @@ function ColorKeyLabelComponent({
 }
 
 export const ColorKeyLabel = React.memo(ColorKeyLabelComponent);
+ColorKeyLabel.displayName = 'ColorKeyLabel';

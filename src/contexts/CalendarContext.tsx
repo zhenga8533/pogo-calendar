@@ -1,19 +1,13 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-} from 'react';
+import { useMemo } from 'react';
 import { CUSTOM_EVENT_CATEGORY } from '../config/constants';
-import { useCustomEvents } from '../hooks/useCustomEvents';
-import { useEventData } from '../hooks/useEventData';
-import { useEventNotes } from '../hooks/useEventNotes';
-import { useFilters } from '../hooks/useFilters';
-import { useSavedEvents } from '../hooks/useSavedEvents';
 import type { CalendarEvent, NewEventData } from '../types/events';
 import type { Filters } from '../types/filters';
-import { useSettingsContext } from './SettingsContext';
+import {
+  CustomEventsProvider,
+  useCustomEventsContext,
+} from './CustomEventsContext';
+import { EventDataProvider, useEventDataContext } from './EventDataContext';
+import { FilterProvider, useFilterContext } from './FilterContext';
 
 interface CalendarContextType {
   loading: boolean;
@@ -39,150 +33,105 @@ interface CalendarContextType {
   updateNote: (eventId: string, noteText: string) => void;
 }
 
-const CalendarContext = createContext<CalendarContextType | undefined>(
-  undefined
-);
+/**
+ * Inner component that consumes all three contexts and provides the combined API
+ */
+function CalendarContextBridge({ children }: { children: React.ReactNode }) {
+  const eventData = useEventDataContext();
+  const customEvents = useCustomEventsContext();
 
-export function CalendarProvider({ children }: { children: React.ReactNode }) {
-  const { settings } = useSettingsContext();
-  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
-    null
-  );
-  const {
-    allEvents: apiEvents,
-    loading,
-    error,
-    refetch: refetchEvents,
-  } = useEventData(settings.timezone);
-  const { savedEventIds, handleToggleSaveEvent } = useSavedEvents();
-  const { customEvents, addEvent, updateEvent, deleteEvent } =
-    useCustomEvents();
-  const { eventNotes, updateNote } = useEventNotes();
-
+  // Combine API events with custom events
   const combinedEvents = useMemo(
-    () => [...apiEvents, ...customEvents],
-    [apiEvents, customEvents]
-  );
-
-  const {
-    filters,
-    setFilters,
-    handleResetFilters,
-    setCurrentView,
-    filteredEvents,
-  } = useFilters(combinedEvents, savedEventIds);
-
-  const { allCategories, allPokemon, allBonuses } = useMemo(() => {
-    const categories = new Set<string>();
-    const pokemon = new Set<string>();
-    const bonuses = new Set<string>();
-
-    combinedEvents.forEach((event) => {
-      categories.add(event.extendedProps.category);
-
-      // Collect all bonuses
-      if (event.extendedProps.bonuses) {
-        event.extendedProps.bonuses.forEach((b) => bonuses.add(b));
-      }
-
-      // Collect all other fields as Pokemon (everything except the known non-Pokemon fields)
-      const nonPokemonFields = [
-        'category',
-        'article_url',
-        'banner_url',
-        'description',
-        'bonuses',
-      ];
-      Object.entries(event.extendedProps).forEach(([key, value]) => {
-        if (!nonPokemonFields.includes(key) && Array.isArray(value)) {
-          value.forEach((item) => pokemon.add(item));
-        }
-      });
-    });
-
-    return {
-      allCategories: Array.from(categories).sort(),
-      allPokemon: Array.from(pokemon).sort(),
-      allBonuses: Array.from(bonuses).sort(),
-    };
-  }, [combinedEvents]);
-
-  const handleAddEvent = useCallback(
-    (eventData: NewEventData) => {
-      addEvent(eventData);
-      if (filters.selectedCategories.length > 0) {
-        setFilters((prev) => ({
-          ...prev,
-          selectedCategories: [
-            ...new Set([...prev.selectedCategories, CUSTOM_EVENT_CATEGORY]),
-          ],
-        }));
-      }
-    },
-    [addEvent, filters.selectedCategories, setFilters]
-  );
-
-  const value = useMemo(
-    () => ({
-      loading,
-      error,
-      filters,
-      setFilters,
-      handleResetFilters,
-      setCurrentView,
-      filteredEvents,
-      allEvents: combinedEvents,
-      savedEventIds,
-      eventNotes,
-      allCategories,
-      allPokemon,
-      allBonuses,
-      selectedEvent,
-      setSelectedEvent,
-      refetchEvents,
-      handleToggleSaveEvent,
-      addEvent: handleAddEvent,
-      updateEvent,
-      deleteEvent,
-      updateNote,
-    }),
-    [
-      loading,
-      error,
-      filters,
-      setFilters,
-      handleResetFilters,
-      setCurrentView,
-      filteredEvents,
-      combinedEvents,
-      savedEventIds,
-      eventNotes,
-      allCategories,
-      allPokemon,
-      allBonuses,
-      selectedEvent,
-      refetchEvents,
-      handleToggleSaveEvent,
-      handleAddEvent,
-      updateEvent,
-      deleteEvent,
-      updateNote,
-    ]
+    () => [...eventData.allEvents, ...customEvents.customEvents],
+    [eventData.allEvents, customEvents.customEvents]
   );
 
   return (
-    <CalendarContext.Provider value={value}>
+    <FilterProvider
+      allEvents={combinedEvents}
+      savedEventIds={customEvents.savedEventIds}
+    >
       {children}
-    </CalendarContext.Provider>
+    </FilterProvider>
   );
 }
 
-export function useCalendarContext() {
-  const context = useContext(CalendarContext);
-  if (!context) {
-    throw new Error(
-      'useCalendarContext must be used within a CalendarProvider'
-    );
-  }
-  return context;
+/**
+ * Provider that composes all three contexts
+ */
+export function CalendarProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <EventDataProvider>
+      <CustomEventsProvider>
+        <CalendarContextBridge>{children}</CalendarContextBridge>
+      </CustomEventsProvider>
+    </EventDataProvider>
+  );
+}
+
+/**
+ * Hook that combines all three contexts into a single API
+ * This maintains backward compatibility with the old CalendarContext
+ */
+export function useCalendarContext(): CalendarContextType {
+  const eventData = useEventDataContext();
+  const customEvents = useCustomEventsContext();
+  const filters = useFilterContext();
+
+  // Combine API events with custom events
+  const combinedEvents = useMemo(
+    () => [...eventData.allEvents, ...customEvents.customEvents],
+    [eventData.allEvents, customEvents.customEvents]
+  );
+
+  // Enhanced addEvent that also updates filters
+  const handleAddEvent = (eventData: NewEventData) => {
+    customEvents.addEvent(eventData);
+    if (filters.filters.selectedCategories.length > 0) {
+      filters.setFilters((prev) => ({
+        ...prev,
+        selectedCategories: [
+          ...new Set([...prev.selectedCategories, CUSTOM_EVENT_CATEGORY]),
+        ],
+      }));
+    }
+  };
+
+  return useMemo(
+    () => ({
+      // Event data context
+      loading: eventData.loading,
+      error: eventData.error,
+      allEvents: combinedEvents,
+      eventNotes: eventData.eventNotes,
+      selectedEvent: eventData.selectedEvent,
+      setSelectedEvent: eventData.setSelectedEvent,
+      refetchEvents: eventData.refetchEvents,
+      updateNote: eventData.updateNote,
+      allCategories: eventData.allCategories,
+      allPokemon: eventData.allPokemon,
+      allBonuses: eventData.allBonuses,
+
+      // Custom events context
+      savedEventIds: customEvents.savedEventIds,
+      addEvent: handleAddEvent,
+      updateEvent: customEvents.updateEvent,
+      deleteEvent: customEvents.deleteEvent,
+      handleToggleSaveEvent: customEvents.handleToggleSaveEvent,
+
+      // Filter context
+      filters: filters.filters,
+      setFilters: filters.setFilters,
+      handleResetFilters: filters.handleResetFilters,
+      setCurrentView: filters.setCurrentView,
+      filteredEvents: filters.filteredEvents,
+    }),
+    [
+      eventData,
+      customEvents,
+      filters,
+      combinedEvents,
+      handleAddEvent,
+    ]
+  );
 }

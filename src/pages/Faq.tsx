@@ -217,6 +217,8 @@ const FaqItem = React.memo(
   }
 );
 
+FaqItem.displayName = 'FaqItem';
+
 function FaqPage() {
   return (
     <Container maxWidth="md">

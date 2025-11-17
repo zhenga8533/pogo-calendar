@@ -274,4 +274,5 @@ function HeaderComponent(props: HeaderProps) {
 }
 
 const Header = React.memo(HeaderComponent);
+Header.displayName = 'Header';
 export default Header;

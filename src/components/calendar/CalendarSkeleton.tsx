@@ -93,3 +93,4 @@ function CalendarSkeletonComponent({ isMobile }: CalendarSkeletonProps) {
 }
 
 export const CalendarSkeleton = React.memo(CalendarSkeletonComponent);
+CalendarSkeleton.displayName = 'CalendarSkeleton';

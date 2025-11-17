@@ -47,3 +47,4 @@ function EventStatusTagComponent({ start, end }: EventStatusTagProps) {
 }
 
 export const EventStatusTag = React.memo(EventStatusTagComponent);
+EventStatusTag.displayName = 'EventStatusTag';

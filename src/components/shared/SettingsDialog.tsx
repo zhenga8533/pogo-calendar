@@ -298,3 +298,4 @@ function SettingsDialogComponent({
 }
 
 export const SettingsDialog = React.memo(SettingsDialogComponent);
+SettingsDialog.displayName = 'SettingsDialog';

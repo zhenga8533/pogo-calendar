@@ -198,7 +198,7 @@ function EventDetailDialog({
           <Box
             component="img"
             src={bannerUrl}
-            alt={`${title} banner`}
+            alt={`Event banner for ${title} - ${eventDetails.category} event`}
             sx={{ width: '100%', aspectRatio: '16 / 9', objectFit: 'cover' }}
           />
 
@@ -336,7 +336,9 @@ function EventDetailDialog({
             <Button
               variant="outlined"
               startIcon={<AddToCalendarIcon />}
-              onClick={() => downloadIcsFile(event)}
+              onClick={() =>
+                downloadIcsFile(event, (error) => showToast(error, 'error'))
+              }
             >
               Add to Calendar
             </Button>

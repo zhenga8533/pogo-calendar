@@ -99,4 +99,5 @@ function FooterComponent() {
 }
 
 const Footer = React.memo(FooterComponent);
+Footer.displayName = 'Footer';
 export default Footer;

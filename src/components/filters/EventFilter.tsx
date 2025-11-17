@@ -53,6 +53,7 @@ const CategoryCheckbox = React.memo(
     );
   }
 );
+CategoryCheckbox.displayName = 'CategoryCheckbox';
 
 const FilterSection = ({
   title,

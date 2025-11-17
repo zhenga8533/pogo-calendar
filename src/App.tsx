@@ -135,7 +135,9 @@ function App() {
 
   const handleExport = useCallback(
     (eventsToExport: CalendarEvent[]) => {
-      downloadIcsForEvents(eventsToExport);
+      downloadIcsForEvents(eventsToExport, (error) =>
+        showToast(error, 'error')
+      );
       showToast(`Exported ${eventsToExport.length} events!`, 'success');
     },
     [showToast]

@@ -28,3 +28,4 @@ function CategoryTagComponent({ category }: CategoryTagProps) {
 }
 
 export const CategoryTag = React.memo(CategoryTagComponent);
+CategoryTag.displayName = 'CategoryTag';

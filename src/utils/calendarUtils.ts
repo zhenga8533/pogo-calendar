@@ -5,13 +5,17 @@ import type { CalendarEvent } from '../types/events';
  * Converts a CalendarEvent to an ICS EventAttributes object.
  *
  * @param event The calendar event to convert.
+ * @param onError Optional callback for error handling.
  * @returns The ICS event attributes or null if the event is invalid.
  */
-function eventToIcsAttributes(event: CalendarEvent): EventAttributes | null {
+function eventToIcsAttributes(
+  event: CalendarEvent,
+  onError?: (message: string) => void
+): EventAttributes | null {
   if (!event.start || !event.end) {
-    console.error(
-      'Cannot create .ics attributes for event with no start or end date.'
-    );
+    const errorMsg = 'Cannot create calendar file for event with no start or end date.';
+    console.error(errorMsg);
+    onError?.(errorMsg);
     return null;
   }
 
@@ -67,10 +71,14 @@ function triggerIcsDownload(content: string, filename: string): void {
  * Download an .ics file for a given calendar event.
  *
  * @param event The calendar event to create the .ics file for.
+ * @param onError Optional callback for error notification.
  * @returns {void}
  */
-export function downloadIcsFile(event: CalendarEvent) {
-  const eventAttributes = eventToIcsAttributes(event);
+export function downloadIcsFile(
+  event: CalendarEvent,
+  onError?: (message: string) => void
+) {
+  const eventAttributes = eventToIcsAttributes(event, onError);
   if (!eventAttributes) {
     return;
   }
@@ -78,7 +86,9 @@ export function downloadIcsFile(event: CalendarEvent) {
   // Generate the .ics file content
   createEvent(eventAttributes, (error, value) => {
     if (error) {
-      console.error(error);
+      const errorMsg = 'Failed to generate calendar file';
+      console.error(errorMsg, error);
+      onError?.(errorMsg);
       return;
     }
 
@@ -91,21 +101,29 @@ export function downloadIcsFile(event: CalendarEvent) {
  * Download an .ics file for multiple calendar events.
  *
  * @param events Array of calendar events to create the .ics file for.
+ * @param onError Optional callback for error notification.
  */
-export function downloadIcsForEvents(events: CalendarEvent[]) {
+export function downloadIcsForEvents(
+  events: CalendarEvent[],
+  onError?: (message: string) => void
+) {
   const eventAttributesList: EventAttributes[] = events
     .map((event) => eventToIcsAttributes(event))
     .filter((attr): attr is EventAttributes => attr !== null);
 
   if (eventAttributesList.length === 0) {
-    console.error('No valid events to export.');
+    const errorMsg = 'No valid events to export';
+    console.error(errorMsg);
+    onError?.(errorMsg);
     return;
   }
 
   // Generate the .ics file content
   createEvents(eventAttributesList, (error, value) => {
     if (error) {
-      console.error(error);
+      const errorMsg = 'Failed to generate calendar export file';
+      console.error(errorMsg, error);
+      onError?.(errorMsg);
       return;
     }
 

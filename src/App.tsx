@@ -32,6 +32,10 @@ import { downloadIcsForEvents } from './utils/calendarUtils';
 // Lazy load page components
 const CalendarPage = lazy(() => import('./pages/Calendar'));
 const FaqPage = lazy(() => import('./pages/Faq'));
+const EggPoolPage = lazy(() => import('./pages/EggPool'));
+const RaidBossesPage = lazy(() => import('./pages/RaidBosses'));
+const ResearchTasksPage = lazy(() => import('./pages/ResearchTasks'));
+const RocketLineupPage = lazy(() => import('./pages/RocketLineup'));
 
 function App() {
   const { settings, setSettings } = useSettingsContext();
@@ -189,6 +193,38 @@ function App() {
                         showToast={showToast}
                         isMobile={isMobile}
                       />
+                    </Container>
+                  }
+                />
+                <Route
+                  path="/egg-pool"
+                  element={
+                    <Container maxWidth="xl">
+                      <EggPoolPage />
+                    </Container>
+                  }
+                />
+                <Route
+                  path="/raid-bosses"
+                  element={
+                    <Container maxWidth="xl">
+                      <RaidBossesPage />
+                    </Container>
+                  }
+                />
+                <Route
+                  path="/research-tasks"
+                  element={
+                    <Container maxWidth="xl">
+                      <ResearchTasksPage />
+                    </Container>
+                  }
+                />
+                <Route
+                  path="/rocket-lineup"
+                  element={
+                    <Container maxWidth="xl">
+                      <RocketLineupPage />
                     </Container>
                   }
                 />

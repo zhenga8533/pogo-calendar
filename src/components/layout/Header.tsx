@@ -1,5 +1,6 @@
 import FilterListIcon from '@mui/icons-material/FilterList';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import SyncIcon from '@mui/icons-material/Sync';
 import TuneIcon from '@mui/icons-material/Tune';
 import {
@@ -10,6 +11,10 @@ import {
   Divider,
   Drawer,
   IconButton,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
   Popover,
   Stack,
   Toolbar,
@@ -18,13 +23,27 @@ import {
   useScrollTrigger,
   useTheme,
 } from '@mui/material';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import EggIcon from '@mui/icons-material/Egg';
+import BoltIcon from '@mui/icons-material/Bolt';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import GroupIcon from '@mui/icons-material/Group';
 import React, { useState } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useLocation } from 'react-router-dom';
 import type { CalendarEvent } from '../../types/events';
 import type { EventFilterProps } from '../../types/filters';
 import EventFilter from '../filters/EventFilter';
 import NextEventTracker from '../shared/NextEventTracker';
 import LogoIcon from '/icon.svg';
+
+const NAV_ITEMS = [
+  { label: 'Calendar', path: '/', icon: CalendarMonthIcon },
+  { label: 'Egg Pool', path: '/egg-pool', icon: EggIcon },
+  { label: 'Raid Bosses', path: '/raid-bosses', icon: BoltIcon },
+  { label: 'Research Tasks', path: '/research-tasks', icon: AssignmentIcon },
+  { label: 'Team Rocket', path: '/rocket-lineup', icon: GroupIcon },
+  { label: 'FAQ', path: '/faq', icon: HelpOutlineIcon },
+];
 
 const LastUpdatedDisplay = React.memo(function LastUpdatedDisplay({
   onRefresh,
@@ -97,10 +116,12 @@ function HeaderComponent(props: HeaderProps) {
   } = props;
   const theme = useTheme();
   const trigger = useScrollTrigger({ disableHysteresis: true, threshold: 0 });
+  const location = useLocation();
 
   const [filterAnchorEl, setFilterAnchorEl] =
     useState<HTMLButtonElement | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [navMenuAnchorEl, setNavMenuAnchorEl] = useState<HTMLElement | null>(null);
 
   const handleFilterClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     if (isMobile) {
@@ -113,6 +134,14 @@ function HeaderComponent(props: HeaderProps) {
   const handleCloseFilter = () => {
     setFilterAnchorEl(null);
     setDrawerOpen(false);
+  };
+
+  const handleNavMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setNavMenuAnchorEl(event.currentTarget);
+  };
+
+  const handleNavMenuClose = () => {
+    setNavMenuAnchorEl(null);
   };
 
   const filterContent = <EventFilter {...filterProps} />;
@@ -172,6 +201,8 @@ function HeaderComponent(props: HeaderProps) {
             </Typography>
           </Stack>
 
+          <Box sx={{ flexGrow: 1 }} />
+
           {showNextEventTracker && (
             <Box sx={{ display: { xs: 'none', lg: 'block' } }}>
               <NextEventTracker
@@ -180,6 +211,8 @@ function HeaderComponent(props: HeaderProps) {
               />
             </Box>
           )}
+
+          <Box sx={{ flexGrow: 1 }} />
 
           <Stack direction="row" alignItems="center" spacing={isMobile ? 0 : 1}>
             <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
@@ -195,20 +228,23 @@ function HeaderComponent(props: HeaderProps) {
               flexItem
               sx={{ display: { xs: 'none', sm: 'block' }, mx: 1 }}
             />
+
             {isMobile ? (
-              <Tooltip title="FAQ">
-                <IconButton component={RouterLink} to="/faq" color="inherit">
-                  <HelpOutlineIcon />
+              <Tooltip title="Menu">
+                <IconButton color="inherit" onClick={handleNavMenuOpen}>
+                  <ArrowDropDownIcon />
                 </IconButton>
               </Tooltip>
             ) : (
               <Button
-                component={RouterLink}
-                to="/faq"
                 color="inherit"
-                sx={{ '&:hover': { backgroundColor: 'action.hover' } }}
+                onClick={handleNavMenuOpen}
+                endIcon={<ArrowDropDownIcon />}
+                sx={{
+                  '&:hover': { backgroundColor: 'action.hover' },
+                }}
               >
-                FAQ
+                {NAV_ITEMS.find((item) => item.path === location.pathname)?.label || 'Calendar'}
               </Button>
             )}
 
@@ -251,6 +287,34 @@ function HeaderComponent(props: HeaderProps) {
         </Toolbar>
       </AppBar>
 
+      {/* Navigation Menu */}
+      <Menu
+        anchorEl={navMenuAnchorEl}
+        open={Boolean(navMenuAnchorEl)}
+        onClose={handleNavMenuClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+      >
+        {NAV_ITEMS.map((item) => {
+          const Icon = item.icon;
+          return (
+            <MenuItem
+              key={item.path}
+              component={RouterLink}
+              to={item.path}
+              onClick={handleNavMenuClose}
+              selected={location.pathname === item.path}
+            >
+              <ListItemIcon>
+                <Icon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>{item.label}</ListItemText>
+            </MenuItem>
+          );
+        })}
+      </Menu>
+
+      {/* Filters Drawer/Popover */}
       {isMobile ? (
         <Drawer anchor="left" open={drawerOpen} onClose={handleCloseFilter}>
           <Box sx={{ width: 300, p: 2, pt: 4 }}>{filterContent}</Box>

@@ -70,10 +70,12 @@ The project is organized into a clean, scalable structure that separates concern
 
 ```
 src/
-├── App.tsx                 # Main application component with routing
-├── main.tsx               # Application entry point
-├── theme.ts               # MUI theme configuration
-├── assets/images/         # Static images
+├── App.tsx               # Main application component with routing
+├── main.tsx              # Application entry point
+├── theme.ts              # MUI theme configuration
+├── vite-env.d.ts         # Vite environment type definitions
+├── assets/images/        # Static images
+│   └── default-banner.jpg
 ├── components/
 │   ├── calendar/         # Calendar-specific components
 │   │   ├── EventCalendar.tsx
@@ -82,8 +84,10 @@ src/
 │   ├── events/           # Event management components
 │   │   ├── CreateEventDialog.tsx
 │   │   ├── EventDetailDialog.tsx
+│   │   ├── EventHoverDetails.tsx
 │   │   ├── ExportEventDialog.tsx
-│   │   └── ...
+│   │   ├── CategoryExportPanel.tsx
+│   │   └── SpecificEventExportPanel.tsx
 │   ├── filters/          # Filter components
 │   │   ├── shared/       # Shared filter components
 │   │   │   ├── FilterSection.tsx
@@ -93,6 +97,7 @@ src/
 │   │   │   └── index.ts
 │   │   ├── AdvancedFilter.tsx
 │   │   ├── EventFilter.tsx
+│   │   ├── ColorKeyLabel.tsx
 │   │   ├── EggPoolFilter.tsx
 │   │   ├── RaidBossFilter.tsx
 │   │   ├── ResearchTaskFilter.tsx
@@ -105,7 +110,14 @@ src/
 │       ├── ErrorBoundary.tsx
 │       ├── DataLoadingSkeleton.tsx
 │       ├── DataErrorDisplay.tsx
-│       └── PageHeader.tsx
+│       ├── PageHeader.tsx
+│       ├── EventStatusTag.tsx
+│       ├── PageLoader.tsx
+│       ├── NextEventTracker.tsx
+│       ├── ScrollToTop.tsx
+│       ├── SettingsDialog.tsx
+│       ├── DeleteConfirmationDialog.tsx
+│       └── UnsavedChangesDialog.tsx
 ├── config/               # Configuration files
 │   ├── api.ts
 │   ├── constants.ts
@@ -124,7 +136,15 @@ src/
 │   ├── useFilters.ts
 │   ├── usePageData.ts
 │   ├── usePageFilters.ts
-│   └── ...
+│   ├── useSavedEvents.ts
+│   ├── useCustomEvents.ts
+│   ├── useEventNotes.ts
+│   ├── useEventStatus.ts
+│   ├── useNextUpcomingEvent.ts
+│   ├── useLastUpdated.ts
+│   ├── useDialogs.ts
+│   ├── useToast.ts
+│   └── useNoteEditor.ts
 ├── pages/                # Page components (lazy-loaded)
 │   ├── Calendar.tsx
 │   ├── EggPool.tsx
@@ -133,16 +153,15 @@ src/
 │   ├── RocketLineup.tsx
 │   └── Faq.tsx
 ├── services/             # API services
-│   ├── utils/            # Service utilities
-│   │   └── createFetcher.ts
 │   ├── eventService.ts   # Calendar event fetching
 │   └── dataService.ts    # Game data fetching
 ├── styles/               # Global styles
-│   └── calendarDarkStyles.ts
+│   └── calendarDarkStyles.tsx
 ├── types/                # TypeScript definitions
 │   ├── events.ts
 │   ├── filters.ts
 │   ├── pageFilters.ts
+│   ├── settings.ts
 │   ├── eggPool.ts
 │   ├── raidBosses.ts
 │   ├── researchTasks.ts
@@ -161,28 +180,6 @@ src/
 - **Lazy Loading:** Page components are lazy-loaded for better performance
 - **Centralized Services:** API calls abstracted into service modules
 - **Type Safety:** Full TypeScript coverage with comprehensive type definitions
-
----
-
-## Recent Code Improvements
-
-The codebase has undergone significant refactoring to eliminate code duplication and improve maintainability:
-
-### Completed Improvements
-
-- **Shared Filter Components:** Created reusable `FilterSection`, `FilterActions`, and `ShinyChip` components, eliminating 500+ lines of duplicated code across filter components.
-- **Generic Data Fetcher:** Implemented `createDataFetcher<T>` utility that consolidates all API fetch logic into a single, type-safe factory function.
-- **Shared Page Components:** Created `PageHeader` component for consistent page titles and descriptions across all data pages.
-- **Routes Configuration:** Centralized all route paths in `src/config/routes.ts` to eliminate string repetition and improve type safety.
-
-### Remaining Opportunities
-
-While the application is fully functional and significantly improved, there are still some architectural considerations for future refactoring:
-
-- **Props Drilling:** The Header component receives 30+ props from App.tsx, which could be simplified using additional context providers or a reducer pattern.
-- **Filter State Management:** Page-specific filter states are managed in App.tsx, creating tight coupling that could be improved with dedicated contexts.
-
-These are non-blocking issues that don't affect functionality but would further improve maintainability.
 
 ---
 

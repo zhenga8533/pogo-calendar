@@ -11,7 +11,7 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import React from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { DataErrorDisplay } from '../components/shared/DataErrorDisplay';
 import { DataLoadingSkeleton } from '../components/shared/DataLoadingSkeleton';
 import { SHINY_COLOR } from '../config/colorMapping';
@@ -22,18 +22,109 @@ import type {
   ResearchTaskData,
   TaskReward,
 } from '../types/researchTasks';
+import type { ResearchTaskFilters } from '../types/pageFilters';
 
-function ResearchTasksPage() {
+interface ResearchTasksPageProps {
+  filters: ResearchTaskFilters;
+  onSetFilterOptions: (options: { categories: string[] }) => void;
+}
+
+function ResearchTasksPage({
+  filters,
+  onSetFilterOptions,
+}: ResearchTasksPageProps) {
   const { data, loading, error, refetch } = usePageData<ResearchTaskData>(
     fetchResearchTasks,
     'Failed to load research task data. Please try again later.'
   );
 
+  // Extract and set available filter options from data
+  useEffect(() => {
+    if (data) {
+      const categories = Object.keys(data);
+      onSetFilterOptions({ categories });
+    }
+  }, [data, onSetFilterOptions]);
+
+  // Filter the data based on filters
+  const filteredData = useMemo(() => {
+    if (!data) return null;
+
+    const result: ResearchTaskData = {};
+
+    Object.entries(data).forEach(([category, tasks]) => {
+      // Filter by category
+      if (
+        filters.selectedCategories.length > 0 &&
+        !filters.selectedCategories.includes(category)
+      ) {
+        return;
+      }
+
+      // Filter tasks within this category
+      const filteredTasks = tasks.filter((task) => {
+        // Filter by task description
+        if (
+          filters.taskSearch &&
+          !task.task.toLowerCase().includes(filters.taskSearch.toLowerCase())
+        ) {
+          return false;
+        }
+
+        // Check if task has matching rewards
+        const hasMatchingReward = task.rewards.some((reward) => {
+          // Filter by reward type
+          if (
+            filters.rewardTypes.length > 0 &&
+            !filters.rewardTypes.includes(reward.type)
+          ) {
+            return false;
+          }
+
+          // Filter by pokemon name (for encounter rewards)
+          if (
+            filters.pokemonSearch &&
+            reward.type === 'encounter' &&
+            !reward.name
+              .toLowerCase()
+              .includes(filters.pokemonSearch.toLowerCase())
+          ) {
+            return false;
+          }
+
+          // Filter by shiny availability
+          if (filters.shinyOnly && !reward.shiny_available) {
+            return false;
+          }
+
+          return true;
+        });
+
+        // If no rewards match the filter criteria, exclude this task
+        if (
+          filters.rewardTypes.length > 0 ||
+          filters.pokemonSearch ||
+          filters.shinyOnly
+        ) {
+          return hasMatchingReward;
+        }
+
+        return true;
+      });
+
+      if (filteredTasks.length > 0) {
+        result[category] = filteredTasks;
+      }
+    });
+
+    return result;
+  }, [data, filters]);
+
   if (loading) {
     return <DataLoadingSkeleton itemCount={6} gridSize={{ xs: 12 }} />;
   }
 
-  if (error || !data) {
+  if (error || !data || !filteredData) {
     return (
       <DataErrorDisplay
         title="Failed to Load Research Task Data"
@@ -189,7 +280,7 @@ function ResearchTasksPage() {
       </Alert>
 
       <Stack spacing={3}>
-        {Object.entries(data).map(([category, tasks]) => {
+        {Object.entries(filteredData).map(([category, tasks]) => {
           if (!tasks || tasks.length === 0) return null;
 
           return (

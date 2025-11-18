@@ -10,21 +10,88 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
-import React from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { DataErrorDisplay } from '../components/shared/DataErrorDisplay';
 import { DataLoadingSkeleton } from '../components/shared/DataLoadingSkeleton';
 import { EGG_COLORS, RARITY_TIERS, SHINY_COLOR } from '../config/colorMapping';
 import { usePageData } from '../hooks/usePageData';
 import { fetchEggPool } from '../services/dataService';
 import type { EggPokemon, EggPoolData } from '../types/eggPool';
+import type { EggPoolFilters } from '../types/pageFilters';
 
-function EggPoolPage() {
+interface EggPoolPageProps {
+  filters: EggPoolFilters;
+  onSetFilterOptions: (options: {
+    eggTiers: string[];
+    rarityTiers: string[];
+  }) => void;
+}
+
+function EggPoolPage({ filters, onSetFilterOptions }: EggPoolPageProps) {
   const { data, loading, error, refetch } = usePageData<EggPoolData>(
     fetchEggPool,
     'Failed to load egg pool data. Please try again later.'
   );
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  // Extract and set available filter options from data
+  useEffect(() => {
+    if (data) {
+      const eggTiers = Object.keys(data);
+      const rarityTiers = Object.values(RARITY_TIERS).map((tier) => tier.label);
+      onSetFilterOptions({ eggTiers, rarityTiers });
+    }
+  }, [data, onSetFilterOptions]);
+
+  // Filter the data based on filters
+  const filteredData = useMemo(() => {
+    if (!data) return null;
+
+    const result: EggPoolData = {};
+
+    Object.entries(data).forEach(([tier, pokemon]) => {
+      // Filter by egg tier
+      if (
+        filters.selectedEggTiers.length > 0 &&
+        !filters.selectedEggTiers.includes(tier)
+      ) {
+        return;
+      }
+
+      // Filter pokemon within this tier
+      const filteredPokemon = pokemon.filter((p) => {
+        // Filter by pokemon name
+        if (
+          filters.pokemonSearch &&
+          !p.name.toLowerCase().includes(filters.pokemonSearch.toLowerCase())
+        ) {
+          return false;
+        }
+
+        // Filter by shiny availability
+        if (filters.shinyOnly && !p.shiny_available) {
+          return false;
+        }
+
+        // Filter by rarity tier
+        if (filters.selectedRarityTiers.length > 0) {
+          const rarityLabel = RARITY_TIERS[p.rarity_tier]?.label;
+          if (!rarityLabel || !filters.selectedRarityTiers.includes(rarityLabel)) {
+            return false;
+          }
+        }
+
+        return true;
+      });
+
+      if (filteredPokemon.length > 0) {
+        result[tier] = filteredPokemon;
+      }
+    });
+
+    return result;
+  }, [data, filters]);
 
   if (loading) {
     return (
@@ -35,7 +102,7 @@ function EggPoolPage() {
     );
   }
 
-  if (error || !data) {
+  if (error || !data || !filteredData) {
     return (
       <DataErrorDisplay
         title="Failed to Load Egg Pool Data"
@@ -133,7 +200,7 @@ function EggPoolPage() {
         Rarity tiers indicate the relative hatch chance.
       </Alert>
 
-      {Object.entries(data).map(([tier, pokemon]) => {
+      {Object.entries(filteredData).map(([tier, pokemon]) => {
         if (!pokemon || pokemon.length === 0) return null;
 
         return (

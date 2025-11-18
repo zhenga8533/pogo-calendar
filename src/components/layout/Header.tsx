@@ -32,7 +32,17 @@ import React, { useState } from 'react';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
 import type { CalendarEvent } from '../../types/events';
 import type { EventFilterProps } from '../../types/filters';
+import type {
+  EggPoolFilters,
+  RaidBossFilters,
+  ResearchTaskFilters,
+  RocketLineupFilters,
+} from '../../types/pageFilters';
+import EggPoolFilter from '../filters/EggPoolFilter';
 import EventFilter from '../filters/EventFilter';
+import RaidBossFilter from '../filters/RaidBossFilter';
+import ResearchTaskFilter from '../filters/ResearchTaskFilter';
+import RocketLineupFilter from '../filters/RocketLineupFilter';
 import NextEventTracker from '../shared/NextEventTracker';
 import LogoIcon from '/icon.svg';
 
@@ -98,6 +108,27 @@ type HeaderProps = Omit<EventFilterProps, 'isMobile'> & {
   lastUpdatedError: string | null;
   activeFilterCount: number;
   isMobile: boolean;
+  // Page-specific filters
+  eggPoolFilters?: EggPoolFilters;
+  onEggPoolFilterChange?: (filters: EggPoolFilters) => void;
+  onResetEggPoolFilters?: () => void;
+  eggPoolActiveFilterCount?: number;
+  eggPoolOptions?: { eggTiers: string[]; rarityTiers: string[] };
+  raidBossFilters?: RaidBossFilters;
+  onRaidBossFilterChange?: (filters: RaidBossFilters) => void;
+  onResetRaidBossFilters?: () => void;
+  raidBossActiveFilterCount?: number;
+  raidBossOptions?: { raidTiers: string[]; types: string[] };
+  researchTaskFilters?: ResearchTaskFilters;
+  onResearchTaskFilterChange?: (filters: ResearchTaskFilters) => void;
+  onResetResearchTaskFilters?: () => void;
+  researchTaskActiveFilterCount?: number;
+  researchTaskOptions?: { categories: string[] };
+  rocketLineupFilters?: RocketLineupFilters;
+  onRocketLineupFilterChange?: (filters: RocketLineupFilters) => void;
+  onResetRocketLineupFilters?: () => void;
+  rocketLineupActiveFilterCount?: number;
+  rocketLineupOptions?: { leaders: string[] };
 };
 
 function HeaderComponent(props: HeaderProps) {
@@ -112,6 +143,26 @@ function HeaderComponent(props: HeaderProps) {
     lastUpdatedError,
     activeFilterCount,
     isMobile,
+    eggPoolFilters,
+    onEggPoolFilterChange,
+    onResetEggPoolFilters,
+    eggPoolActiveFilterCount,
+    eggPoolOptions,
+    raidBossFilters,
+    onRaidBossFilterChange,
+    onResetRaidBossFilters,
+    raidBossActiveFilterCount,
+    raidBossOptions,
+    researchTaskFilters,
+    onResearchTaskFilterChange,
+    onResetResearchTaskFilters,
+    researchTaskActiveFilterCount,
+    researchTaskOptions,
+    rocketLineupFilters,
+    onRocketLineupFilterChange,
+    onResetRocketLineupFilters,
+    rocketLineupActiveFilterCount,
+    rocketLineupOptions,
     ...filterProps
   } = props;
   const theme = useTheme();
@@ -144,8 +195,90 @@ function HeaderComponent(props: HeaderProps) {
     setNavMenuAnchorEl(null);
   };
 
-  const filterContent = <EventFilter {...filterProps} />;
+  // Determine which filter to render based on current route
+  const getFilterContent = () => {
+    switch (location.pathname) {
+      case '/':
+        return <EventFilter {...filterProps} />;
+      case '/egg-pool':
+        if (eggPoolFilters && onEggPoolFilterChange && onResetEggPoolFilters) {
+          return (
+            <EggPoolFilter
+              filters={eggPoolFilters}
+              onFilterChange={onEggPoolFilterChange}
+              onResetFilters={onResetEggPoolFilters}
+              availableEggTiers={eggPoolOptions?.eggTiers || []}
+              availableRarityTiers={eggPoolOptions?.rarityTiers || []}
+            />
+          );
+        }
+        return null;
+      case '/raid-bosses':
+        if (raidBossFilters && onRaidBossFilterChange && onResetRaidBossFilters) {
+          return (
+            <RaidBossFilter
+              filters={raidBossFilters}
+              onFilterChange={onRaidBossFilterChange}
+              onResetFilters={onResetRaidBossFilters}
+              availableRaidTiers={raidBossOptions?.raidTiers || []}
+              availableTypes={raidBossOptions?.types || []}
+            />
+          );
+        }
+        return null;
+      case '/research-tasks':
+        if (researchTaskFilters && onResearchTaskFilterChange && onResetResearchTaskFilters) {
+          return (
+            <ResearchTaskFilter
+              filters={researchTaskFilters}
+              onFilterChange={onResearchTaskFilterChange}
+              onResetFilters={onResetResearchTaskFilters}
+              availableCategories={researchTaskOptions?.categories || []}
+            />
+          );
+        }
+        return null;
+      case '/rocket-lineup':
+        if (rocketLineupFilters && onRocketLineupFilterChange && onResetRocketLineupFilters) {
+          return (
+            <RocketLineupFilter
+              filters={rocketLineupFilters}
+              onFilterChange={onRocketLineupFilterChange}
+              onResetFilters={onResetRocketLineupFilters}
+              availableLeaders={rocketLineupOptions?.leaders || []}
+            />
+          );
+        }
+        return null;
+      case '/faq':
+        return null; // No filters for FAQ page
+      default:
+        return <EventFilter {...filterProps} />;
+    }
+  };
+
+  const filterContent = getFilterContent();
   const open = Boolean(filterAnchorEl);
+
+  // Get current active filter count based on route
+  const getCurrentActiveFilterCount = () => {
+    switch (location.pathname) {
+      case '/':
+        return activeFilterCount;
+      case '/egg-pool':
+        return eggPoolActiveFilterCount || 0;
+      case '/raid-bosses':
+        return raidBossActiveFilterCount || 0;
+      case '/research-tasks':
+        return researchTaskActiveFilterCount || 0;
+      case '/rocket-lineup':
+        return rocketLineupActiveFilterCount || 0;
+      default:
+        return 0;
+    }
+  };
+
+  const currentActiveFilterCount = getCurrentActiveFilterCount();
 
   return (
     <>
@@ -248,24 +381,26 @@ function HeaderComponent(props: HeaderProps) {
               </Button>
             )}
 
-            <Tooltip title="Filters">
-              <Badge badgeContent={activeFilterCount} color="primary">
-                {isMobile ? (
-                  <IconButton color="inherit" onClick={handleFilterClick}>
-                    <FilterListIcon />
-                  </IconButton>
-                ) : (
-                  <Button
-                    color="inherit"
-                    startIcon={<FilterListIcon />}
-                    onClick={handleFilterClick}
-                    sx={{ '&:hover': { backgroundColor: 'action.hover' } }}
-                  >
-                    Filters
-                  </Button>
-                )}
-              </Badge>
-            </Tooltip>
+            {filterContent && (
+              <Tooltip title="Filters">
+                <Badge badgeContent={currentActiveFilterCount} color="primary">
+                  {isMobile ? (
+                    <IconButton color="inherit" onClick={handleFilterClick}>
+                      <FilterListIcon />
+                    </IconButton>
+                  ) : (
+                    <Button
+                      color="inherit"
+                      startIcon={<FilterListIcon />}
+                      onClick={handleFilterClick}
+                      sx={{ '&:hover': { backgroundColor: 'action.hover' } }}
+                    >
+                      Filters
+                    </Button>
+                  )}
+                </Badge>
+              </Tooltip>
+            )}
 
             <Tooltip title="Settings">
               {isMobile ? (

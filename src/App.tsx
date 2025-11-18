@@ -22,6 +22,12 @@ import { useSettingsContext } from './contexts/SettingsContext';
 import { useDialogs } from './hooks/useDialogs';
 import { useLastUpdated } from './hooks/useLastUpdated';
 import { useNextUpcomingEvent } from './hooks/useNextUpcomingEvent';
+import {
+  useEggPoolFilters,
+  useRaidBossFilters,
+  useResearchTaskFilters,
+  useRocketLineupFilters,
+} from './hooks/usePageFilters';
 import { useToast } from './hooks/useToast';
 import { CalendarDarkStyles } from './styles/calendarDarkStyles';
 import { getTheme } from './theme';
@@ -65,6 +71,31 @@ function App() {
     deleteEvent,
     setSelectedEvent,
   } = useCalendarContext();
+
+  // Page-specific filters
+  const eggPoolFilterState = useEggPoolFilters();
+  const raidBossFilterState = useRaidBossFilters();
+  const researchTaskFilterState = useResearchTaskFilters();
+  const rocketLineupFilterState = useRocketLineupFilters();
+
+  // Available filter options for each page
+  const [eggPoolOptions, setEggPoolOptions] = useState<{
+    eggTiers: string[];
+    rarityTiers: string[];
+  }>({ eggTiers: [], rarityTiers: [] });
+
+  const [raidBossOptions, setRaidBossOptions] = useState<{
+    raidTiers: string[];
+    types: string[];
+  }>({ raidTiers: [], types: [] });
+
+  const [researchTaskOptions, setResearchTaskOptions] = useState<{
+    categories: string[];
+  }>({ categories: [] });
+
+  const [rocketLineupOptions, setRocketLineupOptions] = useState<{
+    leaders: string[];
+  }>({ leaders: [] });
 
   const {
     lastUpdated,
@@ -174,6 +205,31 @@ function App() {
           lastUpdatedError={error}
           activeFilterCount={activeFilterCount}
           isMobile={isMobile}
+          // Page-specific filters
+          eggPoolFilters={eggPoolFilterState.filters}
+          onEggPoolFilterChange={eggPoolFilterState.setFilters}
+          onResetEggPoolFilters={eggPoolFilterState.resetFilters}
+          eggPoolActiveFilterCount={eggPoolFilterState.activeFilterCount}
+          eggPoolOptions={eggPoolOptions}
+          raidBossFilters={raidBossFilterState.filters}
+          onRaidBossFilterChange={raidBossFilterState.setFilters}
+          onResetRaidBossFilters={raidBossFilterState.resetFilters}
+          raidBossActiveFilterCount={raidBossFilterState.activeFilterCount}
+          raidBossOptions={raidBossOptions}
+          researchTaskFilters={researchTaskFilterState.filters}
+          onResearchTaskFilterChange={researchTaskFilterState.setFilters}
+          onResetResearchTaskFilters={researchTaskFilterState.resetFilters}
+          researchTaskActiveFilterCount={
+            researchTaskFilterState.activeFilterCount
+          }
+          researchTaskOptions={researchTaskOptions}
+          rocketLineupFilters={rocketLineupFilterState.filters}
+          onRocketLineupFilterChange={rocketLineupFilterState.setFilters}
+          onResetRocketLineupFilters={rocketLineupFilterState.resetFilters}
+          rocketLineupActiveFilterCount={
+            rocketLineupFilterState.activeFilterCount
+          }
+          rocketLineupOptions={rocketLineupOptions}
         />
         <Box
           component="main"
@@ -200,7 +256,10 @@ function App() {
                   path="/egg-pool"
                   element={
                     <Container maxWidth="xl">
-                      <EggPoolPage />
+                      <EggPoolPage
+                        filters={eggPoolFilterState.filters}
+                        onSetFilterOptions={setEggPoolOptions}
+                      />
                     </Container>
                   }
                 />
@@ -208,7 +267,10 @@ function App() {
                   path="/raid-bosses"
                   element={
                     <Container maxWidth="xl">
-                      <RaidBossesPage />
+                      <RaidBossesPage
+                        filters={raidBossFilterState.filters}
+                        onSetFilterOptions={setRaidBossOptions}
+                      />
                     </Container>
                   }
                 />
@@ -216,7 +278,10 @@ function App() {
                   path="/research-tasks"
                   element={
                     <Container maxWidth="xl">
-                      <ResearchTasksPage />
+                      <ResearchTasksPage
+                        filters={researchTaskFilterState.filters}
+                        onSetFilterOptions={setResearchTaskOptions}
+                      />
                     </Container>
                   }
                 />
@@ -224,7 +289,10 @@ function App() {
                   path="/rocket-lineup"
                   element={
                     <Container maxWidth="xl">
-                      <RocketLineupPage />
+                      <RocketLineupPage
+                        filters={rocketLineupFilterState.filters}
+                        onSetFilterOptions={setRocketLineupOptions}
+                      />
                     </Container>
                   }
                 />

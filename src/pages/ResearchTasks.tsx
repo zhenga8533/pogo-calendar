@@ -12,17 +12,18 @@ import {
   Typography,
 } from '@mui/material';
 import React, { useEffect, useMemo } from 'react';
+import { ShinyChip } from '../components/filters/shared';
 import { DataErrorDisplay } from '../components/shared/DataErrorDisplay';
 import { DataLoadingSkeleton } from '../components/shared/DataLoadingSkeleton';
-import { SHINY_COLOR } from '../config/colorMapping';
+import { PageHeader } from '../components/shared/PageHeader';
 import { usePageData } from '../hooks/usePageData';
 import { fetchResearchTasks } from '../services/dataService';
+import type { ResearchTaskFilters } from '../types/pageFilters';
 import type {
   ResearchTask,
   ResearchTaskData,
   TaskReward,
 } from '../types/researchTasks';
-import type { ResearchTaskFilters } from '../types/pageFilters';
 
 interface ResearchTasksPageProps {
   filters: ResearchTaskFilters;
@@ -188,19 +189,7 @@ function ResearchTasksPage({
               fontWeight: 600,
             }}
           />
-          {reward.shiny_available && (
-            <Chip
-              label="✨ Shiny"
-              size="small"
-              sx={{
-                height: 20,
-                fontSize: '0.7rem',
-                backgroundColor: SHINY_COLOR,
-                color: '#000',
-                fontWeight: 600,
-              }}
-            />
-          )}
+          {reward.shiny_available && <ShinyChip />}
         </Box>
       </Box>
     </Card>
@@ -265,14 +254,10 @@ function ResearchTasksPage({
 
   return (
     <Box sx={{ py: 4 }}>
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h3" fontWeight={700} gutterBottom>
-          Research Tasks
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Current field research tasks and their rewards
-        </Typography>
-      </Box>
+      <PageHeader
+        title="Research Tasks"
+        description="Current field research tasks and their rewards"
+      />
 
       <Alert severity="info" sx={{ mb: 3 }}>
         Field research tasks are obtained by spinning PokéStops. Complete tasks

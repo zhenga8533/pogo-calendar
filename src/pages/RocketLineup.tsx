@@ -10,21 +10,22 @@ import {
   Typography,
 } from '@mui/material';
 import React, { useEffect, useMemo } from 'react';
+import { ShinyChip } from '../components/filters/shared';
 import { DataErrorDisplay } from '../components/shared/DataErrorDisplay';
 import { DataLoadingSkeleton } from '../components/shared/DataLoadingSkeleton';
+import { PageHeader } from '../components/shared/PageHeader';
 import {
   ROCKET_LEADER_COLORS,
   ROCKET_LEADER_DESCRIPTIONS,
-  SHINY_COLOR,
 } from '../config/colorMapping';
 import { usePageData } from '../hooks/usePageData';
 import { fetchRocketLineup } from '../services/dataService';
+import type { RocketLineupFilters } from '../types/pageFilters';
 import type {
   RocketLineupData,
   RocketPokemon,
   RocketSlot,
 } from '../types/rocketLineup';
-import type { RocketLineupFilters } from '../types/pageFilters';
 
 interface RocketLineupPageProps {
   filters: RocketLineupFilters;
@@ -192,18 +193,9 @@ function RocketLineupPage({
           {pokemon.name}
         </Typography>
         {pokemon.shiny_available && (
-          <Chip
-            label="✨ Shiny"
-            size="small"
-            sx={{
-              height: 18,
-              fontSize: '0.65rem',
-              backgroundColor: SHINY_COLOR,
-              color: '#000',
-              fontWeight: 600,
-              mt: 0.5,
-            }}
-          />
+          <Box sx={{ mt: 0.5 }}>
+            <ShinyChip />
+          </Box>
         )}
       </Box>
     </Box>
@@ -290,14 +282,10 @@ function RocketLineupPage({
 
   return (
     <Box sx={{ py: 4 }}>
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h3" fontWeight={700} gutterBottom>
-          Team GO Rocket Lineups
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Current Pokémon used by Team GO Rocket leaders
-        </Typography>
-      </Box>
+      <PageHeader
+        title="Team GO Rocket Lineups"
+        description="Current Pokémon used by Team GO Rocket leaders"
+      />
 
       <Alert severity="info" sx={{ mb: 3 }}>
         Team GO Rocket leaders use one Pokémon from each slot. Defeating the

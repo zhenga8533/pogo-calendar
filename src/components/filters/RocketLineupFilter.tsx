@@ -1,9 +1,5 @@
-import ReplayIcon from '@mui/icons-material/Replay';
 import {
-  Box,
   Button,
-  Card,
-  CardContent,
   Checkbox,
   Divider,
   FormControlLabel,
@@ -12,8 +8,9 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import type { RocketLineupFilters } from '../../types/pageFilters';
+import { FilterActions, FilterSection } from './shared';
 
 interface RocketLineupFilterProps {
   filters: RocketLineupFilters;
@@ -21,23 +18,6 @@ interface RocketLineupFilterProps {
   onResetFilters: () => void;
   availableLeaders: string[];
 }
-
-const FilterSection = ({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) => (
-  <Box sx={{ mb: 3 }}>
-    <Typography variant="h6" component="h3" fontWeight="bold" gutterBottom>
-      {title}
-    </Typography>
-    <Stack spacing={2} sx={{ mt: 1 }}>
-      {children}
-    </Stack>
-  </Box>
-);
 
 function RocketLineupFilter(props: RocketLineupFilterProps) {
   const { filters, onFilterChange, onResetFilters, availableLeaders } = props;
@@ -78,135 +58,109 @@ function RocketLineupFilter(props: RocketLineupFilterProps) {
   }, [handleFilterChange]);
 
   return (
-    <Card
+    <Stack
+      spacing={4}
       sx={{
         width: { xs: '100%', md: '450px' },
+        p: { xs: 3, md: 4 },
+        backgroundColor: 'background.paper',
         borderRadius: 2,
         boxShadow: 3,
       }}
     >
-      <CardContent sx={{ p: { xs: 3, md: 4 } }}>
-        <Stack spacing={4}>
-          {/* Search Section */}
-          <FilterSection title="Search">
-            <TextField
-              fullWidth
-              label="Search by Pokémon Name"
-              variant="outlined"
-              value={filters.pokemonSearch}
+      {/* Search Section */}
+      <FilterSection title="Search">
+        <TextField
+          fullWidth
+          label="Search by Pokémon Name"
+          variant="outlined"
+          value={filters.pokemonSearch}
+          onChange={(e) => handleFilterChange('pokemonSearch', e.target.value)}
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={filters.encounterOnly}
               onChange={(e) =>
-                handleFilterChange('pokemonSearch', e.target.value)
+                handleFilterChange('encounterOnly', e.target.checked)
               }
             />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={filters.encounterOnly}
-                  onChange={(e) =>
-                    handleFilterChange('encounterOnly', e.target.checked)
-                  }
-                />
+          }
+          label="Show Encounter Pokémon Only"
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={filters.shinyOnly}
+              onChange={(e) =>
+                handleFilterChange('shinyOnly', e.target.checked)
               }
-              label="Show Encounter Pokémon Only"
             />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={filters.shinyOnly}
-                  onChange={(e) =>
-                    handleFilterChange('shinyOnly', e.target.checked)
-                  }
-                />
-              }
-              label="Show Shiny Available Only"
-            />
-          </FilterSection>
+          }
+          label="Show Shiny Available Only"
+        />
+      </FilterSection>
 
-          {/* Leaders Section */}
-          <Divider />
-          <FilterSection title="Leaders">
-            <Stack
-              direction="row"
-              justifyContent="space-between"
-              alignItems="center"
-            >
-              <Typography variant="body2" color="text.secondary">
-                Select leaders to display
-              </Typography>
-              <Stack direction="row" spacing={1}>
-                <Button size="small" onClick={handleSelectAllLeaders}>
-                  Select All
-                </Button>
-                <Button size="small" onClick={handleClearAllLeaders}>
-                  Clear All
-                </Button>
-              </Stack>
-            </Stack>
-            <FormGroup>
-              {availableLeaders.map((leader) => (
-                <FormControlLabel
-                  key={leader}
-                  control={
-                    <Checkbox
-                      checked={filters.selectedLeaders.includes(leader)}
-                      onChange={(e) =>
-                        handleLeaderChange(leader, e.target.checked)
-                      }
-                    />
-                  }
-                  label={leader}
-                />
-              ))}
-            </FormGroup>
-          </FilterSection>
-
-          {/* Slots Section */}
-          <Divider />
-          <FilterSection title="Battle Slots">
-            <Typography variant="body2" color="text.secondary">
-              Filter by battle slot position
-            </Typography>
-            <FormGroup>
-              {[1, 2, 3].map((slot) => (
-                <FormControlLabel
-                  key={slot}
-                  control={
-                    <Checkbox
-                      checked={filters.selectedSlots.includes(slot)}
-                      onChange={(e) =>
-                        handleSlotChange(slot, e.target.checked)
-                      }
-                    />
-                  }
-                  label={`Slot ${slot}${slot === 3 ? ' (Encounter Slot)' : ''}`}
-                />
-              ))}
-            </FormGroup>
-          </FilterSection>
-
-          <Divider />
-
-          {/* Action Buttons */}
-          <Stack
-            direction={{ xs: 'column', md: 'row' }}
-            spacing={2}
-            sx={{
-              justifyContent: { xs: 'flex-start', md: 'flex-end' },
-              flexWrap: 'wrap',
-              mt: 3,
-            }}
-          >
-            <Button
-              variant="outlined"
-              startIcon={<ReplayIcon />}
-              onClick={onResetFilters}
-            >
-              Reset
+      {/* Leaders Section */}
+      <Divider />
+      <FilterSection title="Leaders">
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
+        >
+          <Typography variant="body2" color="text.secondary">
+            Select leaders to display
+          </Typography>
+          <Stack direction="row" spacing={1}>
+            <Button size="small" onClick={handleSelectAllLeaders}>
+              Select All
+            </Button>
+            <Button size="small" onClick={handleClearAllLeaders}>
+              Clear All
             </Button>
           </Stack>
         </Stack>
-      </CardContent>
-    </Card>
+        <FormGroup>
+          {availableLeaders.map((leader) => (
+            <FormControlLabel
+              key={leader}
+              control={
+                <Checkbox
+                  checked={filters.selectedLeaders.includes(leader)}
+                  onChange={(e) => handleLeaderChange(leader, e.target.checked)}
+                />
+              }
+              label={leader}
+            />
+          ))}
+        </FormGroup>
+      </FilterSection>
+
+      {/* Slots Section */}
+      <Divider />
+      <FilterSection title="Battle Slots">
+        <Typography variant="body2" color="text.secondary">
+          Filter by battle slot position
+        </Typography>
+        <FormGroup>
+          {[1, 2, 3].map((slot) => (
+            <FormControlLabel
+              key={slot}
+              control={
+                <Checkbox
+                  checked={filters.selectedSlots.includes(slot)}
+                  onChange={(e) => handleSlotChange(slot, e.target.checked)}
+                />
+              }
+              label={`Slot ${slot}${slot === 3 ? ' (Encounter Slot)' : ''}`}
+            />
+          ))}
+        </FormGroup>
+      </FilterSection>
+
+      <FilterActions onReset={onResetFilters} />
+    </Stack>
   );
 }
 

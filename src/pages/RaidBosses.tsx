@@ -12,17 +12,15 @@ import {
   useTheme,
 } from '@mui/material';
 import React, { useEffect, useMemo } from 'react';
+import { ShinyChip } from '../components/filters/shared';
 import { DataErrorDisplay } from '../components/shared/DataErrorDisplay';
 import { DataLoadingSkeleton } from '../components/shared/DataLoadingSkeleton';
-import {
-  POKEMON_TYPE_COLORS,
-  RAID_TIER_COLORS,
-  SHINY_COLOR,
-} from '../config/colorMapping';
+import { PageHeader } from '../components/shared/PageHeader';
+import { POKEMON_TYPE_COLORS, RAID_TIER_COLORS } from '../config/colorMapping';
 import { usePageData } from '../hooks/usePageData';
 import { fetchRaidBosses } from '../services/dataService';
-import type { RaidBoss, RaidBossData } from '../types/raidBosses';
 import type { RaidBossFilters } from '../types/pageFilters';
+import type { RaidBoss, RaidBossData } from '../types/raidBosses';
 
 interface RaidBossesPageProps {
   filters: RaidBossFilters;
@@ -190,18 +188,7 @@ function RaidBossesPage({ filters, onSetFilterOptions }: RaidBossesPageProps) {
                 }}
               />
             ))}
-            {boss.shiny_available && (
-              <Chip
-                label="✨ Shiny"
-                size="small"
-                sx={{
-                  backgroundColor: SHINY_COLOR,
-                  color: '#000',
-                  fontWeight: 600,
-                  fontSize: '0.75rem',
-                }}
-              />
-            )}
+            {boss.shiny_available && <ShinyChip />}
           </Box>
 
           <Box
@@ -250,14 +237,10 @@ function RaidBossesPage({ filters, onSetFilterOptions }: RaidBossesPageProps) {
 
   return (
     <Box sx={{ py: 4 }}>
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h3" fontWeight={700} gutterBottom>
-          Raid Bosses
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Current raid bosses available in Pokémon GO
-        </Typography>
-      </Box>
+      <PageHeader
+        title="Raid Bosses"
+        description="Current raid bosses available in Pokémon GO"
+      />
 
       <Alert severity="info" sx={{ mb: 3 }}>
         CP ranges help you identify perfect IV catches. Weather boosted ranges

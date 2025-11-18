@@ -1,6 +1,6 @@
 # Pokémon GO Event Calendar
 
-A comprehensive and polished single-page application for tracking Pokémon GO events. This project was built from the ground up, evolving from a simple data display into a full-featured, interactive calendar with advanced filtering, custom event management, and a modern, responsive user interface.
+A comprehensive React application for tracking Pokémon GO events and game data. This project evolved from a simple calendar display into a full-featured platform with interactive calendar views, data reference pages, advanced filtering, custom event management, and a modern, responsive user interface.
 
 ---
 
@@ -26,20 +26,28 @@ You can view the live application here: `https://zhenga8533.github.io/pogo-calen
 - **Custom Events:** Full CRUD (Create, Read, Update, Delete) functionality for user-created events.
 - **"Add to Calendar":** Export any event to a universal `.ics` file that can be imported into Google Calendar, Apple Calendar, Outlook, etc.
 
+### Data Reference Pages
+
+- **Egg Pool:** Browse current egg hatches by tier (2km, 5km, 7km, 10km, 12km) with regional availability filters.
+- **Raid Bosses:** View active raid bosses by tier (1-star through Mega) with CP ranges, shiny availability, and move filters.
+- **Research Tasks:** Search research tasks by rewards (Pokemon, items, Stardust, XP, etc.) and track shiny availability.
+- **Rocket Lineup:** View current Team GO Rocket encounters by grunt type, leader, or Giovanni, with shiny tracking.
+
 ### Advanced Filtering
 
-- **Multi-faceted Filtering:** Filter events by search term, date range, and a specific time-of-day range using a slider.
-- **Optimized Category Filter:** A modern pop-up menu for category selection with grouping, color keys, "Select All," and "Clear All" actions.
+- **Calendar Filters:** Filter events by search term, date range, time-of-day range, and category with view-specific settings.
+- **Page-Specific Filters:** Each data page has tailored filters (tiers, types, shiny status, regions, etc.) with search and bulk selection.
+- **Optimized Category Filter:** Modern pop-up menu for category selection with grouping, color keys, "Select All," and "Clear All" actions.
 - **Integrated "Saved" Filter:** Filter by your saved events directly from the category menu.
-- **View-Specific Filters:** Each calendar view (Month, Week, Day, List) remembers its own unique filter settings.
+- **Persistent State:** All filter settings are preserved in `localStorage`.
 
 ### Polished User Experience
 
-- **Persistent State:** All filters and user data (saved & custom events) are saved in the browser's `localStorage`.
-- **Fully Responsive:** A clean, mobile-friendly layout with a collapsible filter drawer.
-- **Skeleton Loaders:** A modern skeleton screen is shown during the initial data fetch for improved perceived performance.
-- **Empty State:** A user-friendly message appears when filters result in no events.
-- **Toast Notifications:** Clear feedback is provided for actions like creating and deleting events.
+- **Fully Responsive:** Clean, mobile-friendly layout with collapsible filter drawers across all pages.
+- **Skeleton Loaders:** Modern skeleton screens shown during data fetching for improved perceived performance.
+- **Error Handling:** Graceful error displays with retry functionality when data fails to load.
+- **Empty States:** User-friendly messages when filters result in no content.
+- **Toast Notifications:** Clear feedback for actions like creating and deleting events.
 
 ---
 
@@ -62,22 +70,119 @@ The project is organized into a clean, scalable structure that separates concern
 
 ```
 src/
-├── App.tsx
-├── pages/
-│   └── CalendarView.tsx
+├── App.tsx                 # Main application component with routing
+├── main.tsx               # Application entry point
+├── theme.ts               # MUI theme configuration
+├── assets/images/         # Static images
 ├── components/
-│   ├── calendar/
-│   ├── events/
-│   ├── filters/
-│   ├── info/
-│   └── layout/
-├── config/
-├── hooks/
-├── services/
-├── styles/
-├── types/
-└── utils/
+│   ├── calendar/         # Calendar-specific components
+│   │   ├── EventCalendar.tsx
+│   │   ├── CalendarEventContent.tsx
+│   │   └── CalendarSkeleton.tsx
+│   ├── events/           # Event management components
+│   │   ├── CreateEventDialog.tsx
+│   │   ├── EventDetailDialog.tsx
+│   │   ├── ExportEventDialog.tsx
+│   │   └── ...
+│   ├── filters/          # Filter components
+│   │   ├── shared/       # Shared filter components
+│   │   │   ├── FilterSection.tsx
+│   │   │   ├── FilterActions.tsx
+│   │   │   ├── ShinyChip.tsx
+│   │   │   ├── BaseFilterCard.tsx
+│   │   │   └── index.ts
+│   │   ├── AdvancedFilter.tsx
+│   │   ├── EventFilter.tsx
+│   │   ├── EggPoolFilter.tsx
+│   │   ├── RaidBossFilter.tsx
+│   │   ├── ResearchTaskFilter.tsx
+│   │   └── RocketLineupFilter.tsx
+│   ├── layout/           # Layout components
+│   │   ├── Header.tsx
+│   │   └── Footer.tsx
+│   └── shared/           # Reusable UI components
+│       ├── CategoryTag.tsx
+│       ├── ErrorBoundary.tsx
+│       ├── DataLoadingSkeleton.tsx
+│       ├── DataErrorDisplay.tsx
+│       └── PageHeader.tsx
+├── config/               # Configuration files
+│   ├── api.ts
+│   ├── constants.ts
+│   ├── eventFilter.ts
+│   ├── colorMapping.ts
+│   ├── timeConstants.ts
+│   └── routes.ts
+├── contexts/             # React contexts for state management
+│   ├── CalendarContext.tsx
+│   ├── EventDataContext.tsx
+│   ├── FilterContext.tsx
+│   ├── CustomEventsContext.tsx
+│   └── SettingsContext.tsx
+├── hooks/                # Custom React hooks
+│   ├── useEventData.ts
+│   ├── useFilters.ts
+│   ├── usePageData.ts
+│   ├── usePageFilters.ts
+│   └── ...
+├── pages/                # Page components (lazy-loaded)
+│   ├── Calendar.tsx
+│   ├── EggPool.tsx
+│   ├── RaidBosses.tsx
+│   ├── ResearchTasks.tsx
+│   ├── RocketLineup.tsx
+│   └── Faq.tsx
+├── services/             # API services
+│   ├── utils/            # Service utilities
+│   │   └── createFetcher.ts
+│   ├── eventService.ts   # Calendar event fetching
+│   └── dataService.ts    # Game data fetching
+├── styles/               # Global styles
+│   └── calendarDarkStyles.ts
+├── types/                # TypeScript definitions
+│   ├── events.ts
+│   ├── filters.ts
+│   ├── pageFilters.ts
+│   ├── eggPool.ts
+│   ├── raidBosses.ts
+│   ├── researchTasks.ts
+│   └── rocketLineup.ts
+└── utils/                # Utility functions
+    ├── colorUtils.ts
+    ├── dateUtils.ts
+    ├── storageUtils.ts
+    └── calendarUtils.ts
 ```
+
+### Architecture Patterns
+
+- **Context-based State Management:** Separate contexts for calendar, events, filters, and settings
+- **Custom Hooks:** Business logic separated into reusable hooks
+- **Lazy Loading:** Page components are lazy-loaded for better performance
+- **Centralized Services:** API calls abstracted into service modules
+- **Type Safety:** Full TypeScript coverage with comprehensive type definitions
+
+---
+
+## Recent Code Improvements
+
+The codebase has undergone significant refactoring to eliminate code duplication and improve maintainability:
+
+### Completed Improvements
+
+- **Shared Filter Components:** Created reusable `FilterSection`, `FilterActions`, and `ShinyChip` components, eliminating 500+ lines of duplicated code across filter components.
+- **Generic Data Fetcher:** Implemented `createDataFetcher<T>` utility that consolidates all API fetch logic into a single, type-safe factory function.
+- **Shared Page Components:** Created `PageHeader` component for consistent page titles and descriptions across all data pages.
+- **Routes Configuration:** Centralized all route paths in `src/config/routes.ts` to eliminate string repetition and improve type safety.
+
+### Remaining Opportunities
+
+While the application is fully functional and significantly improved, there are still some architectural considerations for future refactoring:
+
+- **Props Drilling:** The Header component receives 30+ props from App.tsx, which could be simplified using additional context providers or a reducer pattern.
+- **Filter State Management:** Page-specific filter states are managed in App.tsx, creating tight coupling that could be improved with dedicated contexts.
+
+These are non-blocking issues that don't affect functionality but would further improve maintainability.
 
 ---
 
@@ -116,7 +221,7 @@ npm run dev
     ```ts
     export default defineConfig({
       plugins: [react()],
-      base: "/pogo-calendar/",
+      base: '/pogo-calendar/',
     });
     ```
 3.  **Update `package.json`**: Add a `homepage` URL and `deploy` scripts.

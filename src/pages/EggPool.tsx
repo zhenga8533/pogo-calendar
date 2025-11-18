@@ -11,9 +11,11 @@ import {
   useTheme,
 } from '@mui/material';
 import React, { useEffect, useMemo } from 'react';
+import { ShinyChip } from '../components/filters/shared';
 import { DataErrorDisplay } from '../components/shared/DataErrorDisplay';
 import { DataLoadingSkeleton } from '../components/shared/DataLoadingSkeleton';
-import { EGG_COLORS, RARITY_TIERS, SHINY_COLOR } from '../config/colorMapping';
+import { PageHeader } from '../components/shared/PageHeader';
+import { EGG_COLORS, RARITY_TIERS } from '../config/colorMapping';
 import { usePageData } from '../hooks/usePageData';
 import { fetchEggPool } from '../services/dataService';
 import type { EggPokemon, EggPoolData } from '../types/eggPool';
@@ -77,7 +79,10 @@ function EggPoolPage({ filters, onSetFilterOptions }: EggPoolPageProps) {
         // Filter by rarity tier
         if (filters.selectedRarityTiers.length > 0) {
           const rarityLabel = RARITY_TIERS[p.rarity_tier]?.label;
-          if (!rarityLabel || !filters.selectedRarityTiers.includes(rarityLabel)) {
+          if (
+            !rarityLabel ||
+            !filters.selectedRarityTiers.includes(rarityLabel)
+          ) {
             return false;
           }
         }
@@ -154,19 +159,7 @@ function EggPoolPage({ filters, onSetFilterOptions }: EggPoolPageProps) {
             flexWrap: 'wrap',
           }}
         >
-          {pokemon.shiny_available && (
-            <Chip
-              label="✨ Shiny"
-              size="small"
-              sx={{
-                height: 20,
-                fontSize: '0.7rem',
-                backgroundColor: SHINY_COLOR,
-                color: '#000',
-                fontWeight: 600,
-              }}
-            />
-          )}
+          {pokemon.shiny_available && <ShinyChip />}
           <Chip
             label={RARITY_TIERS[pokemon.rarity_tier]?.label || 'Unknown'}
             size="small"
@@ -186,14 +179,10 @@ function EggPoolPage({ filters, onSetFilterOptions }: EggPoolPageProps) {
 
   return (
     <Box sx={{ py: 4 }}>
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h3" fontWeight={700} gutterBottom>
-          Egg Pool
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Current Pokémon available from different egg types
-        </Typography>
-      </Box>
+      <PageHeader
+        title="Egg Pool"
+        description="Current Pokémon available from different egg types"
+      />
 
       <Alert severity="info" sx={{ mb: 3 }}>
         Egg contents are updated regularly based on current in-game events.

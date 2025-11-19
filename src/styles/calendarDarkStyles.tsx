@@ -35,8 +35,7 @@ export function CalendarDarkStyles() {
         '.fc .fc-list-event:hover td': {
           backgroundColor: theme.palette.action.hover,
         },
-        // Event hover styles
-        '.fc-event:hover': {
+        '.fc-event:hover, .event-highlight': {
           filter: 'brightness(1.3)',
           boxShadow: '0 0 8px rgba(0, 0, 0, 0.5)',
           zIndex: 10,

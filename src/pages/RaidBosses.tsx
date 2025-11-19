@@ -1,3 +1,5 @@
+import ViewListIcon from '@mui/icons-material/ViewList';
+import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import {
   Alert,
   Box,
@@ -7,11 +9,13 @@ import {
   Chip,
   Grid,
   Stack,
+  ToggleButton,
+  ToggleButtonGroup,
   Typography,
   useMediaQuery,
   useTheme,
 } from '@mui/material';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ShinyChip } from '../components/filters/shared';
 import { DataErrorDisplay } from '../components/shared/DataErrorDisplay';
 import { DataLoadingSkeleton } from '../components/shared/DataLoadingSkeleton';
@@ -37,6 +41,7 @@ function RaidBossesPage({ filters, onSetFilterOptions }: RaidBossesPageProps) {
   );
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   // Extract and set available filter options from data
   useEffect(() => {
@@ -70,20 +75,15 @@ function RaidBossesPage({ filters, onSetFilterOptions }: RaidBossesPageProps) {
 
       // Filter bosses within this tier
       const filteredBosses = bosses.filter((boss) => {
-        // Filter by pokemon name
         if (
           filters.pokemonSearch &&
           !boss.name.toLowerCase().includes(filters.pokemonSearch.toLowerCase())
         ) {
           return false;
         }
-
-        // Filter by shiny availability
         if (filters.shinyOnly && !boss.shiny_available) {
           return false;
         }
-
-        // Filter by pokemon type
         if (filters.selectedTypes.length > 0) {
           const hasMatchingType = boss.types.some((type) =>
             filters.selectedTypes.includes(type)
@@ -92,15 +92,12 @@ function RaidBossesPage({ filters, onSetFilterOptions }: RaidBossesPageProps) {
             return false;
           }
         }
-
-        // Filter by CP range
         if (
           boss.cp_range.max < filters.minCP ||
           boss.cp_range.min > filters.maxCP
         ) {
           return false;
         }
-
         return true;
       });
 
@@ -235,12 +232,109 @@ function RaidBossesPage({ filters, onSetFilterOptions }: RaidBossesPageProps) {
     </Card>
   );
 
+  const renderRaidBossListItem = (boss: RaidBoss) => (
+    <Card
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        p: 1.5,
+        gap: 2,
+        width: '100%',
+      }}
+    >
+      <Box
+        sx={{
+          width: 60,
+          height: 60,
+          bgcolor: 'background.default',
+          borderRadius: 2,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+        }}
+      >
+        <Box
+          component="img"
+          src={boss.asset_url}
+          alt={boss.name}
+          sx={{ maxWidth: '80%', maxHeight: '80%' }}
+        />
+      </Box>
+      <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+        <Stack
+          direction="row"
+          alignItems="center"
+          spacing={1}
+          mb={0.5}
+          flexWrap="wrap"
+        >
+          <Typography variant="subtitle1" fontWeight={600}>
+            {boss.name}
+          </Typography>
+          {boss.shiny_available && <ShinyChip />}
+        </Stack>
+        <Stack direction="row" spacing={0.5} flexWrap="wrap" gap={0.5}>
+          {boss.types.map((t) => (
+            <Chip
+              key={t}
+              label={t}
+              size="small"
+              sx={{
+                height: 20,
+                fontSize: '0.7rem',
+                bgcolor: POKEMON_TYPE_COLORS[t],
+                color: '#fff',
+                fontWeight: 600,
+              }}
+            />
+          ))}
+        </Stack>
+      </Box>
+      <Box
+        sx={{
+          textAlign: 'right',
+          minWidth: 100,
+          display: { xs: 'none', sm: 'block' },
+        }}
+      >
+        <Typography variant="caption" color="text.secondary" display="block">
+          CP Range
+        </Typography>
+        <Typography variant="body2" fontWeight={600}>
+          {boss.cp_range.max.toLocaleString()}
+        </Typography>
+      </Box>
+    </Card>
+  );
+
   return (
-    <Box sx={{ py: 4 }}>
-      <PageHeader
-        title="Raid Bosses"
-        description="Current raid bosses available in Pokémon GO"
-      />
+    <Box sx={{ py: 4, pb: isMobile ? 8 : 4 }}>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="flex-start"
+        mb={3}
+      >
+        <PageHeader
+          title="Raid Bosses"
+          description="Current raid bosses available in Pokémon GO"
+        />
+        <ToggleButtonGroup
+          value={viewMode}
+          exclusive
+          onChange={(_, newView) => newView && setViewMode(newView)}
+          size="small"
+          aria-label="view mode"
+        >
+          <ToggleButton value="grid" aria-label="grid view">
+            <ViewModuleIcon />
+          </ToggleButton>
+          <ToggleButton value="list" aria-label="list view">
+            <ViewListIcon />
+          </ToggleButton>
+        </ToggleButtonGroup>
+      </Stack>
 
       <Alert severity="info" sx={{ mb: 3 }}>
         CP ranges help you identify perfect IV catches. Weather boosted ranges
@@ -252,7 +346,7 @@ function RaidBossesPage({ filters, onSetFilterOptions }: RaidBossesPageProps) {
 
         return (
           <Box key={tier} sx={{ mb: 4 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+            <Stack direction="row" spacing={2} alignItems="center" mb={2}>
               <Typography variant="h5" fontWeight={600}>
                 {tier}
               </Typography>
@@ -268,14 +362,21 @@ function RaidBossesPage({ filters, onSetFilterOptions }: RaidBossesPageProps) {
                   fontWeight: 600,
                 }}
               />
-            </Box>
-            <Grid container spacing={2}>
-              {bosses.map((boss) => (
-                <Grid key={boss.name} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                  {renderRaidBossCard(boss)}
-                </Grid>
-              ))}
-            </Grid>
+            </Stack>
+
+            {viewMode === 'grid' ? (
+              <Grid container spacing={2}>
+                {bosses.map((boss) => (
+                  <Grid key={boss.name} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                    {renderRaidBossCard(boss)}
+                  </Grid>
+                ))}
+              </Grid>
+            ) : (
+              <Stack spacing={1}>
+                {bosses.map((boss) => renderRaidBossListItem(boss))}
+              </Stack>
+            )}
           </Box>
         );
       })}

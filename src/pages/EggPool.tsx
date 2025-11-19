@@ -1,3 +1,5 @@
+import ViewListIcon from '@mui/icons-material/ViewList';
+import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import {
   Alert,
   Box,
@@ -6,11 +8,14 @@ import {
   CardMedia,
   Chip,
   Grid,
+  Stack,
+  ToggleButton,
+  ToggleButtonGroup,
   Typography,
   useMediaQuery,
   useTheme,
 } from '@mui/material';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ShinyChip } from '../components/filters/shared';
 import { DataErrorDisplay } from '../components/shared/DataErrorDisplay';
 import { DataLoadingSkeleton } from '../components/shared/DataLoadingSkeleton';
@@ -36,6 +41,7 @@ function EggPoolPage({ filters, onSetFilterOptions }: EggPoolPageProps) {
   );
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   // Extract and set available filter options from data
   useEffect(() => {
@@ -177,12 +183,85 @@ function EggPoolPage({ filters, onSetFilterOptions }: EggPoolPageProps) {
     </Card>
   );
 
-  return (
-    <Box sx={{ py: 4 }}>
-      <PageHeader
-        title="Egg Pool"
-        description="Current Pokémon available from different egg types"
+  const renderPokemonListItem = (pokemon: EggPokemon) => (
+    <Card
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        p: 1.5,
+        gap: 2,
+        width: '100%',
+      }}
+    >
+      <Box
+        sx={{
+          width: 50,
+          height: 50,
+          bgcolor: 'background.default',
+          borderRadius: 2,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+        }}
+      >
+        <Box
+          component="img"
+          src={pokemon.asset_url}
+          alt={pokemon.name}
+          sx={{ maxWidth: '80%', maxHeight: '80%' }}
+        />
+      </Box>
+      <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+        <Stack direction="row" alignItems="center" spacing={1} mb={0.5}>
+          <Typography variant="subtitle2" fontWeight={600}>
+            {pokemon.name}
+          </Typography>
+          {pokemon.shiny_available && <ShinyChip />}
+        </Stack>
+      </Box>
+      <Chip
+        label={RARITY_TIERS[pokemon.rarity_tier]?.label || 'Unknown'}
+        size="small"
+        sx={{
+          height: 20,
+          fontSize: '0.7rem',
+          backgroundColor: RARITY_TIERS[pokemon.rarity_tier]?.color || '#999',
+          color: '#fff',
+          fontWeight: 600,
+          minWidth: 80,
+        }}
       />
+    </Card>
+  );
+
+  return (
+    <Box sx={{ py: 4, pb: isMobile ? 8 : 4 }}>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="flex-start"
+        mb={3}
+      >
+        <PageHeader
+          title="Egg Pool"
+          description="Current Pokémon available from different egg types"
+        />
+        <ToggleButtonGroup
+          value={viewMode}
+          exclusive
+          onChange={(_, newView) => newView && setViewMode(newView)}
+          size="small"
+          aria-label="view mode"
+        >
+          <ToggleButton value="grid" aria-label="grid view">
+            <ViewModuleIcon />
+          </ToggleButton>
+          <ToggleButton value="list" aria-label="list view">
+            <ViewListIcon />
+          </ToggleButton>
+        </ToggleButtonGroup>
+      </Stack>
 
       <Alert severity="info" sx={{ mb: 3 }}>
         Egg contents are updated regularly based on current in-game events.
@@ -194,7 +273,7 @@ function EggPoolPage({ filters, onSetFilterOptions }: EggPoolPageProps) {
 
         return (
           <Box key={tier} sx={{ mb: 4 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+            <Stack direction="row" spacing={2} alignItems="center" mb={2}>
               <Typography variant="h5" fontWeight={600}>
                 {tier}
               </Typography>
@@ -208,14 +287,21 @@ function EggPoolPage({ filters, onSetFilterOptions }: EggPoolPageProps) {
                   fontWeight: 600,
                 }}
               />
-            </Box>
-            <Grid container spacing={2}>
-              {pokemon.map((p) => (
-                <Grid key={p.name} size={{ xs: 6, sm: 4, md: 3, lg: 2 }}>
-                  {renderPokemonCard(p)}
-                </Grid>
-              ))}
-            </Grid>
+            </Stack>
+
+            {viewMode === 'grid' ? (
+              <Grid container spacing={2}>
+                {pokemon.map((p) => (
+                  <Grid key={p.name} size={{ xs: 6, sm: 4, md: 3, lg: 2 }}>
+                    {renderPokemonCard(p)}
+                  </Grid>
+                ))}
+              </Grid>
+            ) : (
+              <Stack spacing={1}>
+                {pokemon.map((p) => renderPokemonListItem(p))}
+              </Stack>
+            )}
           </Box>
         );
       })}

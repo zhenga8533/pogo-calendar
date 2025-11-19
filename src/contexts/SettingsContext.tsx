@@ -18,12 +18,16 @@ const initialSettings: Settings = {
   firstDay: 0,
   timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   hour12: true,
-  showNextEvent: true,
 };
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<Settings>(() => {
     const saved = safeGetJSON<Partial<Settings>>(SETTINGS_KEY, {});
+    // Merge saved settings with initial to ensure new fields (if any) are present
+    // and removed fields (like showNextEvent) don't persist if we don't want them to
+    // Although for safeGetJSON, we usually just cast.
+    // To cleaner remove the old key from local storage,
+    // the useEffect below will handle saving the "clean" version on next render.
     return { ...initialSettings, ...saved };
   });
 

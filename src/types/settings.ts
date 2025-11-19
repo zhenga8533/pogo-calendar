@@ -7,7 +7,6 @@ export interface Settings {
   firstDay: number;
   timezone: string;
   hour12: boolean;
-  showNextEvent: boolean;
 }
 
 export interface Timezone {

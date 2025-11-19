@@ -1,7 +1,7 @@
 import type { EventContentArg } from '@fullcalendar/core';
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
-import { Box, IconButton, useTheme } from '@mui/material';
+import { Box, IconButton, Typography, alpha, useTheme } from '@mui/material';
 import React from 'react';
 import type { CalendarEvent } from '../../types/events';
 import { getColorForCategory } from '../../utils/colorUtils';
@@ -26,13 +26,14 @@ export const CalendarEventContent = React.memo(function CalendarEventContent({
 }: CalendarEventContentProps) {
   const theme = useTheme();
   const { category, article_url } = eventInfo.event.extendedProps;
-  const backgroundColor = getColorForCategory(category, theme.palette.mode);
+  const baseColor = getColorForCategory(category, theme.palette.mode);
 
   return (
     <Box
       sx={{
-        backgroundColor,
-        color: theme.palette.getContrastText(backgroundColor),
+        backgroundColor: alpha(baseColor, 0.15),
+        borderLeft: `4px solid ${baseColor}`,
+        color: theme.palette.text.primary,
         borderRadius: '4px',
         overflow: 'hidden',
         width: '100%',
@@ -41,12 +42,12 @@ export const CalendarEventContent = React.memo(function CalendarEventContent({
         alignItems: 'center',
         justifyContent: 'space-between',
         cursor: 'pointer',
-        border: `1px solid ${theme.palette.divider}`,
         boxSizing: 'border-box',
-        boxShadow: theme.shadows[1],
-        transition: 'box-shadow 0.15s ease-in-out',
+        transition: 'all 0.2s ease',
+        px: 0.5,
         '&:hover': {
-          boxShadow: theme.shadows[4],
+          backgroundColor: alpha(baseColor, 0.25),
+          transform: 'translateY(-1px)',
         },
       }}
       onMouseEnter={(e) =>
@@ -56,13 +57,24 @@ export const CalendarEventContent = React.memo(function CalendarEventContent({
     >
       <Box
         sx={{
-          p: '2px 8px',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
+          display: 'flex',
+          gap: 0.5,
+          alignItems: 'center',
         }}
       >
-        <b>{eventInfo.timeText}</b> <i>{eventInfo.event.title}</i>
+        <Typography
+          variant="caption"
+          fontWeight={700}
+          sx={{ opacity: 0.8, minWidth: 'fit-content' }}
+        >
+          {eventInfo.timeText}
+        </Typography>
+        <Typography variant="caption" noWrap fontWeight={500}>
+          {eventInfo.event.title}
+        </Typography>
       </Box>
 
       <IconButton
@@ -71,10 +83,14 @@ export const CalendarEventContent = React.memo(function CalendarEventContent({
           e.stopPropagation();
           onToggleSave(article_url);
         }}
-        sx={{ color: 'inherit' }}
+        sx={{
+          color: theme.palette.text.secondary,
+          p: 0.25,
+          '&:hover': { color: theme.palette.primary.main },
+        }}
       >
         {isSaved ? (
-          <StarIcon fontSize="inherit" />
+          <StarIcon fontSize="inherit" color="warning" />
         ) : (
           <StarBorderIcon fontSize="inherit" />
         )}

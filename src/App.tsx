@@ -21,7 +21,6 @@ import { useCalendarContext } from './contexts/CalendarContext';
 import { useSettingsContext } from './contexts/SettingsContext';
 import { useDialogs } from './hooks/useDialogs';
 import { useLastUpdated } from './hooks/useLastUpdated';
-import { useNextUpcomingEvent } from './hooks/useNextUpcomingEvent';
 import {
   useEggPoolFilters,
   useRaidBossFilters,
@@ -69,7 +68,6 @@ function App() {
     addEvent,
     updateEvent,
     deleteEvent,
-    setSelectedEvent,
   } = useCalendarContext();
 
   // Page-specific filters
@@ -103,7 +101,6 @@ function App() {
     error,
     refetch: refetchLastUpdated,
   } = useLastUpdated();
-  const nextUpcomingEvent = useNextUpcomingEvent(filteredEvents);
 
   const activeFilterCount = useMemo(() => {
     return (
@@ -197,9 +194,6 @@ function App() {
           allCategories={allCategories}
           allPokemon={allPokemon}
           allBonuses={allBonuses}
-          nextUpcomingEvent={nextUpcomingEvent}
-          onSelectEvent={setSelectedEvent}
-          showNextEventTracker={settings.showNextEvent}
           lastUpdated={lastUpdated}
           lastUpdatedLoading={lastUpdatedLoading}
           lastUpdatedError={error}

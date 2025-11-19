@@ -1,6 +1,12 @@
-import FilterListIcon from '@mui/icons-material/FilterList';
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import BoltIcon from '@mui/icons-material/Bolt';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import EggIcon from '@mui/icons-material/Egg';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import GroupIcon from '@mui/icons-material/Group';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import SearchIcon from '@mui/icons-material/Search';
 import SyncIcon from '@mui/icons-material/Sync';
 import TuneIcon from '@mui/icons-material/Tune';
 import {
@@ -11,6 +17,7 @@ import {
   Divider,
   Drawer,
   IconButton,
+  InputBase,
   ListItemIcon,
   ListItemText,
   Menu,
@@ -20,17 +27,13 @@ import {
   Toolbar,
   Tooltip,
   Typography,
+  alpha,
+  styled,
   useScrollTrigger,
   useTheme,
 } from '@mui/material';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import EggIcon from '@mui/icons-material/Egg';
-import BoltIcon from '@mui/icons-material/Bolt';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import GroupIcon from '@mui/icons-material/Group';
 import React, { useState } from 'react';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
-import type { CalendarEvent } from '../../types/events';
 import type { EventFilterProps } from '../../types/filters';
 import type {
   EggPoolFilters,
@@ -43,66 +46,67 @@ import EventFilter from '../filters/EventFilter';
 import RaidBossFilter from '../filters/RaidBossFilter';
 import ResearchTaskFilter from '../filters/ResearchTaskFilter';
 import RocketLineupFilter from '../filters/RocketLineupFilter';
-import NextEventTracker from '../shared/NextEventTracker';
 import LogoIcon from '/icon.svg';
+
+// Styled Search Component
+const Search = styled('div')(({ theme }) => ({
+  position: 'relative',
+  borderRadius: theme.shape.borderRadius,
+  backgroundColor: alpha(theme.palette.common.white, 0.15),
+  '&:hover': {
+    backgroundColor: alpha(theme.palette.common.white, 0.25),
+  },
+  marginRight: 0,
+  marginLeft: 0,
+  width: '100%',
+  flexGrow: 1, // Allow growing on mobile to fill space
+  [theme.breakpoints.up('sm')]: {
+    width: 'auto',
+    minWidth: '300px', // Wider search on desktop
+    flexGrow: 0, // Don't grow on desktop, let spacers center it
+  },
+  // Adjust for light mode visibility
+  ...(theme.palette.mode === 'light' && {
+    backgroundColor: alpha(theme.palette.common.black, 0.05),
+    '&:hover': {
+      backgroundColor: alpha(theme.palette.common.black, 0.1),
+    },
+  }),
+}));
+
+const SearchIconWrapper = styled('div')(({ theme }) => ({
+  padding: theme.spacing(0, 2),
+  height: '100%',
+  position: 'absolute',
+  pointerEvents: 'none',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+}));
+
+const StyledInputBase = styled(InputBase)(({ theme }) => ({
+  color: 'inherit',
+  width: '100%',
+  '& .MuiInputBase-input': {
+    padding: theme.spacing(1, 1, 1, 0),
+    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
+    transition: theme.transitions.create('width'),
+    width: '100%',
+  },
+}));
 
 const NAV_ITEMS = [
   { label: 'Calendar', path: '/', icon: CalendarMonthIcon },
   { label: 'Egg Pool', path: '/egg-pool', icon: EggIcon },
   { label: 'Raid Bosses', path: '/raid-bosses', icon: BoltIcon },
-  { label: 'Research Tasks', path: '/research-tasks', icon: AssignmentIcon },
-  { label: 'Team Rocket', path: '/rocket-lineup', icon: GroupIcon },
+  { label: 'Research', path: '/research-tasks', icon: AssignmentIcon },
+  { label: 'Rocket', path: '/rocket-lineup', icon: GroupIcon },
   { label: 'FAQ', path: '/faq', icon: HelpOutlineIcon },
 ];
-
-const LastUpdatedDisplay = React.memo(function LastUpdatedDisplay({
-  onRefresh,
-  lastUpdated,
-  loading,
-  error,
-}: {
-  onRefresh: () => void;
-  lastUpdated: string | null;
-  loading: boolean;
-  error: string | null;
-}) {
-  if (loading)
-    return (
-      <Typography variant="body2" sx={{ opacity: 0.7 }}>
-        Checking for updates...
-      </Typography>
-    );
-  if (error)
-    return (
-      <Typography variant="body2" color="error">
-        {error}
-      </Typography>
-    );
-
-  return (
-    <Tooltip title="Click to refresh data">
-      <Stack
-        direction="row"
-        alignItems="center"
-        spacing={1}
-        onClick={onRefresh}
-        sx={{ cursor: 'pointer' }}
-      >
-        <SyncIcon fontSize="small" />
-        <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
-          {lastUpdated}
-        </Typography>
-      </Stack>
-    </Tooltip>
-  );
-});
 
 type HeaderProps = Omit<EventFilterProps, 'isMobile'> & {
   onSettingsClick: () => void;
   onRefresh: () => void;
-  nextUpcomingEvent: CalendarEvent | null;
-  onSelectEvent: (event: CalendarEvent) => void;
-  showNextEventTracker: boolean;
   lastUpdated: string | null;
   lastUpdatedLoading: boolean;
   lastUpdatedError: string | null;
@@ -135,36 +139,25 @@ function HeaderComponent(props: HeaderProps) {
   const {
     onSettingsClick,
     onRefresh,
-    nextUpcomingEvent,
-    onSelectEvent,
-    showNextEventTracker,
     lastUpdated,
-    lastUpdatedLoading,
-    lastUpdatedError,
-    activeFilterCount,
     isMobile,
+    // Filter props
+    activeFilterCount,
     eggPoolFilters,
     onEggPoolFilterChange,
-    onResetEggPoolFilters,
     eggPoolActiveFilterCount,
-    eggPoolOptions,
     raidBossFilters,
     onRaidBossFilterChange,
-    onResetRaidBossFilters,
     raidBossActiveFilterCount,
-    raidBossOptions,
     researchTaskFilters,
     onResearchTaskFilterChange,
-    onResetResearchTaskFilters,
     researchTaskActiveFilterCount,
-    researchTaskOptions,
     rocketLineupFilters,
     onRocketLineupFilterChange,
-    onResetRocketLineupFilters,
     rocketLineupActiveFilterCount,
-    rocketLineupOptions,
     ...filterProps
   } = props;
+
   const theme = useTheme();
   const trigger = useScrollTrigger({ disableHysteresis: true, threshold: 0 });
   const location = useLocation();
@@ -172,14 +165,13 @@ function HeaderComponent(props: HeaderProps) {
   const [filterAnchorEl, setFilterAnchorEl] =
     useState<HTMLButtonElement | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [navMenuAnchorEl, setNavMenuAnchorEl] = useState<HTMLElement | null>(null);
+  const [navMenuAnchorEl, setNavMenuAnchorEl] = useState<HTMLElement | null>(
+    null
+  );
 
   const handleFilterClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    if (isMobile) {
-      setDrawerOpen(true);
-    } else {
-      setFilterAnchorEl(event.currentTarget);
-    }
+    if (isMobile) setDrawerOpen(true);
+    else setFilterAnchorEl(event.currentTarget);
   };
 
   const handleCloseFilter = () => {
@@ -195,72 +187,116 @@ function HeaderComponent(props: HeaderProps) {
     setNavMenuAnchorEl(null);
   };
 
-  // Determine which filter to render based on current route
+  // --- Search Logic ---
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    switch (location.pathname) {
+      case '/':
+        filterProps.onFilterChange({
+          ...filterProps.filters,
+          searchTerm: value,
+        });
+        break;
+      case '/egg-pool':
+        onEggPoolFilterChange?.({ ...eggPoolFilters!, pokemonSearch: value });
+        break;
+      case '/raid-bosses':
+        onRaidBossFilterChange?.({ ...raidBossFilters!, pokemonSearch: value });
+        break;
+      case '/research-tasks':
+        onResearchTaskFilterChange?.({
+          ...researchTaskFilters!,
+          taskSearch: value,
+        });
+        break;
+      case '/rocket-lineup':
+        onRocketLineupFilterChange?.({
+          ...rocketLineupFilters!,
+          pokemonSearch: value,
+        });
+        break;
+    }
+  };
+
+  const getCurrentSearchValue = () => {
+    switch (location.pathname) {
+      case '/':
+        return filterProps.filters.searchTerm;
+      case '/egg-pool':
+        return eggPoolFilters?.pokemonSearch || '';
+      case '/raid-bosses':
+        return raidBossFilters?.pokemonSearch || '';
+      case '/research-tasks':
+        return researchTaskFilters?.taskSearch || '';
+      case '/rocket-lineup':
+        return rocketLineupFilters?.pokemonSearch || '';
+      default:
+        return '';
+    }
+  };
+
+  // --- Filter Content Logic ---
   const getFilterContent = () => {
     switch (location.pathname) {
       case '/':
         return <EventFilter {...filterProps} />;
       case '/egg-pool':
-        if (eggPoolFilters && onEggPoolFilterChange && onResetEggPoolFilters) {
-          return (
+        return (
+          props.onEggPoolFilterChange &&
+          props.onResetEggPoolFilters && (
             <EggPoolFilter
-              filters={eggPoolFilters}
-              onFilterChange={onEggPoolFilterChange}
-              onResetFilters={onResetEggPoolFilters}
-              availableEggTiers={eggPoolOptions?.eggTiers || []}
-              availableRarityTiers={eggPoolOptions?.rarityTiers || []}
+              filters={eggPoolFilters!}
+              onFilterChange={props.onEggPoolFilterChange}
+              onResetFilters={props.onResetEggPoolFilters}
+              availableEggTiers={props.eggPoolOptions?.eggTiers || []}
+              availableRarityTiers={props.eggPoolOptions?.rarityTiers || []}
             />
-          );
-        }
-        return null;
+          )
+        );
       case '/raid-bosses':
-        if (raidBossFilters && onRaidBossFilterChange && onResetRaidBossFilters) {
-          return (
+        return (
+          props.onRaidBossFilterChange &&
+          props.onResetRaidBossFilters && (
             <RaidBossFilter
-              filters={raidBossFilters}
-              onFilterChange={onRaidBossFilterChange}
-              onResetFilters={onResetRaidBossFilters}
-              availableRaidTiers={raidBossOptions?.raidTiers || []}
-              availableTypes={raidBossOptions?.types || []}
+              filters={raidBossFilters!}
+              onFilterChange={props.onRaidBossFilterChange}
+              onResetFilters={props.onResetRaidBossFilters}
+              availableRaidTiers={props.raidBossOptions?.raidTiers || []}
+              availableTypes={props.raidBossOptions?.types || []}
             />
-          );
-        }
-        return null;
+          )
+        );
       case '/research-tasks':
-        if (researchTaskFilters && onResearchTaskFilterChange && onResetResearchTaskFilters) {
-          return (
+        return (
+          props.onResearchTaskFilterChange &&
+          props.onResetResearchTaskFilters && (
             <ResearchTaskFilter
-              filters={researchTaskFilters}
-              onFilterChange={onResearchTaskFilterChange}
-              onResetFilters={onResetResearchTaskFilters}
-              availableCategories={researchTaskOptions?.categories || []}
+              filters={researchTaskFilters!}
+              onFilterChange={props.onResearchTaskFilterChange}
+              onResetFilters={props.onResetResearchTaskFilters}
+              availableCategories={props.researchTaskOptions?.categories || []}
             />
-          );
-        }
-        return null;
+          )
+        );
       case '/rocket-lineup':
-        if (rocketLineupFilters && onRocketLineupFilterChange && onResetRocketLineupFilters) {
-          return (
+        return (
+          props.onRocketLineupFilterChange &&
+          props.onResetRocketLineupFilters && (
             <RocketLineupFilter
-              filters={rocketLineupFilters}
-              onFilterChange={onRocketLineupFilterChange}
-              onResetFilters={onResetRocketLineupFilters}
-              availableLeaders={rocketLineupOptions?.leaders || []}
+              filters={rocketLineupFilters!}
+              onFilterChange={props.onRocketLineupFilterChange}
+              onResetFilters={props.onResetRocketLineupFilters}
+              availableLeaders={props.rocketLineupOptions?.leaders || []}
             />
-          );
-        }
-        return null;
-      case '/faq':
-        return null; // No filters for FAQ page
+          )
+        );
       default:
-        return <EventFilter {...filterProps} />;
+        return null;
     }
   };
 
   const filterContent = getFilterContent();
-  const open = Boolean(filterAnchorEl);
 
-  // Get current active filter count based on route
   const getCurrentActiveFilterCount = () => {
     switch (location.pathname) {
       case '/':
@@ -278,8 +314,6 @@ function HeaderComponent(props: HeaderProps) {
     }
   };
 
-  const currentActiveFilterCount = getCurrentActiveFilterCount();
-
   return (
     <>
       <AppBar
@@ -295,73 +329,82 @@ function HeaderComponent(props: HeaderProps) {
           color: theme.palette.text.primary,
           borderBottom: `1px solid ${theme.palette.divider}`,
           transition: theme.transitions.create(
-            ['background-color', 'box-shadow', 'color'],
+            ['background-color', 'box-shadow'],
             {
               duration: theme.transitions.duration.short,
             }
           ),
         }}
       >
-        <Toolbar sx={{ justifyContent: 'space-between' }}>
+        <Toolbar sx={{ gap: 2 }}>
+          {/* Logo Section */}
           <Stack
             component={RouterLink}
             to="/"
             direction="row"
             alignItems="center"
-            sx={{
-              cursor: 'pointer',
-              textDecoration: 'none',
-              color: 'inherit',
-              flexShrink: 0,
-            }}
+            sx={{ textDecoration: 'none', color: 'inherit', flexShrink: 0 }}
           >
             <Box
               component="img"
               src={LogoIcon}
-              alt="PoGo Calendar Logo"
-              sx={{
-                mr: 1.5,
-                height: 28,
-                width: 28,
-              }}
+              alt="Logo"
+              sx={{ mr: 1, height: 32, width: 32 }}
             />
             <Typography
               variant="h6"
               component="div"
-              sx={{ display: { xs: 'none', sm: 'block' } }}
+              sx={{ display: { xs: 'none', md: 'block' }, fontWeight: 700 }}
             >
-              PoGo Event Calendar
+              PoGo Calendar
             </Typography>
           </Stack>
 
-          <Box sx={{ flexGrow: 1 }} />
+          {/* Search Section with Centering Logic */}
+          {location.pathname !== '/faq' ? (
+            <>
+              {/* Left Spacer: Pushes search to center on desktop, hidden on mobile to let search grow */}
+              <Box sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }} />
 
-          {showNextEventTracker && (
-            <Box sx={{ display: { xs: 'none', lg: 'block' } }}>
-              <NextEventTracker
-                nextEvent={nextUpcomingEvent}
-                onEventClick={onSelectEvent}
-              />
-            </Box>
+              <Search>
+                <SearchIconWrapper>
+                  <SearchIcon />
+                </SearchIconWrapper>
+                <StyledInputBase
+                  placeholder="Search..."
+                  inputProps={{ 'aria-label': 'search' }}
+                  value={getCurrentSearchValue()}
+                  onChange={handleSearchChange}
+                />
+              </Search>
+
+              {/* Right Spacer */}
+              <Box sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }} />
+            </>
+          ) : (
+            // FAQ Page: Just use a spacer to push actions to the right
+            <Box sx={{ flexGrow: 1 }} />
           )}
 
-          <Box sx={{ flexGrow: 1 }} />
-
+          {/* Actions Section */}
           <Stack direction="row" alignItems="center" spacing={isMobile ? 0 : 1}>
-            <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
-              <LastUpdatedDisplay
-                onRefresh={onRefresh}
-                lastUpdated={lastUpdated}
-                loading={lastUpdatedLoading}
-                error={lastUpdatedError}
-              />
-            </Box>
+            {/* Last Updated (Desktop) */}
+            {!isMobile && (
+              <Tooltip title={`Last Updated: ${lastUpdated}`}>
+                <IconButton onClick={onRefresh} color="inherit">
+                  <SyncIcon />
+                </IconButton>
+              </Tooltip>
+            )}
+
+            {/* Divider */}
             <Divider
               orientation="vertical"
               flexItem
               sx={{ display: { xs: 'none', sm: 'block' }, mx: 1 }}
             />
 
+            {/* Navigation Dropdown Trigger */}
             {isMobile ? (
               <Tooltip title="Menu">
                 <IconButton color="inherit" onClick={handleNavMenuOpen}>
@@ -374,61 +417,48 @@ function HeaderComponent(props: HeaderProps) {
                 onClick={handleNavMenuOpen}
                 endIcon={<ArrowDropDownIcon />}
                 sx={{
+                  textTransform: 'none',
+                  fontWeight: 600,
                   '&:hover': { backgroundColor: 'action.hover' },
                 }}
               >
-                {NAV_ITEMS.find((item) => item.path === location.pathname)?.label || 'Calendar'}
+                {NAV_ITEMS.find((item) => item.path === location.pathname)
+                  ?.label || 'Calendar'}
               </Button>
             )}
 
+            {/* Filters Trigger */}
             {filterContent && (
               <Tooltip title="Filters">
-                <Badge badgeContent={currentActiveFilterCount} color="primary">
-                  {isMobile ? (
-                    <IconButton color="inherit" onClick={handleFilterClick}>
-                      <FilterListIcon />
-                    </IconButton>
-                  ) : (
-                    <Button
-                      color="inherit"
-                      startIcon={<FilterListIcon />}
-                      onClick={handleFilterClick}
-                      sx={{ '&:hover': { backgroundColor: 'action.hover' } }}
-                    >
-                      Filters
-                    </Button>
-                  )}
-                </Badge>
+                <IconButton color="inherit" onClick={handleFilterClick}>
+                  <Badge
+                    badgeContent={getCurrentActiveFilterCount()}
+                    color="primary"
+                  >
+                    <FilterListIcon />
+                  </Badge>
+                </IconButton>
               </Tooltip>
             )}
 
+            {/* Settings Trigger */}
             <Tooltip title="Settings">
-              {isMobile ? (
-                <IconButton color="inherit" onClick={onSettingsClick}>
-                  <TuneIcon />
-                </IconButton>
-              ) : (
-                <Button
-                  color="inherit"
-                  startIcon={<TuneIcon />}
-                  onClick={onSettingsClick}
-                  sx={{ '&:hover': { backgroundColor: 'action.hover' } }}
-                >
-                  Settings
-                </Button>
-              )}
+              <IconButton color="inherit" onClick={onSettingsClick}>
+                <TuneIcon />
+              </IconButton>
             </Tooltip>
           </Stack>
         </Toolbar>
       </AppBar>
 
-      {/* Navigation Menu */}
+      {/* Navigation Menu Dropdown */}
       <Menu
         anchorEl={navMenuAnchorEl}
         open={Boolean(navMenuAnchorEl)}
         onClose={handleNavMenuClose}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
         transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+        PaperProps={{ sx: { minWidth: 200, borderRadius: 3, mt: 1 } }}
       >
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
@@ -439,31 +469,39 @@ function HeaderComponent(props: HeaderProps) {
               to={item.path}
               onClick={handleNavMenuClose}
               selected={location.pathname === item.path}
+              sx={{ py: 1.5 }}
             >
               <ListItemIcon>
                 <Icon fontSize="small" />
               </ListItemIcon>
-              <ListItemText>{item.label}</ListItemText>
+              <ListItemText primaryTypographyProps={{ fontWeight: 500 }}>
+                {item.label}
+              </ListItemText>
             </MenuItem>
           );
         })}
       </Menu>
 
-      {/* Filters Drawer/Popover */}
+      {/* Filters Drawer (Mobile) or Popover (Desktop) */}
       {isMobile ? (
-        <Drawer anchor="left" open={drawerOpen} onClose={handleCloseFilter}>
-          <Box sx={{ width: 300, p: 2, pt: 4 }}>{filterContent}</Box>
+        <Drawer
+          anchor="bottom"
+          open={drawerOpen}
+          onClose={handleCloseFilter}
+          PaperProps={{
+            sx: { borderRadius: '20px 20px 0 0', maxHeight: '80vh' },
+          }}
+        >
+          <Box sx={{ p: 3 }}>{filterContent}</Box>
         </Drawer>
       ) : (
         <Popover
-          open={open}
+          open={Boolean(filterAnchorEl)}
           anchorEl={filterAnchorEl}
           onClose={handleCloseFilter}
           anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
           transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-          slotProps={{
-            paper: { sx: { backgroundColor: 'background.default' } },
-          }}
+          PaperProps={{ sx: { mt: 1, borderRadius: 3, p: 0 } }}
         >
           {filterContent}
         </Popover>
@@ -472,6 +510,4 @@ function HeaderComponent(props: HeaderProps) {
   );
 }
 
-const Header = React.memo(HeaderComponent);
-Header.displayName = 'Header';
-export default Header;
+export default React.memo(HeaderComponent);

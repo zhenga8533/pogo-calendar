@@ -187,6 +187,7 @@ function EventDetailDialog({
     banner_url: bannerUrl,
     isCustomEvent,
     isSaved,
+    category,
   } = eventDetails;
 
   return (
@@ -197,16 +198,63 @@ function EventDetailDialog({
         maxWidth="sm"
         fullWidth
         disableRestoreFocus
+        scroll="body"
         slotProps={{
           paper: {
             sx: {
               borderRadius: 3,
+              overflow: 'hidden',
               boxShadow: (theme) => theme.shadows[12],
             },
           },
         }}
       >
-        <DialogContent sx={{ p: 0, position: 'relative' }}>
+        {/* Header Container with Image & Title Overlay */}
+        <Box sx={{ position: 'relative', height: 200, width: '100%' }}>
+          <Box
+            component="img"
+            src={bannerUrl}
+            alt={title}
+            sx={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+            }}
+          />
+
+          {/* Gradient Overlay */}
+          <Box
+            sx={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: '100%',
+              background:
+                'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0.1) 100%)',
+            }}
+          />
+
+          {/* Close Button */}
+          <IconButton
+            onClick={onClose}
+            sx={{
+              position: 'absolute',
+              top: 8,
+              left: 8,
+              color: 'white',
+              bgcolor: 'rgba(0,0,0,0.3)',
+              '&:hover': { bgcolor: 'rgba(0,0,0,0.5)' },
+            }}
+          >
+            <OpenInNewIcon
+              sx={{ transform: 'rotate(180deg)', display: 'none' }}
+            />{' '}
+            {/* Placeholder for spacing if needed */}
+            {/* We use standard Close via DialogActions usually, but this is an image overlay close */}
+          </IconButton>
+
+          {/* Save Button */}
           <IconButton
             aria-label={isSaved ? 'Unsave event' : 'Save event'}
             onClick={() => onToggleSaveEvent(id)}
@@ -214,63 +262,73 @@ function EventDetailDialog({
               position: 'absolute',
               top: 8,
               right: 8,
-              backgroundColor: 'rgba(0, 0, 0, 0.4)',
               color: 'white',
-              '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.6)' },
-              zIndex: 2,
+              bgcolor: 'rgba(0, 0, 0, 0.3)',
+              '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.5)' },
             }}
           >
             {isSaved ? <StarIcon /> : <StarBorderIcon />}
           </IconButton>
 
+          {/* Title & Category Bottom Overlay */}
           <Box
-            component="img"
-            src={bannerUrl}
-            alt={`Event banner for ${title} - ${eventDetails.category} event`}
             sx={{
-              width: '100%',
-              aspectRatio: '16 / 9',
-              objectFit: 'cover',
-              maxHeight: '280px',
-            }}
-          />
-
-          {/* Header section */}
-          <Box
-            sx={(theme) => ({
-              borderBottom: `1px solid ${theme.palette.divider}`,
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
               p: 3,
-              pb: 2.5,
-            })}
+              width: '100%',
+            }}
           >
-            <Stack spacing={2}>
-              <Stack
-                direction="row"
-                justifyContent="space-between"
-                alignItems="center"
-                flexWrap="wrap"
-                gap={1}
-              >
-                <CategoryTag category={eventDetails.category} />
-                <EventStatusTag start={event.start} end={event.end} />
+            <Stack direction="row" spacing={1} mb={1} alignItems="center">
+              <CategoryTag category={category} />
+              <EventStatusTag start={event.start} end={event.end} />
+            </Stack>
+            <Typography
+              variant="h5"
+              component="h2"
+              fontWeight={700}
+              color="white"
+              sx={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)', lineHeight: 1.2 }}
+            >
+              {title}
+            </Typography>
+          </Box>
+        </Box>
+
+        <DialogContent sx={{ p: 3 }}>
+          {/* Time Section */}
+          <Box sx={{ mb: 3 }}>
+            <Stack spacing={1.5}>
+              <Stack direction="row" spacing={1.5} alignItems="center">
+                <CalendarTodayIcon
+                  sx={{ fontSize: 20, color: 'primary.main' }}
+                />
+                <Box>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      fontWeight: 600,
+                      color: 'text.secondary',
+                      textTransform: 'uppercase',
+                      fontSize: '0.7rem',
+                    }}
+                  >
+                    Start Time
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{ fontWeight: 500, color: 'text.primary' }}
+                  >
+                    {eventDetails.start}
+                  </Typography>
+                </Box>
               </Stack>
 
-              <Typography
-                variant="h5"
-                component="h2"
-                sx={{
-                  fontWeight: 700,
-                  fontSize: '1.5rem',
-                  lineHeight: 1.3,
-                }}
-              >
-                {title}
-              </Typography>
-
-              <Stack spacing={1.5}>
+              {eventDetails.end && (
                 <Stack direction="row" spacing={1.5} alignItems="center">
-                  <CalendarTodayIcon
-                    sx={{ fontSize: 20, color: 'primary.main' }}
+                  <AccessTimeIcon
+                    sx={{ fontSize: 20, color: 'secondary.main' }}
                   />
                   <Box>
                     <Typography
@@ -279,145 +337,107 @@ function EventDetailDialog({
                         fontWeight: 600,
                         color: 'text.secondary',
                         textTransform: 'uppercase',
-                        letterSpacing: 0.5,
                         fontSize: '0.7rem',
-                        display: 'block',
                       }}
                     >
-                      Start Time
+                      End Time
                     </Typography>
                     <Typography
                       variant="body2"
                       sx={{ fontWeight: 500, color: 'text.primary' }}
                     >
-                      {eventDetails.start}
+                      {eventDetails.end}
                     </Typography>
                   </Box>
                 </Stack>
-
-                {eventDetails.end && (
-                  <Stack direction="row" spacing={1.5} alignItems="center">
-                    <AccessTimeIcon
-                      sx={{ fontSize: 20, color: 'secondary.main' }}
-                    />
-                    <Box>
-                      <Typography
-                        variant="caption"
-                        sx={{
-                          fontWeight: 600,
-                          color: 'text.secondary',
-                          textTransform: 'uppercase',
-                          letterSpacing: 0.5,
-                          fontSize: '0.7rem',
-                          display: 'block',
-                        }}
-                      >
-                        End Time
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        sx={{ fontWeight: 500, color: 'text.primary' }}
-                      >
-                        {eventDetails.end}
-                      </Typography>
-                    </Box>
-                  </Stack>
-                )}
-              </Stack>
+              )}
             </Stack>
           </Box>
 
-          {/* Content section */}
-          <Box sx={{ p: 3 }}>
-            <Stack spacing={3} divider={<Divider />}>
-              {eventDetails.description && (
-                <DetailSection title="Description">
-                  <Stack spacing={0.75}>
-                    {eventDetails.description.split('\n').map((line, index) => {
-                      const trimmedLine = line.trim();
-                      if (!trimmedLine) return null;
-                      // Replace "- " with "• " for list items
-                      const displayText = trimmedLine.startsWith('- ')
-                        ? '• ' + trimmedLine.substring(2)
-                        : trimmedLine;
-                      return (
-                        <Typography
-                          key={index}
-                          variant="body1"
-                          sx={{ lineHeight: 1.7 }}
-                        >
-                          {displayText}
-                        </Typography>
-                      );
-                    })}
-                  </Stack>
-                </DetailSection>
-              )}
+          <Divider sx={{ mb: 3 }} />
 
-              {eventDetails.bonuses && eventDetails.bonuses.length > 0 && (
-                <DetailSection title="Event Bonuses">
-                  <Stack spacing={0.75}>
-                    {eventDetails.bonuses.map((bonus) => (
+          <Stack spacing={3} divider={<Divider />}>
+            {eventDetails.description && (
+              <DetailSection title="Description">
+                <Stack spacing={0.75}>
+                  {eventDetails.description.split('\n').map((line, index) => {
+                    const trimmedLine = line.trim();
+                    if (!trimmedLine) return null;
+                    const displayText = trimmedLine.startsWith('- ')
+                      ? '• ' + trimmedLine.substring(2)
+                      : trimmedLine;
+                    return (
                       <Typography
-                        key={bonus}
-                        variant="body2"
-                        sx={{ lineHeight: 1.6, pl: 1 }}
+                        key={index}
+                        variant="body1"
+                        sx={{ lineHeight: 1.7 }}
                       >
-                        • {bonus}
+                        {displayText}
                       </Typography>
-                    ))}
-                  </Stack>
-                </DetailSection>
-              )}
-
-              {/* Dynamically render all Pokemon-related fields */}
-              {Object.entries(eventDetails)
-                .filter(([key, value]) => {
-                  // Exclude known non-Pokemon fields and only show arrays with content
-                  const nonPokemonFields = [
-                    'category',
-                    'article_url',
-                    'banner_url',
-                    'description',
-                    'bonuses',
-                    'id',
-                    'title',
-                    'isCustomEvent',
-                    'isSaved',
-                    'start',
-                    'end',
-                  ];
-                  return (
-                    !nonPokemonFields.includes(key) &&
-                    Array.isArray(value) &&
-                    value.length > 0
-                  );
-                })
-                .map(([key, value]) => (
-                  <DetailSection key={key} title={getPokemonFieldTitle(key)}>
-                    <ChipList items={value as string[]} />
-                  </DetailSection>
-                ))}
-
-              <DetailSection title="Notes">
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={4}
-                  variant="outlined"
-                  placeholder="Add your personal notes here..."
-                  value={noteText}
-                  onChange={(e) => handleNoteChange(e.target.value)}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 2,
-                    },
-                  }}
-                />
+                    );
+                  })}
+                </Stack>
               </DetailSection>
-            </Stack>
-          </Box>
+            )}
+
+            {eventDetails.bonuses && eventDetails.bonuses.length > 0 && (
+              <DetailSection title="Event Bonuses">
+                <Stack spacing={0.75}>
+                  {eventDetails.bonuses.map((bonus) => (
+                    <Typography
+                      key={bonus}
+                      variant="body2"
+                      sx={{ lineHeight: 1.6, pl: 1 }}
+                    >
+                      • {bonus}
+                    </Typography>
+                  ))}
+                </Stack>
+              </DetailSection>
+            )}
+
+            {Object.entries(eventDetails)
+              .filter(([key, value]) => {
+                const nonPokemonFields = [
+                  'category',
+                  'article_url',
+                  'banner_url',
+                  'description',
+                  'bonuses',
+                  'id',
+                  'title',
+                  'isCustomEvent',
+                  'isSaved',
+                  'start',
+                  'end',
+                ];
+                return (
+                  !nonPokemonFields.includes(key) &&
+                  Array.isArray(value) &&
+                  value.length > 0
+                );
+              })
+              .map(([key, value]) => (
+                <DetailSection key={key} title={getPokemonFieldTitle(key)}>
+                  <ChipList items={value as string[]} />
+                </DetailSection>
+              ))}
+
+            <DetailSection title="Notes">
+              <TextField
+                fullWidth
+                multiline
+                rows={4}
+                variant="outlined"
+                placeholder="Add your personal notes here..."
+                value={noteText}
+                onChange={(e) => handleNoteChange(e.target.value)}
+                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+              />
+            </DetailSection>
+          </Stack>
         </DialogContent>
+
         <DialogActions
           sx={{
             p: 2,

@@ -6,47 +6,45 @@ export const getTheme = (mode: PaletteMode) =>
       mode,
       ...(mode === 'light'
         ? {
-            // Light Mode Palette
-            primary: {
-              main: '#E53935', // Vibrant Red
-            },
-            background: {
-              default: '#F8F9FA',
-              paper: '#FFFFFF',
-            },
+            primary: { main: '#E53935' },
+            background: { default: '#F8F9FA', paper: '#FFFFFF' },
           }
         : {
-            // Dark Mode Palette
-            primary: {
-              main: '#EF5350', // Lighter Red for contrast
-            },
-            background: {
-              default: '#121212', // Standard dark background
-              paper: '#1E1E1E',
-            },
+            primary: { main: '#EF5350' },
+            background: { default: '#121212', paper: '#1E1E1E' },
           }),
     },
+    shape: {
+      borderRadius: 16,
+    },
     components: {
-      // Small tweaks for a more modern feel on components
       MuiButton: {
         styleOverrides: {
           root: {
-            borderRadius: 8,
+            borderRadius: 12,
             textTransform: 'none',
+            fontWeight: 600,
           },
         },
       },
       MuiPaper: {
         styleOverrides: {
           root: {
-            borderRadius: 12,
+            backgroundImage: 'none',
           },
         },
       },
       MuiDialog: {
         styleOverrides: {
           paper: {
-            borderRadius: 16,
+            borderRadius: 24,
+          },
+        },
+      },
+      MuiCard: {
+        styleOverrides: {
+          root: {
+            borderRadius: 20,
           },
         },
       },

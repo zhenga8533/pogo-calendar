@@ -10,7 +10,13 @@ import listPlugin from '@fullcalendar/list';
 import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import EventBusyIcon from '@mui/icons-material/EventBusy';
-import { Paper, Typography } from '@mui/material';
+import {
+  Button,
+  GlobalStyles,
+  Paper,
+  Typography,
+  useTheme,
+} from '@mui/material';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import type { ToastSeverity } from '../../hooks/useToast';
@@ -57,6 +63,8 @@ function EventCalendar({
   const calendarRef = useRef<FullCalendar>(null);
   const { settings } = useSettingsContext();
   const { firstDay, hour12, timezone } = settings;
+  const theme = useTheme();
+
   const [popoverState, setPopoverState] = useState<{
     event: CalendarEvent | null;
     position: { top: number; left: number } | null;
@@ -119,9 +127,21 @@ function EventCalendar({
     [filterStartDate, filterEndDate, onDateSelect]
   );
 
+  const getEventClassSelector = (url: string) => {
+    return `event-${url.replace(/[^a-zA-Z0-9]/g, '_')}`;
+  };
+
   const handlePopoverOpen = useCallback(
     (event: React.MouseEvent<HTMLElement>, calendarEvent: CalendarEvent) => {
       const originalEvent = findOriginalEvent(calendarEvent);
+
+      // Highlighting Logic
+      const selector = getEventClassSelector(
+        calendarEvent.extendedProps.article_url
+      );
+      const elements = document.querySelectorAll(`.${selector}`);
+      elements.forEach((el) => el.classList.add('event-highlight'));
+
       setPopoverState({
         event: originalEvent,
         position: { top: event.clientY, left: event.clientX },
@@ -131,6 +151,10 @@ function EventCalendar({
   );
 
   const handlePopoverClose = useCallback(() => {
+    // Remove highlight from all events
+    const elements = document.querySelectorAll('.event-highlight');
+    elements.forEach((el) => el.classList.remove('event-highlight'));
+
     setPopoverState({ event: null, position: null });
   }, []);
 
@@ -169,27 +193,56 @@ function EventCalendar({
       <Paper
         elevation={3}
         sx={{
-          p: { xs: 2, md: 4 },
+          p: { xs: 4, md: 8 },
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
           minHeight: '60vh',
+          textAlign: 'center',
         }}
       >
-        <EventBusyIcon sx={{ fontSize: 60, color: 'text.secondary', mb: 2 }} />
-        <Typography variant="h6" component="p" color="text.secondary">
+        <EventBusyIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+        <Typography
+          variant="h5"
+          component="p"
+          color="text.primary"
+          gutterBottom
+        >
           No Events Found
         </Typography>
-        <Typography color="text.secondary">
+        <Typography color="text.secondary" paragraph>
           Try adjusting your filters or creating a new custom event.
         </Typography>
+        <Button
+          variant="outlined"
+          onClick={() => window.location.reload()}
+          sx={{ mt: 1 }}
+        >
+          Reset All Filters
+        </Button>
       </Paper>
     );
   }
 
   return (
     <>
+      <GlobalStyles
+        styles={{
+          '.event-highlight': {
+            // Removed scale(1.01) to prevent clipping/overflow issues
+            filter: 'brightness(1.1) saturate(1.2)',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            zIndex: 50,
+            position: 'relative',
+            transition: 'all 0.1s ease',
+            ...(theme.palette.mode === 'dark' && {
+              filter: 'brightness(1.3)',
+              boxShadow: '0 0 8px rgba(255,255,255,0.2)',
+            }),
+          },
+        }}
+      />
       <Paper
         elevation={3}
         sx={{ p: { xs: 1, md: 2 } }}
@@ -238,10 +291,7 @@ function EventCalendar({
           eventTimeFormat={eventTimeFormat}
           timeZone={timezone}
           eventClassNames={(arg) => {
-            return `event-${arg.event.extendedProps.article_url.replace(
-              /[^a-zA-Z0-9]/g,
-              '_'
-            )}`;
+            return getEventClassSelector(arg.event.extendedProps.article_url);
           }}
         />
       </Paper>

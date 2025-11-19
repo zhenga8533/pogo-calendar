@@ -3,7 +3,6 @@ import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined';
 import PublicIcon from '@mui/icons-material/Public';
 import SettingsBrightnessOutlinedIcon from '@mui/icons-material/SettingsBrightnessOutlined';
 import {
-  Box,
   Button,
   CircularProgress,
   Dialog,
@@ -147,37 +146,6 @@ function SettingsDialogComponent({
                 </ToggleButton>
               ))}
             </ToggleButtonGroup>
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}
-            >
-              <Typography variant="body1">Upcoming Event Tracker</Typography>
-              <ToggleButtonGroup
-                value={settings.showNextEvent}
-                exclusive
-                onChange={(_, value) => {
-                  if (value !== null) {
-                    handleSettingChange('showNextEvent', value);
-                  }
-                }}
-              >
-                <ToggleButton
-                  value={true}
-                  sx={{ textTransform: 'none', px: 2, py: 0.5 }}
-                >
-                  Show
-                </ToggleButton>
-                <ToggleButton
-                  value={false}
-                  sx={{ textTransform: 'none', px: 2, py: 0.5 }}
-                >
-                  Hide
-                </ToggleButton>
-              </ToggleButtonGroup>
-            </Box>
           </Stack>
 
           <Stack spacing={1.5}>

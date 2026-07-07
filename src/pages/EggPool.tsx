@@ -238,9 +238,10 @@ function EggPoolPage({ filters, onSetFilterOptions }: EggPoolPageProps) {
   return (
     <Box sx={{ py: 4, pb: isMobile ? 8 : 4 }}>
       <Stack
-        direction="row"
+        direction={{ xs: 'column', sm: 'row' }}
         justifyContent="space-between"
-        alignItems="flex-start"
+        alignItems={{ xs: 'flex-start', sm: 'flex-start' }}
+        spacing={2}
         mb={3}
       >
         <PageHeader

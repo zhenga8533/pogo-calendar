@@ -6,11 +6,13 @@ import {
   AccordionSummary,
   Box,
   Button,
+  Container,
   Stack,
   Typography,
 } from '@mui/material';
 import React from 'react';
 import { Link as RouterLink } from 'react-router-dom';
+import { PageHeader } from '../components/shared/PageHeader';
 
 interface FaqLink {
   text: string;
@@ -266,37 +268,34 @@ FaqItem.displayName = 'FaqItem';
 
 function FaqPage() {
   return (
-    <Box sx={{ py: 4 }}>
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h3" fontWeight={700} gutterBottom>
-          Frequently Asked Questions
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Here are answers to some common questions about the PoGo Event
-          Calendar.
-        </Typography>
-      </Box>
-      <Stack spacing={2} sx={{ mb: 4 }}>
-        {faqData.map((item) => (
-          <FaqItem
-            key={item.question}
-            question={item.question}
-            answer={item.answer}
-          />
-        ))}
-      </Stack>
+    <Container maxWidth="md">
+      <Box sx={{ py: 4 }}>
+        <PageHeader
+          title="Frequently Asked Questions"
+          description="Here are answers to some common questions about the PoGo Event Calendar."
+        />
+        <Stack spacing={2} sx={{ mb: 4 }}>
+          {faqData.map((item) => (
+            <FaqItem
+              key={item.question}
+              question={item.question}
+              answer={item.answer}
+            />
+          ))}
+        </Stack>
 
-      <Box sx={{ textAlign: 'center', pt: 2 }}>
-        <Button
-          component={RouterLink}
-          to="/"
-          variant="contained"
-          startIcon={<ArrowBackIcon />}
-        >
-          Back to Calendar
-        </Button>
+        <Box sx={{ textAlign: 'center', pt: 2 }}>
+          <Button
+            component={RouterLink}
+            to="/"
+            variant="contained"
+            startIcon={<ArrowBackIcon />}
+          >
+            Back to Calendar
+          </Button>
+        </Box>
       </Box>
-    </Box>
+    </Container>
   );
 }
 

@@ -96,12 +96,6 @@ function SettingsDialogComponent({
       onClose={onClose}
       fullWidth
       maxWidth="xs"
-      PaperProps={{
-        sx: {
-          borderRadius: 4,
-          boxShadow: 'none',
-        },
-      }}
     >
       <DialogTitle>
         <Typography variant="h6" component="div" fontWeight={600}>
@@ -163,7 +157,6 @@ function SettingsDialogComponent({
                 onChange={(e: SelectChangeEvent<number>) =>
                   handleSettingChange('firstDay', e.target.value)
                 }
-                sx={{ borderRadius: 2 }}
               >
                 {dayOptions.map((day) => (
                   <MenuItem key={day.value} value={day.value}>
@@ -187,7 +180,6 @@ function SettingsDialogComponent({
                 onChange={(e: SelectChangeEvent<string>) =>
                   handleSettingChange('timezone', e.target.value)
                 }
-                sx={{ borderRadius: 2 }}
                 MenuProps={{
                   PaperProps: {
                     style: {
@@ -257,7 +249,7 @@ function SettingsDialogComponent({
         </Stack>
       </DialogContent>
       <DialogActions sx={{ p: 2 }}>
-        <Button onClick={onClose} variant="contained" sx={{ borderRadius: 2 }}>
+        <Button onClick={onClose} variant="contained">
           Done
         </Button>
       </DialogActions>

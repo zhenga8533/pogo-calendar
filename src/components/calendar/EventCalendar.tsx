@@ -229,6 +229,14 @@ function EventCalendar({
     <>
       <GlobalStyles
         styles={{
+          // FullCalendar's list view sizes the title <td> to fit its content
+          // by default, which pushes our pill past the container edge instead
+          // of letting it shrink and ellipsize. Forcing width:100% with
+          // max-width:0 makes the cell shrink to the space actually available.
+          '.fc-list-event-title': {
+            width: '100%',
+            maxWidth: 0,
+          },
           '.event-highlight': {
             // Removed scale(1.01) to prevent clipping/overflow issues
             filter: 'brightness(1.1) saturate(1.2)',

@@ -10,8 +10,6 @@ import {
   AccordionSummary,
   Box,
   Button,
-  Card,
-  CardContent,
   Checkbox,
   Divider,
   FormControlLabel,
@@ -119,15 +117,7 @@ function EventFilter(props: EventFilterProps) {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <Card
-        sx={{
-          width: { xs: '100%', md: '450px' },
-          borderRadius: 2,
-          boxShadow: 3,
-        }}
-      >
-        <CardContent sx={{ p: { xs: 3, md: 4 } }}>
-          <Stack spacing={4}>
+      <Stack spacing={4}>
             {/* Search & Filter Section */}
             <FilterSection title="Search & Filter">
               <TextField
@@ -340,9 +330,7 @@ function EventFilter(props: EventFilterProps) {
                 New Event
               </Button>
             </Stack>
-          </Stack>
-        </CardContent>
-      </Card>
+      </Stack>
     </LocalizationProvider>
   );
 }

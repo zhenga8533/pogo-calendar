@@ -47,7 +47,7 @@ export const getTheme = (mode: PaletteMode) =>
           }),
     },
     shape: {
-      borderRadius: 14,
+      borderRadius: 8,
     },
     typography: {
       fontFamily: FONT_STACK,
@@ -85,7 +85,7 @@ export const getTheme = (mode: PaletteMode) =>
         defaultProps: { disableElevation: true },
         styleOverrides: {
           root: {
-            borderRadius: 10,
+            borderRadius: 8,
             textTransform: 'none',
             fontWeight: 600,
             transition:
@@ -114,7 +114,7 @@ export const getTheme = (mode: PaletteMode) =>
       MuiCard: {
         styleOverrides: {
           root: {
-            borderRadius: 18,
+            borderRadius: 12,
             border: `1px solid ${
               mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(15,23,42,0.06)'
             }`,
@@ -125,14 +125,14 @@ export const getTheme = (mode: PaletteMode) =>
       MuiDialog: {
         styleOverrides: {
           paper: {
-            borderRadius: 20,
+            borderRadius: 12,
           },
         },
       },
       MuiChip: {
         styleOverrides: {
           root: {
-            borderRadius: 8,
+            borderRadius: 6,
             fontWeight: 600,
           },
         },
@@ -140,14 +140,14 @@ export const getTheme = (mode: PaletteMode) =>
       MuiOutlinedInput: {
         styleOverrides: {
           root: {
-            borderRadius: 10,
+            borderRadius: 8,
           },
         },
       },
       MuiTooltip: {
         styleOverrides: {
           tooltip: {
-            borderRadius: 8,
+            borderRadius: 6,
             fontWeight: 500,
           },
         },
@@ -155,7 +155,7 @@ export const getTheme = (mode: PaletteMode) =>
       MuiListItemButton: {
         styleOverrides: {
           root: {
-            borderRadius: 10,
+            borderRadius: 8,
           },
         },
       },

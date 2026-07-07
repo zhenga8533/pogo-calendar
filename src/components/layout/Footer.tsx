@@ -5,6 +5,7 @@ import {
   Link,
   Stack,
   Typography,
+  alpha,
 } from '@mui/material';
 import React, { useMemo } from 'react';
 
@@ -59,11 +60,9 @@ function FooterComponent() {
     <Box
       component="footer"
       sx={(theme) => ({
-        p: 2,
-        backgroundColor:
-          theme.palette.mode === 'dark'
-            ? 'rgba(18, 18, 18, 0.8)'
-            : 'rgba(255, 255, 255, 0.8)',
+        py: 3,
+        px: 2,
+        backgroundColor: alpha(theme.palette.background.paper, 0.8),
         backdropFilter: 'blur(8px)',
         borderTop: `1px solid ${theme.palette.divider}`,
       })}

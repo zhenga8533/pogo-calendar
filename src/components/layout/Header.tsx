@@ -2,6 +2,7 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import BoltIcon from '@mui/icons-material/Bolt';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import CloseIcon from '@mui/icons-material/Close';
 import EggIcon from '@mui/icons-material/Egg';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import GroupIcon from '@mui/icons-material/Group';
@@ -140,6 +141,8 @@ function HeaderComponent(props: HeaderProps) {
     onSettingsClick,
     onRefresh,
     lastUpdated,
+    lastUpdatedLoading,
+    lastUpdatedError,
     isMobile,
     // Filter props
     activeFilterCount,
@@ -322,9 +325,7 @@ function HeaderComponent(props: HeaderProps) {
         sx={{
           backgroundColor: trigger
             ? theme.palette.background.paper
-            : theme.palette.mode === 'dark'
-            ? 'rgba(18, 18, 18, 0.8)'
-            : 'rgba(255, 255, 255, 0.8)',
+            : alpha(theme.palette.background.paper, 0.8),
           backdropFilter: 'blur(12px)',
           color: theme.palette.text.primary,
           borderBottom: `1px solid ${theme.palette.divider}`,
@@ -390,10 +391,46 @@ function HeaderComponent(props: HeaderProps) {
           <Stack direction="row" alignItems="center" spacing={isMobile ? 0 : 1}>
             {/* Last Updated (Desktop) */}
             {!isMobile && (
-              <Tooltip title={`Last Updated: ${lastUpdated}`}>
-                <IconButton onClick={onRefresh} color="inherit">
-                  <SyncIcon />
-                </IconButton>
+              <Tooltip
+                title={
+                  lastUpdatedError
+                    ? lastUpdatedError
+                    : lastUpdatedLoading
+                    ? 'Refreshing…'
+                    : 'Refresh data'
+                }
+              >
+                <Button
+                  onClick={onRefresh}
+                  color="inherit"
+                  size="small"
+                  startIcon={
+                    <SyncIcon
+                      fontSize="small"
+                      sx={{
+                        animation: lastUpdatedLoading
+                          ? 'spin 1s linear infinite'
+                          : 'none',
+                        '@keyframes spin': {
+                          from: { transform: 'rotate(0deg)' },
+                          to: { transform: 'rotate(360deg)' },
+                        },
+                      }}
+                    />
+                  }
+                  sx={{
+                    color: 'text.secondary',
+                    fontWeight: 500,
+                    px: 1,
+                    '&:hover': { backgroundColor: 'action.hover' },
+                  }}
+                >
+                  {lastUpdatedError
+                    ? 'Update failed'
+                    : lastUpdatedLoading
+                    ? 'Updating…'
+                    : `Updated ${lastUpdated}`}
+                </Button>
               </Tooltip>
             )}
 
@@ -489,10 +526,38 @@ function HeaderComponent(props: HeaderProps) {
           open={drawerOpen}
           onClose={handleCloseFilter}
           PaperProps={{
-            sx: { borderRadius: '20px 20px 0 0', maxHeight: '80vh' },
+            sx: {
+              borderRadius: '16px 16px 0 0',
+              maxHeight: '85vh',
+              display: 'flex',
+              flexDirection: 'column',
+            },
           }}
         >
-          <Box sx={{ p: 3 }}>{filterContent}</Box>
+          <Box sx={{ display: 'flex', justifyContent: 'center', pt: 1.5 }}>
+            <Box
+              sx={{
+                width: 36,
+                height: 4,
+                borderRadius: 2,
+                bgcolor: 'divider',
+              }}
+            />
+          </Box>
+          <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent="space-between"
+            sx={{ px: 3, pt: 1, pb: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}
+          >
+            <Typography variant="subtitle1" fontWeight={700}>
+              Filters
+            </Typography>
+            <IconButton size="small" onClick={handleCloseFilter}>
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </Stack>
+          <Box sx={{ p: 3, overflowY: 'auto' }}>{filterContent}</Box>
         </Drawer>
       ) : (
         <Popover
@@ -501,9 +566,37 @@ function HeaderComponent(props: HeaderProps) {
           onClose={handleCloseFilter}
           anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
           transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-          PaperProps={{ sx: { mt: 1, borderRadius: 3, p: 0 } }}
+          PaperProps={{ sx: { mt: 0.5, borderRadius: 2 } }}
         >
-          {filterContent}
+          <Box
+            sx={{
+              width: 420,
+              maxWidth: '90vw',
+              maxHeight: '75vh',
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
+            <Stack
+              direction="row"
+              alignItems="center"
+              justifyContent="space-between"
+              sx={{
+                px: 2.5,
+                py: 1.5,
+                borderBottom: '1px solid',
+                borderColor: 'divider',
+              }}
+            >
+              <Typography variant="subtitle1" fontWeight={700}>
+                Filters
+              </Typography>
+              <IconButton size="small" onClick={handleCloseFilter}>
+                <CloseIcon fontSize="small" />
+              </IconButton>
+            </Stack>
+            <Box sx={{ p: 2.5, overflowY: 'auto' }}>{filterContent}</Box>
+          </Box>
         </Popover>
       )}
     </>

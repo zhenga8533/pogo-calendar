@@ -31,7 +31,8 @@ export const DataErrorDisplay = ({
           p: 4,
           textAlign: 'center',
           backgroundColor: 'background.paper',
-          borderRadius: 2,
+          border: '1px solid',
+          borderColor: 'divider',
           maxWidth: 400,
         }}
       >

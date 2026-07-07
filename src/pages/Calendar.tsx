@@ -1,7 +1,7 @@
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import { Box, Paper, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 import { CalendarSkeleton } from '../components/calendar/CalendarSkeleton';
 import EventCalendar from '../components/calendar/EventCalendar';
+import { DataErrorDisplay } from '../components/shared/DataErrorDisplay';
 import { useCalendarContext } from '../contexts/CalendarContext';
 import type { ToastSeverity } from '../hooks/useToast';
 import type { CalendarEvent } from '../types/events';
@@ -35,25 +35,7 @@ function CalendarPage(props: CalendarPageProps) {
   }
 
   if (error) {
-    return (
-      <Paper
-        elevation={0}
-        sx={{
-          p: 4,
-          textAlign: 'center',
-          backgroundColor: 'background.paper',
-          borderRadius: 2,
-        }}
-      >
-        <ErrorOutlineIcon sx={{ fontSize: 64, color: 'error.main', mb: 2 }} />
-        <Typography variant="h5" color="text.primary" gutterBottom>
-          Failed to Load Events
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          {error}
-        </Typography>
-      </Paper>
-    );
+    return <DataErrorDisplay title="Failed to Load Events" message={error} />;
   }
 
   return (

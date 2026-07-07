@@ -73,16 +73,7 @@ function EggPoolFilter(props: EggPoolFilterProps) {
   }, [handleFilterChange]);
 
   return (
-    <Stack
-      spacing={4}
-      sx={{
-        width: { xs: '100%', md: '450px' },
-        p: { xs: 3, md: 4 },
-        backgroundColor: 'background.paper',
-        borderRadius: 2,
-        boxShadow: 3,
-      }}
-    >
+    <Stack spacing={4}>
       {/* Search Section */}
       <FilterSection title="Search">
         <TextField

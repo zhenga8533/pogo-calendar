@@ -19,6 +19,8 @@ import {
   Stack,
   TextField,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import { useCallback, useMemo, useState } from 'react';
 import { CUSTOM_EVENT_CATEGORY } from '../../config/constants';
@@ -132,6 +134,8 @@ function EventDetailDialog({
   const { settings } = useSettingsContext();
   const { hour12 } = settings;
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const theme = useTheme();
+  const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
   const eventDetails = useMemo(() => {
     if (!event) return null;
@@ -197,12 +201,12 @@ function EventDetailDialog({
         onClose={handleClose}
         maxWidth="sm"
         fullWidth
+        fullScreen={fullScreen}
         disableRestoreFocus
         scroll="body"
         slotProps={{
           paper: {
             sx: {
-              borderRadius: 3,
               overflow: 'hidden',
               boxShadow: (theme) => theme.shadows[12],
             },

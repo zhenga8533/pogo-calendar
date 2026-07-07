@@ -8,6 +8,8 @@ import {
   Tab,
   Tabs,
   TextField,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { CalendarEvent } from '../../types/events';
@@ -31,6 +33,8 @@ export function ExportEventDialog({
   filteredEvents,
   savedEventIds,
 }: ExportEventDialogProps) {
+  const theme = useTheme();
+  const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const [tab, setTab] = useState(0);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedEventIds, setSelectedEventIds] = useState<string[]>([]);
@@ -88,7 +92,13 @@ export function ExportEventDialog({
   const isExportDisabled = exportCount === 0;
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+    <Dialog
+      open={open}
+      onClose={onClose}
+      fullWidth
+      maxWidth="sm"
+      fullScreen={fullScreen}
+    >
       <DialogTitle>Select Events to Export</DialogTitle>
       <DialogContent sx={{ display: 'flex', flexDirection: 'column' }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>

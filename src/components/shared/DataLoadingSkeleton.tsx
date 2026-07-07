@@ -19,7 +19,8 @@ export const DataLoadingSkeleton = ({
               sx={{
                 p: 2,
                 backgroundColor: 'background.paper',
-                borderRadius: 2,
+                border: '1px solid',
+                borderColor: 'divider',
               }}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>

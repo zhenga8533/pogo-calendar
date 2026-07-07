@@ -227,7 +227,11 @@ function App() {
         />
         <Box
           component="main"
-          sx={{ flexGrow: 1, p: 3, backgroundColor: 'background.default' }}
+          sx={{
+            flexGrow: 1,
+            p: { xs: 1.5, sm: 2, md: 3 },
+            backgroundColor: 'background.default',
+          }}
         >
           <ErrorBoundary>
             <Suspense fallback={<PageLoader />}>

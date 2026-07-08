@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useFilters } from '../hooks/useFilters';
 import type { CalendarEvent } from '../types/events';
-import { FilterContext } from './filterContextValue';
+import { FilterContext } from './FilterContext';
 
 export function FilterProvider({
   children,

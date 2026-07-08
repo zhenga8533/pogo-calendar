@@ -3,7 +3,7 @@ import { useEventData } from '../hooks/useEventData';
 import { useEventNotes } from '../hooks/useEventNotes';
 import { useSettingsContext } from '../hooks/useSettingsContext';
 import type { CalendarEvent } from '../types/events';
-import { EventDataContext } from './eventDataContextValue';
+import { EventDataContext } from './EventDataContext';
 
 export function EventDataProvider({ children }: { children: React.ReactNode }) {
   const { settings } = useSettingsContext();

@@ -25,6 +25,7 @@ import { useToast } from './hooks/useToast';
 import type { CalendarEvent, NewEventData } from './types/events';
 import type { Settings } from './types/settings';
 import { downloadIcsForEvents } from './utils/calendarUtils';
+import { ROUTES } from './config/routes';
 
 // Lazy load page components
 const CalendarPage = lazy(() => import('./pages/Calendar'));
@@ -208,7 +209,7 @@ function App() {
           <Suspense fallback={<PageLoader />}>
             <Routes>
               <Route
-                path="/"
+                path={ROUTES.CALENDAR}
                 element={
                   <div className="w-full">
                     <CalendarPage
@@ -222,7 +223,7 @@ function App() {
                 }
               />
               <Route
-                path="/egg-pool"
+                path={ROUTES.EGG_POOL}
                 element={
                   <div className="mx-auto max-w-7xl">
                     <EggPoolPage
@@ -233,7 +234,7 @@ function App() {
                 }
               />
               <Route
-                path="/raid-bosses"
+                path={ROUTES.RAID_BOSSES}
                 element={
                   <div className="mx-auto max-w-7xl">
                     <RaidBossesPage
@@ -244,7 +245,7 @@ function App() {
                 }
               />
               <Route
-                path="/research-tasks"
+                path={ROUTES.RESEARCH_TASKS}
                 element={
                   <div className="mx-auto max-w-7xl">
                     <ResearchTasksPage
@@ -255,7 +256,7 @@ function App() {
                 }
               />
               <Route
-                path="/rocket-lineup"
+                path={ROUTES.ROCKET_LINEUP}
                 element={
                   <div className="mx-auto max-w-7xl">
                     <RocketLineupPage
@@ -265,7 +266,7 @@ function App() {
                   </div>
                 }
               />
-              <Route path="/faq" element={<FaqPage />} />
+              <Route path={ROUTES.FAQ} element={<FaqPage />} />
             </Routes>
           </Suspense>
         </ErrorBoundary>

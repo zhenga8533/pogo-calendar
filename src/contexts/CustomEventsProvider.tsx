@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useCustomEvents } from '../hooks/useCustomEvents';
 import { useSavedEvents } from '../hooks/useSavedEvents';
-import { CustomEventsContext } from './customEventsContextValue';
+import { CustomEventsContext } from './CustomEventsContext';
 
 export function CustomEventsProvider({
   children,

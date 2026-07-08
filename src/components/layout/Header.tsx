@@ -21,6 +21,7 @@ import type {
   ResearchTaskFilters,
   RocketLineupFilters,
 } from '../../types/pageFilters';
+import { ROUTES } from '../../config/routes';
 import { cn } from '../../lib/utils';
 import { useScrollTrigger } from '../../hooks/useScrollTrigger';
 import EggPoolFilter from '../filters/EggPoolFilter';
@@ -40,12 +41,12 @@ import { Button } from '../ui/button';
 import LogoIcon from '/icon.svg';
 
 const NAV_ITEMS: { label: string; path: string; icon: LucideIcon }[] = [
-  { label: 'Calendar', path: '/', icon: CalendarIcon },
-  { label: 'Egg Pool', path: '/egg-pool', icon: Egg },
-  { label: 'Raid Bosses', path: '/raid-bosses', icon: Zap },
-  { label: 'Research', path: '/research-tasks', icon: Clipboard },
-  { label: 'Rocket', path: '/rocket-lineup', icon: Ship },
-  { label: 'FAQ', path: '/faq', icon: HelpCircle },
+  { label: 'Calendar', path: ROUTES.CALENDAR, icon: CalendarIcon },
+  { label: 'Egg Pool', path: ROUTES.EGG_POOL, icon: Egg },
+  { label: 'Raid Bosses', path: ROUTES.RAID_BOSSES, icon: Zap },
+  { label: 'Research', path: ROUTES.RESEARCH_TASKS, icon: Clipboard },
+  { label: 'Rocket', path: ROUTES.ROCKET_LINEUP, icon: Ship },
+  { label: 'FAQ', path: ROUTES.FAQ, icon: HelpCircle },
 ];
 
 type HeaderProps = Omit<EventFilterProps, 'isMobile'> & {
@@ -108,9 +109,9 @@ function HeaderComponent(props: HeaderProps) {
 
   const getFilterContent = () => {
     switch (location.pathname) {
-      case '/':
+      case ROUTES.CALENDAR:
         return <EventFilter {...filterProps} />;
-      case '/egg-pool':
+      case ROUTES.EGG_POOL:
         return (
           props.onEggPoolFilterChange &&
           props.onResetEggPoolFilters && (
@@ -123,7 +124,7 @@ function HeaderComponent(props: HeaderProps) {
             />
           )
         );
-      case '/raid-bosses':
+      case ROUTES.RAID_BOSSES:
         return (
           props.onRaidBossFilterChange &&
           props.onResetRaidBossFilters && (
@@ -136,7 +137,7 @@ function HeaderComponent(props: HeaderProps) {
             />
           )
         );
-      case '/research-tasks':
+      case ROUTES.RESEARCH_TASKS:
         return (
           props.onResearchTaskFilterChange &&
           props.onResetResearchTaskFilters && (
@@ -148,7 +149,7 @@ function HeaderComponent(props: HeaderProps) {
             />
           )
         );
-      case '/rocket-lineup':
+      case ROUTES.ROCKET_LINEUP:
         return (
           props.onRocketLineupFilterChange &&
           props.onResetRocketLineupFilters && (
@@ -169,15 +170,15 @@ function HeaderComponent(props: HeaderProps) {
 
   const getCurrentActiveFilterCount = () => {
     switch (location.pathname) {
-      case '/':
+      case ROUTES.CALENDAR:
         return activeFilterCount;
-      case '/egg-pool':
+      case ROUTES.EGG_POOL:
         return eggPoolActiveFilterCount || 0;
-      case '/raid-bosses':
+      case ROUTES.RAID_BOSSES:
         return raidBossActiveFilterCount || 0;
-      case '/research-tasks':
+      case ROUTES.RESEARCH_TASKS:
         return researchTaskActiveFilterCount || 0;
-      case '/rocket-lineup':
+      case ROUTES.ROCKET_LINEUP:
         return rocketLineupActiveFilterCount || 0;
       default:
         return 0;

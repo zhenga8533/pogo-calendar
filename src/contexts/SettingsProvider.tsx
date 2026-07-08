@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { SETTINGS_KEY } from '../config/constants';
 import type { Settings, ThemeSetting } from '../types/settings';
 import { safeGetJSON, safeSetJSON } from '../utils/storageUtils';
-import { SettingsContext } from './settingsContextValue';
+import { SettingsContext } from './SettingsContext';
 
 const initialSettings: Settings = {
   theme: 'auto',

@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 import { useCustomEventsContext } from '../hooks/useCustomEventsContext';
 import { useEventDataContext } from '../hooks/useEventDataContext';
-import { CustomEventsProvider } from './CustomEventsContext';
-import { EventDataProvider } from './EventDataContext';
-import { FilterProvider } from './FilterContext';
+import { CustomEventsProvider } from './CustomEventsProvider';
+import { EventDataProvider } from './EventDataProvider';
+import { FilterProvider } from './FilterProvider';
 
 /**
  * Inner component that consumes all three contexts and provides the combined API

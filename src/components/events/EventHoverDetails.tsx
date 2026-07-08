@@ -1,7 +1,7 @@
-import { AccessTime, CalendarMonth } from '@mui/icons-material';
-import { Box, Popover, Stack, Typography } from '@mui/material';
+import { CalendarDays, Clock } from 'lucide-react';
 import { useMemo } from 'react';
 import { useSettingsContext } from '../../contexts/SettingsContext';
+import { cn } from '../../lib/utils';
 import type { CalendarEvent } from '../../types/events';
 import { formatDateLine } from '../../utils/dateUtils';
 import { CategoryTag } from '../shared/CategoryTag';
@@ -9,19 +9,12 @@ import { EventStatusTag } from '../shared/EventStatusTag';
 
 interface EventHoverDetailsProps {
   open: boolean;
-  id: string | undefined;
   mousePosition: { top: number; left: number } | null;
   event: CalendarEvent | null;
   onClose: () => void;
 }
 
-function EventHoverDetails({
-  open,
-  id,
-  mousePosition,
-  event,
-  onClose,
-}: EventHoverDetailsProps) {
+function EventHoverDetails({ open, mousePosition, event }: EventHoverDetailsProps) {
   const { settings } = useSettingsContext();
   const { hour12 } = settings;
 
@@ -34,157 +27,54 @@ function EventHoverDetails({
     [event?.end, hour12]
   );
 
-  if (!event) {
+  if (!event || !mousePosition) {
     return null;
   }
 
   return (
-    <Popover
-      id={id}
-      open={open}
-      anchorReference="anchorPosition"
-      anchorPosition={
-        mousePosition
-          ? { top: mousePosition.top - 10, left: mousePosition.left }
-          : undefined
-      }
-      onClose={onClose}
-      sx={{
-        pointerEvents: 'none',
-      }}
-      anchorOrigin={{
-        vertical: 'top',
-        horizontal: 'center',
-      }}
-      transformOrigin={{
-        vertical: 'bottom',
-        horizontal: 'center',
-      }}
-      disableRestoreFocus
-      disableScrollLock
-      container={document.body}
-      slotProps={{
-        paper: {
-          sx: (theme) => ({
-            backgroundColor: theme.palette.background.paper,
-            boxShadow: theme.shadows[12],
-            borderRadius: 3,
-            maxWidth: '340px',
-            p: 0,
-            overflow: 'hidden',
-            border: `1px solid ${theme.palette.divider}`,
-            backdropFilter: 'blur(10px)',
-          }),
-        },
-      }}
+    <div
+      role="tooltip"
+      aria-hidden="true"
+      className={cn(
+        'pointer-events-none fixed z-50 w-[340px] max-w-[90vw] -translate-x-1/2 -translate-y-full overflow-hidden rounded-xl border border-border bg-popover/95 text-popover-foreground shadow-soft-2xl backdrop-blur-md transition-opacity duration-100',
+        open ? 'opacity-100' : 'opacity-0'
+      )}
+      style={{ top: mousePosition.top - 14, left: mousePosition.left }}
     >
-      {/* Header */}
-      <Box
-        sx={(theme) => ({
-          borderBottom: `1px solid ${theme.palette.divider}`,
-          p: 2.5,
-          pb: 2,
-        })}
-      >
-        <Stack spacing={1.5}>
-          <Typography
-            variant="h6"
-            component="h3"
-            sx={{
-              fontWeight: 700,
-              lineHeight: 1.3,
-              fontSize: '1.1rem',
-            }}
-          >
-            {event.title}
-          </Typography>
+      <div className="border-b border-border p-4 pb-3.5">
+        <h3 className="mb-2 text-[1.05rem] font-bold leading-snug">{event.title}</h3>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <CategoryTag category={event.extendedProps.category} />
+          <EventStatusTag start={event.start} end={event.end} />
+        </div>
+      </div>
 
-          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-            <CategoryTag category={event.extendedProps.category} />
-            <EventStatusTag start={event.start} end={event.end} />
-          </Stack>
-        </Stack>
-      </Box>
+      <div className="flex flex-col gap-3 p-4 pt-3.5">
+        {event.start && (
+          <div className="flex items-start gap-2.5">
+            <CalendarDays className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+            <div className="min-w-0 flex-1">
+              <p className="text-[0.7rem] font-semibold uppercase tracking-wide text-muted-foreground">
+                Start Time
+              </p>
+              <p className="mt-0.5 text-sm font-medium">{formattedStart}</p>
+            </div>
+          </div>
+        )}
 
-      {/* Content section */}
-      <Box sx={{ p: 2.5, pt: 2 }}>
-        <Stack spacing={1.5}>
-          {event.start && (
-            <Stack direction="row" spacing={1.5} alignItems="flex-start">
-              <CalendarMonth
-                sx={{
-                  fontSize: 20,
-                  color: 'primary.main',
-                  mt: 0.25,
-                  flexShrink: 0,
-                }}
-              />
-              <Box sx={{ flex: 1, minWidth: 0 }}>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    fontWeight: 600,
-                    color: 'text.secondary',
-                    textTransform: 'uppercase',
-                    letterSpacing: 0.5,
-                    fontSize: '0.7rem',
-                  }}
-                >
-                  Start Time
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    fontWeight: 500,
-                    color: 'text.primary',
-                    mt: 0.25,
-                  }}
-                >
-                  {formattedStart}
-                </Typography>
-              </Box>
-            </Stack>
-          )}
-
-          {event.end && (
-            <Stack direction="row" spacing={1.5} alignItems="flex-start">
-              <AccessTime
-                sx={{
-                  fontSize: 20,
-                  color: 'secondary.main',
-                  mt: 0.25,
-                  flexShrink: 0,
-                }}
-              />
-              <Box sx={{ flex: 1, minWidth: 0 }}>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    fontWeight: 600,
-                    color: 'text.secondary',
-                    textTransform: 'uppercase',
-                    letterSpacing: 0.5,
-                    fontSize: '0.7rem',
-                  }}
-                >
-                  End Time
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    fontWeight: 500,
-                    color: 'text.primary',
-                    mt: 0.25,
-                  }}
-                >
-                  {formattedEnd}
-                </Typography>
-              </Box>
-            </Stack>
-          )}
-        </Stack>
-      </Box>
-    </Popover>
+        {event.end && (
+          <div className="flex items-start gap-2.5">
+            <Clock className="mt-0.5 h-5 w-5 shrink-0 text-secondary" />
+            <div className="min-w-0 flex-1">
+              <p className="text-[0.7rem] font-semibold uppercase tracking-wide text-muted-foreground">
+                End Time
+              </p>
+              <p className="mt-0.5 text-sm font-medium">{formattedEnd}</p>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 

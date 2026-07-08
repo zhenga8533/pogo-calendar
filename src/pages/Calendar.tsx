@@ -1,4 +1,3 @@
-import { Box } from '@mui/material';
 import { CalendarSkeleton } from '../components/calendar/CalendarSkeleton';
 import EventCalendar from '../components/calendar/EventCalendar';
 import { DataErrorDisplay } from '../components/shared/DataErrorDisplay';
@@ -39,7 +38,7 @@ function CalendarPage(props: CalendarPageProps) {
   }
 
   return (
-    <Box>
+    <div>
       <EventCalendar
         events={filteredEvents}
         isMobile={isMobile}
@@ -63,7 +62,7 @@ function CalendarPage(props: CalendarPageProps) {
         }
         showToast={showToast}
       />
-    </Box>
+    </div>
   );
 }
 

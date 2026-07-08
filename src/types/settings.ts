@@ -1,6 +1,5 @@
-import type { PaletteMode } from '@mui/material';
-
-export type ThemeSetting = PaletteMode | 'auto';
+export type ThemeMode = 'light' | 'dark';
+export type ThemeSetting = ThemeMode | 'auto';
 
 export interface Settings {
   theme: ThemeSetting;

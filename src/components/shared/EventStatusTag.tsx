@@ -1,51 +1,38 @@
-import { Box, useTheme } from '@mui/material';
 import React, { useMemo } from 'react';
 import { useEventStatus } from '../../hooks/useEventStatus';
+import { cn } from '../../lib/utils';
 
 interface EventStatusTagProps {
   start: string | null;
   end: string | null;
 }
 
+const statusClasses: Record<'active' | 'upcoming' | 'finished', string> = {
+  active: 'bg-success text-success-foreground',
+  upcoming: 'bg-warning text-warning-foreground',
+  finished: 'bg-muted text-muted-foreground',
+};
+
 function EventStatusTagComponent({ start, end }: EventStatusTagProps) {
-  const theme = useTheme();
   const { status, displayTime } = useEventStatus(start, end);
 
-  const statusInfo = useMemo(
-    () => ({
-      active: { label: 'Active', color: theme.palette.success.main },
-      upcoming: { label: 'Upcoming', color: theme.palette.warning.main },
-      finished: { label: 'Finished', color: theme.palette.text.secondary },
-    }),
-    [theme]
-  );
+  const label = useMemo(() => {
+    if (!status) return null;
+    const text = status === 'active' ? 'Active' : status === 'upcoming' ? 'Upcoming' : 'Finished';
+    return status === 'finished' ? text : `${text} (${displayTime})`;
+  }, [status, displayTime]);
 
-  if (!status) {
-    return null;
-  }
-
-  const currentStatusInfo = statusInfo[status];
+  if (!status) return null;
 
   return (
-    <Box
-      sx={{
-        backgroundColor: currentStatusInfo.color,
-        color: theme.palette.getContrastText(currentStatusInfo.color),
-        borderRadius: '6px',
-        px: 1.5,
-        py: 0.5,
-        fontSize: '0.75rem',
-        fontWeight: 600,
-        whiteSpace: 'nowrap',
-        height: '24px',
-        display: 'inline-flex',
-        alignItems: 'center',
-      }}
+    <span
+      className={cn(
+        'inline-flex h-6 items-center whitespace-nowrap rounded-md px-2.5 text-xs font-semibold',
+        statusClasses[status]
+      )}
     >
-      {status === 'finished'
-        ? currentStatusInfo.label
-        : `${currentStatusInfo.label} (${displayTime})`}
-    </Box>
+      {label}
+    </span>
   );
 }
 

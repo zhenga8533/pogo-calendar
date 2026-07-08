@@ -1,5 +1,5 @@
-import { Box, CircularProgress, Stack, Typography } from '@mui/material';
 import { memo } from 'react';
+import { Spinner } from '../ui/spinner';
 
 interface PageLoaderProps {
   message?: string;
@@ -11,26 +11,12 @@ interface PageLoaderProps {
  */
 function PageLoaderComponent({ message = 'Loading...' }: PageLoaderProps) {
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '60vh',
-        p: 3,
-      }}
-    >
-      <Stack spacing={2} alignItems="center">
-        <CircularProgress size={48} thickness={4} />
-        <Typography
-          variant="body1"
-          color="text.secondary"
-          sx={{ fontWeight: 500 }}
-        >
-          {message}
-        </Typography>
-      </Stack>
-    </Box>
+    <div className="flex min-h-[60vh] items-center justify-center p-6">
+      <div className="flex flex-col items-center gap-3">
+        <Spinner size={40} />
+        <p className="text-sm font-medium text-muted-foreground">{message}</p>
+      </div>
+    </div>
   );
 }
 

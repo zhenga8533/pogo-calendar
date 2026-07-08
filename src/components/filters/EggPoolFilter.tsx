@@ -1,15 +1,10 @@
-import {
-  Button,
-  Checkbox,
-  Divider,
-  FormControlLabel,
-  FormGroup,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material';
 import { useCallback } from 'react';
 import type { EggPoolFilters } from '../../types/pageFilters';
+import { Button } from '../ui/button';
+import { Checkbox } from '../ui/checkbox';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { Separator } from '../ui/separator';
 import { FilterActions, FilterSection } from './shared';
 
 interface EggPoolFilterProps {
@@ -21,16 +16,11 @@ interface EggPoolFilterProps {
 }
 
 function EggPoolFilter(props: EggPoolFilterProps) {
-  const {
-    filters,
-    onFilterChange,
-    onResetFilters,
-    availableEggTiers,
-    availableRarityTiers,
-  } = props;
+  const { filters, onFilterChange, onResetFilters, availableEggTiers, availableRarityTiers } =
+    props;
 
   const handleFilterChange = useCallback(
-    (field: keyof EggPoolFilters, value: any) => {
+    <K extends keyof EggPoolFilters>(field: K, value: EggPoolFilters[K]) => {
       onFilterChange({ ...filters, [field]: value });
     },
     [filters, onFilterChange]
@@ -56,122 +46,92 @@ function EggPoolFilter(props: EggPoolFilterProps) {
     [filters.selectedRarityTiers, handleFilterChange]
   );
 
-  const handleSelectAllEggTiers = useCallback(() => {
-    handleFilterChange('selectedEggTiers', availableEggTiers);
-  }, [availableEggTiers, handleFilterChange]);
-
-  const handleClearAllEggTiers = useCallback(() => {
-    handleFilterChange('selectedEggTiers', []);
-  }, [handleFilterChange]);
-
-  const handleSelectAllRarityTiers = useCallback(() => {
-    handleFilterChange('selectedRarityTiers', availableRarityTiers);
-  }, [availableRarityTiers, handleFilterChange]);
-
-  const handleClearAllRarityTiers = useCallback(() => {
-    handleFilterChange('selectedRarityTiers', []);
-  }, [handleFilterChange]);
-
   return (
-    <Stack spacing={4}>
-      {/* Search Section */}
+    <div className="flex flex-col gap-4">
       <FilterSection title="Search">
-        <TextField
-          fullWidth
-          label="Search by Pokémon Name"
-          variant="outlined"
-          value={filters.pokemonSearch}
-          onChange={(e) => handleFilterChange('pokemonSearch', e.target.value)}
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={filters.shinyOnly}
-              onChange={(e) =>
-                handleFilterChange('shinyOnly', e.target.checked)
-              }
-            />
-          }
-          label="Show Shiny Available Only"
-        />
+        <div className="space-y-1.5">
+          <Label htmlFor="egg-pokemon-search">Search by Pokémon Name</Label>
+          <Input
+            id="egg-pokemon-search"
+            value={filters.pokemonSearch}
+            onChange={(e) => handleFilterChange('pokemonSearch', e.target.value)}
+          />
+        </div>
+        <label className="flex items-center gap-2.5 text-sm">
+          <Checkbox
+            checked={filters.shinyOnly}
+            onCheckedChange={(checked) => handleFilterChange('shinyOnly', checked === true)}
+          />
+          Show Shiny Available Only
+        </label>
       </FilterSection>
 
-      {/* Egg Tiers Section */}
-      <Divider />
+      <Separator />
       <FilterSection title="Egg Tiers">
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-        >
-          <Typography variant="body2" color="text.secondary">
-            Select egg types to display
-          </Typography>
-          <Stack direction="row" spacing={1}>
-            <Button size="small" onClick={handleSelectAllEggTiers}>
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-muted-foreground">Select egg types to display</span>
+          <div className="flex gap-1">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => handleFilterChange('selectedEggTiers', availableEggTiers)}
+            >
               Select All
             </Button>
-            <Button size="small" onClick={handleClearAllEggTiers}>
+            <Button size="sm" variant="ghost" onClick={() => handleFilterChange('selectedEggTiers', [])}>
               Clear All
             </Button>
-          </Stack>
-        </Stack>
-        <FormGroup>
+          </div>
+        </div>
+        <div className="flex flex-col gap-2">
           {availableEggTiers.map((tier) => (
-            <FormControlLabel
-              key={tier}
-              control={
-                <Checkbox
-                  checked={filters.selectedEggTiers.includes(tier)}
-                  onChange={(e) => handleEggTierChange(tier, e.target.checked)}
-                />
-              }
-              label={tier}
-            />
+            <label key={tier} className="flex items-center gap-2.5 text-sm">
+              <Checkbox
+                checked={filters.selectedEggTiers.includes(tier)}
+                onCheckedChange={(checked) => handleEggTierChange(tier, checked === true)}
+              />
+              {tier}
+            </label>
           ))}
-        </FormGroup>
+        </div>
       </FilterSection>
 
-      {/* Rarity Tiers Section */}
-      <Divider />
+      <Separator />
       <FilterSection title="Rarity Tiers">
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-        >
-          <Typography variant="body2" color="text.secondary">
-            Select rarity levels to display
-          </Typography>
-          <Stack direction="row" spacing={1}>
-            <Button size="small" onClick={handleSelectAllRarityTiers}>
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-muted-foreground">Select rarity levels to display</span>
+          <div className="flex gap-1">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => handleFilterChange('selectedRarityTiers', availableRarityTiers)}
+            >
               Select All
             </Button>
-            <Button size="small" onClick={handleClearAllRarityTiers}>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => handleFilterChange('selectedRarityTiers', [])}
+            >
               Clear All
             </Button>
-          </Stack>
-        </Stack>
-        <FormGroup>
+          </div>
+        </div>
+        <div className="flex flex-col gap-2">
           {availableRarityTiers.map((tier) => (
-            <FormControlLabel
-              key={tier}
-              control={
-                <Checkbox
-                  checked={filters.selectedRarityTiers.includes(tier)}
-                  onChange={(e) =>
-                    handleRarityTierChange(tier, e.target.checked)
-                  }
-                />
-              }
-              label={tier}
-            />
+            <label key={tier} className="flex items-center gap-2.5 text-sm">
+              <Checkbox
+                checked={filters.selectedRarityTiers.includes(tier)}
+                onCheckedChange={(checked) => handleRarityTierChange(tier, checked === true)}
+              />
+              {tier}
+            </label>
           ))}
-        </FormGroup>
+        </div>
       </FilterSection>
 
       <FilterActions onReset={onResetFilters} />
-    </Stack>
+    </div>
   );
 }
 

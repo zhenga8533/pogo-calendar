@@ -1,17 +1,11 @@
-import {
-  Box,
-  Button,
-  Checkbox,
-  Divider,
-  FormControlLabel,
-  FormGroup,
-  Slider,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material';
 import { useCallback } from 'react';
 import type { RaidBossFilters } from '../../types/pageFilters';
+import { Button } from '../ui/button';
+import { Checkbox } from '../ui/checkbox';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { Separator } from '../ui/separator';
+import { Slider } from '../ui/slider';
 import { FilterActions, FilterSection } from './shared';
 
 interface RaidBossFilterProps {
@@ -23,16 +17,10 @@ interface RaidBossFilterProps {
 }
 
 function RaidBossFilter(props: RaidBossFilterProps) {
-  const {
-    filters,
-    onFilterChange,
-    onResetFilters,
-    availableRaidTiers,
-    availableTypes,
-  } = props;
+  const { filters, onFilterChange, onResetFilters, availableRaidTiers, availableTypes } = props;
 
   const handleFilterChange = useCallback(
-    (field: keyof RaidBossFilters, value: any) => {
+    <K extends keyof RaidBossFilters>(field: K, value: RaidBossFilters[K]) => {
       onFilterChange({ ...filters, [field]: value });
     },
     [filters, onFilterChange]
@@ -58,61 +46,36 @@ function RaidBossFilter(props: RaidBossFilterProps) {
     [filters.selectedTypes, handleFilterChange]
   );
 
-  const handleSelectAllRaidTiers = useCallback(() => {
-    handleFilterChange('selectedRaidTiers', availableRaidTiers);
-  }, [availableRaidTiers, handleFilterChange]);
-
-  const handleClearAllRaidTiers = useCallback(() => {
-    handleFilterChange('selectedRaidTiers', []);
-  }, [handleFilterChange]);
-
-  const handleSelectAllTypes = useCallback(() => {
-    handleFilterChange('selectedTypes', availableTypes);
-  }, [availableTypes, handleFilterChange]);
-
-  const handleClearAllTypes = useCallback(() => {
-    handleFilterChange('selectedTypes', []);
-  }, [handleFilterChange]);
-
   return (
-    <Stack spacing={4}>
-      {/* Search Section */}
+    <div className="flex flex-col gap-4">
       <FilterSection title="Search">
-        <TextField
-          fullWidth
-          label="Search by Pokémon Name"
-          variant="outlined"
-          value={filters.pokemonSearch}
-          onChange={(e) => handleFilterChange('pokemonSearch', e.target.value)}
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={filters.shinyOnly}
-              onChange={(e) =>
-                handleFilterChange('shinyOnly', e.target.checked)
-              }
-            />
-          }
-          label="Show Shiny Available Only"
-        />
+        <div className="space-y-1.5">
+          <Label htmlFor="raid-pokemon-search">Search by Pokémon Name</Label>
+          <Input
+            id="raid-pokemon-search"
+            value={filters.pokemonSearch}
+            onChange={(e) => handleFilterChange('pokemonSearch', e.target.value)}
+          />
+        </div>
+        <label className="flex items-center gap-2.5 text-sm">
+          <Checkbox
+            checked={filters.shinyOnly}
+            onCheckedChange={(checked) => handleFilterChange('shinyOnly', checked === true)}
+          />
+          Show Shiny Available Only
+        </label>
       </FilterSection>
 
-      {/* CP Range Section */}
-      <Divider />
+      <Separator />
       <FilterSection title="CP Range">
-        <Box sx={{ px: 1 }}>
-          <Typography gutterBottom variant="body2" color="text.secondary">
-            Filter by CP Range
-          </Typography>
+        <div className="px-1">
+          <p className="mb-2 text-sm text-muted-foreground">Filter by CP Range</p>
           <Slider
             value={[filters.minCP, filters.maxCP]}
-            onChange={(_, value) => {
-              const [min, max] = value as number[];
+            onValueChange={([min, max]) => {
               handleFilterChange('minCP', min);
               handleFilterChange('maxCP', max);
             }}
-            valueLabelDisplay="auto"
             min={0}
             max={60000}
             step={1000}
@@ -121,84 +84,69 @@ function RaidBossFilter(props: RaidBossFilterProps) {
               { value: 30000, label: '30k' },
               { value: 60000, label: '60k' },
             ]}
+            formatLabel={(v) => v.toLocaleString()}
           />
-        </Box>
+        </div>
       </FilterSection>
 
-      {/* Raid Tiers Section */}
-      <Divider />
+      <Separator />
       <FilterSection title="Raid Tiers">
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-        >
-          <Typography variant="body2" color="text.secondary">
-            Select raid tiers to display
-          </Typography>
-          <Stack direction="row" spacing={1}>
-            <Button size="small" onClick={handleSelectAllRaidTiers}>
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-muted-foreground">Select raid tiers to display</span>
+          <div className="flex gap-1">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => handleFilterChange('selectedRaidTiers', availableRaidTiers)}
+            >
               Select All
             </Button>
-            <Button size="small" onClick={handleClearAllRaidTiers}>
+            <Button size="sm" variant="ghost" onClick={() => handleFilterChange('selectedRaidTiers', [])}>
               Clear All
             </Button>
-          </Stack>
-        </Stack>
-        <FormGroup>
+          </div>
+        </div>
+        <div className="flex flex-col gap-2">
           {availableRaidTiers.map((tier) => (
-            <FormControlLabel
-              key={tier}
-              control={
-                <Checkbox
-                  checked={filters.selectedRaidTiers.includes(tier)}
-                  onChange={(e) => handleRaidTierChange(tier, e.target.checked)}
-                />
-              }
-              label={tier}
-            />
+            <label key={tier} className="flex items-center gap-2.5 text-sm">
+              <Checkbox
+                checked={filters.selectedRaidTiers.includes(tier)}
+                onCheckedChange={(checked) => handleRaidTierChange(tier, checked === true)}
+              />
+              {tier}
+            </label>
           ))}
-        </FormGroup>
+        </div>
       </FilterSection>
 
-      {/* Pokémon Types Section */}
-      <Divider />
+      <Separator />
       <FilterSection title="Pokémon Types">
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-        >
-          <Typography variant="body2" color="text.secondary">
-            Select types to display
-          </Typography>
-          <Stack direction="row" spacing={1}>
-            <Button size="small" onClick={handleSelectAllTypes}>
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-muted-foreground">Select types to display</span>
+          <div className="flex gap-1">
+            <Button size="sm" variant="ghost" onClick={() => handleFilterChange('selectedTypes', availableTypes)}>
               Select All
             </Button>
-            <Button size="small" onClick={handleClearAllTypes}>
+            <Button size="sm" variant="ghost" onClick={() => handleFilterChange('selectedTypes', [])}>
               Clear All
             </Button>
-          </Stack>
-        </Stack>
-        <FormGroup>
+          </div>
+        </div>
+        <div className="flex flex-col gap-2">
           {availableTypes.map((type) => (
-            <FormControlLabel
-              key={type}
-              control={
-                <Checkbox
-                  checked={filters.selectedTypes.includes(type)}
-                  onChange={(e) => handleTypeChange(type, e.target.checked)}
-                />
-              }
-              label={type}
-            />
+            <label key={type} className="flex items-center gap-2.5 text-sm">
+              <Checkbox
+                checked={filters.selectedTypes.includes(type)}
+                onCheckedChange={(checked) => handleTypeChange(type, checked === true)}
+              />
+              {type}
+            </label>
           ))}
-        </FormGroup>
+        </div>
       </FilterSection>
 
       <FilterActions onReset={onResetFilters} />
-    </Stack>
+    </div>
   );
 }
 

@@ -1,27 +1,4 @@
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
-import AddToCalendarIcon from '@mui/icons-material/Event';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import StarIcon from '@mui/icons-material/Star';
-import StarBorderIcon from '@mui/icons-material/StarBorder';
-import {
-  Box,
-  Button,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  Divider,
-  IconButton,
-  Link,
-  Stack,
-  TextField,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material';
+import { CalendarDays, Clock, ExternalLink, Pencil, Star, Trash2 } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { CUSTOM_EVENT_CATEGORY } from '../../config/constants';
 import { useSettingsContext } from '../../contexts/SettingsContext';
@@ -34,32 +11,27 @@ import { CategoryTag } from '../shared/CategoryTag';
 import { DeleteConfirmationDialog } from '../shared/DeleteConfirmationDialog';
 import { EventStatusTag } from '../shared/EventStatusTag';
 import { UnsavedChangesDialog } from '../shared/UnsavedChangesDialog';
+import { Badge } from '../ui/badge';
+import { Button } from '../ui/button';
+import { Dialog, DialogContent } from '../ui/dialog';
+import { Separator } from '../ui/separator';
+import { Textarea } from '../ui/textarea';
 
-// Merged DetailSection Component
 interface DetailSectionProps {
   title: string;
   children: React.ReactNode;
   icon?: React.ReactNode;
 }
+
 function DetailSection({ title, children, icon }: DetailSectionProps) {
   return (
-    <Stack spacing={1.5}>
-      <Stack direction="row" spacing={1} alignItems="center">
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center gap-2">
         {icon}
-        <Typography
-          variant="h6"
-          component="h3"
-          sx={{
-            fontWeight: 700,
-            fontSize: '1rem',
-            color: 'text.primary',
-          }}
-        >
-          {title}
-        </Typography>
-      </Stack>
+        <h3 className="text-base font-bold">{title}</h3>
+      </div>
       {children}
-    </Stack>
+    </div>
   );
 }
 
@@ -76,23 +48,15 @@ interface EventDetailDialogProps {
 }
 
 const ChipList = ({ items }: { items: string[] }) => (
-  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+  <div className="flex flex-wrap gap-1.5">
     {items.map((item) => (
-      <Chip
-        key={item}
-        label={item}
-        size="small"
-        sx={{
-          borderRadius: '8px',
-          fontWeight: 500,
-          fontSize: '0.8125rem',
-        }}
-      />
+      <Badge key={item} variant="muted" className="rounded-lg">
+        {item}
+      </Badge>
     ))}
-  </Box>
+  </div>
 );
 
-// Field name to display title mapping (optional custom titles)
 const POKEMON_FIELD_TITLES: Record<string, string> = {
   features: 'Featured Pokémon',
   spawns: 'Wild Encounters',
@@ -103,17 +67,10 @@ const POKEMON_FIELD_TITLES: Record<string, string> = {
   moves: 'Special Moves',
 };
 
-/**
- * Generates a display title for a Pokemon field.
- * Uses the mapping if available, otherwise generates from field name.
- * Example: "field_research" -> "Field Research"
- */
 function getPokemonFieldTitle(fieldName: string): string {
   if (fieldName in POKEMON_FIELD_TITLES) {
     return POKEMON_FIELD_TITLES[fieldName];
   }
-
-  // Auto-generate title: capitalize first letter and replace underscores with spaces
   return fieldName
     .split('_')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
@@ -134,8 +91,6 @@ function EventDetailDialog({
   const { settings } = useSettingsContext();
   const { hour12 } = settings;
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
-  const theme = useTheme();
-  const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
   const eventDetails = useMemo(() => {
     if (!event) return null;
@@ -168,11 +123,7 @@ function EventDetailDialog({
     handleClose,
     handleConfirmClose,
     closeUnsavedDialog,
-  } = useNoteEditor(
-    eventDetails ? eventNotes[eventDetails.id] || '' : '',
-    onSaveNote,
-    onClose
-  );
+  } = useNoteEditor(eventDetails ? eventNotes[eventDetails.id] || '' : '', onSaveNote, onClose);
 
   const handleDelete = useCallback(() => {
     if (!eventDetails) return;
@@ -185,333 +136,183 @@ function EventDetailDialog({
     return null;
   }
 
-  const {
-    id,
-    title,
-    banner_url: bannerUrl,
-    isCustomEvent,
-    isSaved,
-    category,
-  } = eventDetails;
+  const { id, title, banner_url: bannerUrl, isCustomEvent, isSaved, category } = eventDetails;
 
   return (
     <>
-      <Dialog
-        open={true}
-        onClose={handleClose}
-        maxWidth="sm"
-        fullWidth
-        fullScreen={fullScreen}
-        disableRestoreFocus
-        scroll="body"
-        slotProps={{
-          paper: {
-            sx: {
-              overflow: 'hidden',
-              boxShadow: (theme) => theme.shadows[12],
-            },
-          },
-        }}
-      >
-        {/* Header Container with Image & Title Overlay */}
-        <Box sx={{ position: 'relative', height: 200, width: '100%' }}>
-          <Box
-            component="img"
-            src={bannerUrl}
-            alt={title}
-            sx={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-            }}
-          />
+      <Dialog open onOpenChange={(o) => !o && handleClose()}>
+        <DialogContent className="max-w-lg" fullScreenOnMobile hideClose>
+          <div className="relative h-[200px] w-full shrink-0">
+            <img src={bannerUrl} alt={title} className="h-full w-full object-cover" />
+            <div
+              className="absolute inset-0"
+              style={{
+                background:
+                  'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0.1) 100%)',
+              }}
+            />
 
-          {/* Gradient Overlay */}
-          <Box
-            sx={{
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: '100%',
-              background:
-                'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0.1) 100%)',
-            }}
-          />
-
-          {/* Close Button */}
-          <IconButton
-            onClick={onClose}
-            sx={{
-              position: 'absolute',
-              top: 8,
-              left: 8,
-              color: 'white',
-              bgcolor: 'rgba(0,0,0,0.3)',
-              '&:hover': { bgcolor: 'rgba(0,0,0,0.5)' },
-            }}
-          >
-            <OpenInNewIcon
-              sx={{ transform: 'rotate(180deg)', display: 'none' }}
-            />{' '}
-            {/* Placeholder for spacing if needed */}
-            {/* We use standard Close via DialogActions usually, but this is an image overlay close */}
-          </IconButton>
-
-          {/* Save Button */}
-          <IconButton
-            aria-label={isSaved ? 'Unsave event' : 'Save event'}
-            onClick={() => onToggleSaveEvent(id)}
-            sx={{
-              position: 'absolute',
-              top: 8,
-              right: 8,
-              color: 'white',
-              bgcolor: 'rgba(0, 0, 0, 0.3)',
-              '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.5)' },
-            }}
-          >
-            {isSaved ? <StarIcon /> : <StarBorderIcon />}
-          </IconButton>
-
-          {/* Title & Category Bottom Overlay */}
-          <Box
-            sx={{
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              p: 3,
-              width: '100%',
-            }}
-          >
-            <Stack direction="row" spacing={1} mb={1} alignItems="center">
-              <CategoryTag category={category} />
-              <EventStatusTag start={event.start} end={event.end} />
-            </Stack>
-            <Typography
-              variant="h5"
-              component="h2"
-              fontWeight={700}
-              color="white"
-              sx={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)', lineHeight: 1.2 }}
+            <button
+              type="button"
+              aria-label={isSaved ? 'Unsave event' : 'Save event'}
+              onClick={() => onToggleSaveEvent(id)}
+              className="absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-full bg-black/30 text-white transition-colors hover:bg-black/50"
             >
-              {title}
-            </Typography>
-          </Box>
-        </Box>
+              <Star className="h-5 w-5" fill={isSaved ? 'currentColor' : 'none'} />
+            </button>
 
-        <DialogContent sx={{ p: 3 }}>
-          {/* Time Section */}
-          <Box sx={{ mb: 3 }}>
-            <Stack spacing={1.5}>
-              <Stack direction="row" spacing={1.5} alignItems="center">
-                <CalendarTodayIcon
-                  sx={{ fontSize: 20, color: 'primary.main' }}
-                />
-                <Box>
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      fontWeight: 600,
-                      color: 'text.secondary',
-                      textTransform: 'uppercase',
-                      fontSize: '0.7rem',
-                    }}
-                  >
+            <div className="absolute bottom-0 left-0 w-full p-4">
+              <div className="mb-2 flex flex-wrap items-center gap-1.5">
+                <CategoryTag category={category} />
+                <EventStatusTag start={event.start} end={event.end} />
+              </div>
+              <h2
+                className="text-xl font-bold leading-tight text-white"
+                style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}
+              >
+                {title}
+              </h2>
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-4">
+            <div className="mb-4 flex flex-col gap-2.5">
+              <div className="flex items-center gap-2.5">
+                <CalendarDays className="h-5 w-5 shrink-0 text-primary" />
+                <div>
+                  <p className="text-[0.7rem] font-semibold uppercase tracking-wide text-muted-foreground">
                     Start Time
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{ fontWeight: 500, color: 'text.primary' }}
-                  >
-                    {eventDetails.start}
-                  </Typography>
-                </Box>
-              </Stack>
+                  </p>
+                  <p className="text-sm font-medium">{eventDetails.start}</p>
+                </div>
+              </div>
 
               {eventDetails.end && (
-                <Stack direction="row" spacing={1.5} alignItems="center">
-                  <AccessTimeIcon
-                    sx={{ fontSize: 20, color: 'secondary.main' }}
-                  />
-                  <Box>
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        fontWeight: 600,
-                        color: 'text.secondary',
-                        textTransform: 'uppercase',
-                        fontSize: '0.7rem',
-                      }}
-                    >
+                <div className="flex items-center gap-2.5">
+                  <Clock className="h-5 w-5 shrink-0 text-secondary" />
+                  <div>
+                    <p className="text-[0.7rem] font-semibold uppercase tracking-wide text-muted-foreground">
                       End Time
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{ fontWeight: 500, color: 'text.primary' }}
-                    >
-                      {eventDetails.end}
-                    </Typography>
-                  </Box>
-                </Stack>
+                    </p>
+                    <p className="text-sm font-medium">{eventDetails.end}</p>
+                  </div>
+                </div>
               )}
-            </Stack>
-          </Box>
+            </div>
 
-          <Divider sx={{ mb: 3 }} />
+            <Separator className="mb-4" />
 
-          <Stack spacing={3} divider={<Divider />}>
-            {eventDetails.description && (
-              <DetailSection title="Description">
-                <Stack spacing={0.75}>
-                  {eventDetails.description.split('\n').map((line, index) => {
-                    const trimmedLine = line.trim();
-                    if (!trimmedLine) return null;
-                    const displayText = trimmedLine.startsWith('- ')
-                      ? '• ' + trimmedLine.substring(2)
-                      : trimmedLine;
-                    return (
-                      <Typography
-                        key={index}
-                        variant="body1"
-                        sx={{ lineHeight: 1.7 }}
-                      >
-                        {displayText}
-                      </Typography>
-                    );
-                  })}
-                </Stack>
-              </DetailSection>
-            )}
+            <div className="flex flex-col divide-y divide-border">
+              {eventDetails.description && (
+                <div className="pb-4">
+                  <DetailSection title="Description">
+                    <div className="flex flex-col gap-1">
+                      {eventDetails.description.split('\n').map((line, index) => {
+                        const trimmedLine = line.trim();
+                        if (!trimmedLine) return null;
+                        const displayText = trimmedLine.startsWith('- ')
+                          ? '• ' + trimmedLine.substring(2)
+                          : trimmedLine;
+                        return (
+                          <p key={index} className="leading-relaxed">
+                            {displayText}
+                          </p>
+                        );
+                      })}
+                    </div>
+                  </DetailSection>
+                </div>
+              )}
 
-            {eventDetails.bonuses && eventDetails.bonuses.length > 0 && (
-              <DetailSection title="Event Bonuses">
-                <Stack spacing={0.75}>
-                  {eventDetails.bonuses.map((bonus) => (
-                    <Typography
-                      key={bonus}
-                      variant="body2"
-                      sx={{ lineHeight: 1.6, pl: 1 }}
-                    >
-                      • {bonus}
-                    </Typography>
-                  ))}
-                </Stack>
-              </DetailSection>
-            )}
+              {eventDetails.bonuses && eventDetails.bonuses.length > 0 && (
+                <div className="py-4">
+                  <DetailSection title="Event Bonuses">
+                    <div className="flex flex-col gap-1">
+                      {eventDetails.bonuses.map((bonus) => (
+                        <p key={bonus} className="pl-2 text-sm leading-relaxed">
+                          • {bonus}
+                        </p>
+                      ))}
+                    </div>
+                  </DetailSection>
+                </div>
+              )}
 
-            {Object.entries(eventDetails)
-              .filter(([key, value]) => {
-                const nonPokemonFields = [
-                  'category',
-                  'article_url',
-                  'banner_url',
-                  'description',
-                  'bonuses',
-                  'id',
-                  'title',
-                  'isCustomEvent',
-                  'isSaved',
-                  'start',
-                  'end',
-                ];
-                return (
-                  !nonPokemonFields.includes(key) &&
-                  Array.isArray(value) &&
-                  value.length > 0
-                );
-              })
-              .map(([key, value]) => (
-                <DetailSection key={key} title={getPokemonFieldTitle(key)}>
-                  <ChipList items={value as string[]} />
+              {Object.entries(eventDetails)
+                .filter(([key, value]) => {
+                  const nonPokemonFields = [
+                    'category',
+                    'article_url',
+                    'banner_url',
+                    'description',
+                    'bonuses',
+                    'id',
+                    'title',
+                    'isCustomEvent',
+                    'isSaved',
+                    'start',
+                    'end',
+                  ];
+                  return !nonPokemonFields.includes(key) && Array.isArray(value) && value.length > 0;
+                })
+                .map(([key, value]) => (
+                  <div key={key} className="py-4">
+                    <DetailSection title={getPokemonFieldTitle(key)}>
+                      <ChipList items={value as string[]} />
+                    </DetailSection>
+                  </div>
+                ))}
+
+              <div className="pt-4">
+                <DetailSection title="Notes">
+                  <Textarea
+                    rows={4}
+                    placeholder="Add your personal notes here..."
+                    value={noteText}
+                    onChange={(e) => handleNoteChange(e.target.value)}
+                  />
                 </DetailSection>
-              ))}
+              </div>
+            </div>
+          </div>
 
-            <DetailSection title="Notes">
-              <TextField
-                fullWidth
-                multiline
-                rows={4}
-                variant="outlined"
-                placeholder="Add your personal notes here..."
-                value={noteText}
-                onChange={(e) => handleNoteChange(e.target.value)}
-                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-              />
-            </DetailSection>
-          </Stack>
-        </DialogContent>
-
-        <DialogActions
-          sx={{
-            p: 2,
-            flexDirection: { xs: 'column-reverse', sm: 'row' },
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            gap: 2,
-          }}
-        >
-          <Stack
-            direction="row"
-            gap={1}
-            flexWrap="wrap"
-            justifyContent={{ xs: 'center', sm: 'flex-start' }}
-          >
-            {!isCustomEvent && (
-              <Button
-                component={Link}
-                href={id}
-                target="_blank"
-                rel="noopener noreferrer"
-                variant="contained"
-                endIcon={<OpenInNewIcon />}
-              >
-                Learn More
+          <div className="flex shrink-0 flex-col-reverse items-center gap-3 border-t border-border p-3 sm:flex-row sm:justify-between">
+            <div className="flex flex-wrap justify-center gap-2 sm:justify-start">
+              {!isCustomEvent && (
+                <Button asChild>
+                  <a href={id} target="_blank" rel="noopener noreferrer">
+                    Learn More
+                    <ExternalLink className="h-4 w-4" />
+                  </a>
+                </Button>
+              )}
+              <Button variant="outline" onClick={() => downloadIcsFile(event, (error) => showToast(error, 'error'))}>
+                <CalendarDays className="h-4 w-4" />
+                Add to Calendar
               </Button>
-            )}
-            <Button
-              variant="outlined"
-              startIcon={<AddToCalendarIcon />}
-              onClick={() =>
-                downloadIcsFile(event, (error) => showToast(error, 'error'))
-              }
-            >
-              Add to Calendar
-            </Button>
-          </Stack>
-          <Stack
-            direction="row"
-            gap={1}
-            flexWrap="wrap"
-            justifyContent={{ xs: 'center', sm: 'flex-end' }}
-          >
-            {isCustomEvent && (
-              <>
-                <Button
-                  onClick={() => onEditEvent(event)}
-                  startIcon={<EditIcon />}
-                >
-                  Edit
-                </Button>
-                <Button
-                  onClick={() => setConfirmDeleteOpen(true)}
-                  color="error"
-                  startIcon={<DeleteIcon />}
-                >
-                  Delete
-                </Button>
-              </>
-            )}
-            <Button
-              variant="contained"
-              onClick={handleSave}
-              disabled={!isDirty}
-            >
-              Save
-            </Button>
-            <Button onClick={handleClose}>Close</Button>
-          </Stack>
-        </DialogActions>
+            </div>
+            <div className="flex flex-wrap justify-center gap-2 sm:justify-end">
+              {isCustomEvent && (
+                <>
+                  <Button variant="ghost" onClick={() => onEditEvent(event)}>
+                    <Pencil className="h-4 w-4" />
+                    Edit
+                  </Button>
+                  <Button variant="ghost" className="text-destructive hover:text-destructive" onClick={() => setConfirmDeleteOpen(true)}>
+                    <Trash2 className="h-4 w-4" />
+                    Delete
+                  </Button>
+                </>
+              )}
+              <Button onClick={handleSave} disabled={!isDirty}>
+                Save
+              </Button>
+              <Button variant="outline" onClick={handleClose}>
+                Close
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
       </Dialog>
       <DeleteConfirmationDialog
         open={confirmDeleteOpen}

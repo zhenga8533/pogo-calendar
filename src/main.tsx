@@ -4,6 +4,8 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App.tsx';
 import { CalendarProvider } from './contexts/CalendarContext.tsx';
 import { SettingsProvider } from './contexts/SettingsContext.tsx';
+import './index.css';
+import './styles/calendar.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

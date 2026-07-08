@@ -1,5 +1,6 @@
-import ReplayIcon from '@mui/icons-material/Replay';
-import { Button, Divider, Stack } from '@mui/material';
+import { RotateCcw } from 'lucide-react';
+import { Button } from '../../ui/button';
+import { Separator } from '../../ui/separator';
 
 interface FilterActionsProps {
   onReset: () => void;
@@ -10,19 +11,12 @@ interface FilterActionsProps {
  */
 export const FilterActions = ({ onReset }: FilterActionsProps) => (
   <>
-    <Divider />
-    <Stack
-      direction={{ xs: 'column', md: 'row' }}
-      spacing={2}
-      sx={{
-        justifyContent: { xs: 'flex-start', md: 'flex-end' },
-        flexWrap: 'wrap',
-        mt: 3,
-      }}
-    >
-      <Button variant="outlined" startIcon={<ReplayIcon />} onClick={onReset}>
+    <Separator />
+    <div className="mt-3 flex flex-col flex-wrap gap-2 md:flex-row md:justify-end">
+      <Button variant="outline" onClick={onReset}>
+        <RotateCcw className="h-4 w-4" />
         Reset
       </Button>
-    </Stack>
+    </div>
   </>
 );

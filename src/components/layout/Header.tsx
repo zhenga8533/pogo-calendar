@@ -1,38 +1,17 @@
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import BoltIcon from '@mui/icons-material/Bolt';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import CloseIcon from '@mui/icons-material/Close';
-import EggIcon from '@mui/icons-material/Egg';
-import FilterListIcon from '@mui/icons-material/FilterList';
-import GroupIcon from '@mui/icons-material/Group';
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
-import SearchIcon from '@mui/icons-material/Search';
-import SyncIcon from '@mui/icons-material/Sync';
-import TuneIcon from '@mui/icons-material/Tune';
 import {
-  AppBar,
-  Badge,
-  Box,
-  Button,
-  Divider,
-  Drawer,
-  IconButton,
-  InputBase,
-  ListItemIcon,
-  ListItemText,
-  Menu,
-  MenuItem,
-  Popover,
-  Stack,
-  Toolbar,
-  Tooltip,
-  Typography,
-  alpha,
-  styled,
-  useScrollTrigger,
-  useTheme,
-} from '@mui/material';
+  Calendar as CalendarIcon,
+  ChevronDown,
+  Clipboard,
+  Egg,
+  Filter,
+  HelpCircle,
+  Search,
+  Ship,
+  Sliders,
+  X,
+  Zap,
+  type LucideIcon,
+} from 'lucide-react';
 import React, { useState } from 'react';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
 import type { EventFilterProps } from '../../types/filters';
@@ -42,67 +21,32 @@ import type {
   ResearchTaskFilters,
   RocketLineupFilters,
 } from '../../types/pageFilters';
+import { cn } from '../../lib/utils';
+import { useScrollTrigger } from '../../hooks/useScrollTrigger';
 import EggPoolFilter from '../filters/EggPoolFilter';
 import EventFilter from '../filters/EventFilter';
 import RaidBossFilter from '../filters/RaidBossFilter';
 import ResearchTaskFilter from '../filters/ResearchTaskFilter';
 import RocketLineupFilter from '../filters/RocketLineupFilter';
+import { IconButton } from '../ui/icon-button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import { Sheet, SheetBody, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '../ui/sheet';
+import { Button } from '../ui/button';
 import LogoIcon from '/icon.svg';
 
-// Styled Search Component
-const Search = styled('div')(({ theme }) => ({
-  position: 'relative',
-  borderRadius: theme.shape.borderRadius,
-  backgroundColor: alpha(theme.palette.common.white, 0.15),
-  '&:hover': {
-    backgroundColor: alpha(theme.palette.common.white, 0.25),
-  },
-  marginRight: 0,
-  marginLeft: 0,
-  width: '100%',
-  flexGrow: 1, // Allow growing on mobile to fill space
-  [theme.breakpoints.up('sm')]: {
-    width: 'auto',
-    minWidth: '300px', // Wider search on desktop
-    flexGrow: 0, // Don't grow on desktop, let spacers center it
-  },
-  // Adjust for light mode visibility
-  ...(theme.palette.mode === 'light' && {
-    backgroundColor: alpha(theme.palette.common.black, 0.05),
-    '&:hover': {
-      backgroundColor: alpha(theme.palette.common.black, 0.1),
-    },
-  }),
-}));
-
-const SearchIconWrapper = styled('div')(({ theme }) => ({
-  padding: theme.spacing(0, 2),
-  height: '100%',
-  position: 'absolute',
-  pointerEvents: 'none',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-}));
-
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: 'inherit',
-  width: '100%',
-  '& .MuiInputBase-input': {
-    padding: theme.spacing(1, 1, 1, 0),
-    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-    transition: theme.transitions.create('width'),
-    width: '100%',
-  },
-}));
-
-const NAV_ITEMS = [
-  { label: 'Calendar', path: '/', icon: CalendarMonthIcon },
-  { label: 'Egg Pool', path: '/egg-pool', icon: EggIcon },
-  { label: 'Raid Bosses', path: '/raid-bosses', icon: BoltIcon },
-  { label: 'Research', path: '/research-tasks', icon: AssignmentIcon },
-  { label: 'Rocket', path: '/rocket-lineup', icon: GroupIcon },
-  { label: 'FAQ', path: '/faq', icon: HelpOutlineIcon },
+const NAV_ITEMS: { label: string; path: string; icon: LucideIcon }[] = [
+  { label: 'Calendar', path: '/', icon: CalendarIcon },
+  { label: 'Egg Pool', path: '/egg-pool', icon: Egg },
+  { label: 'Raid Bosses', path: '/raid-bosses', icon: Zap },
+  { label: 'Research', path: '/research-tasks', icon: Clipboard },
+  { label: 'Rocket', path: '/rocket-lineup', icon: Ship },
+  { label: 'FAQ', path: '/faq', icon: HelpCircle },
 ];
 
 type HeaderProps = Omit<EventFilterProps, 'isMobile'> & {
@@ -113,7 +57,6 @@ type HeaderProps = Omit<EventFilterProps, 'isMobile'> & {
   lastUpdatedError: string | null;
   activeFilterCount: number;
   isMobile: boolean;
-  // Page-specific filters
   eggPoolFilters?: EggPoolFilters;
   onEggPoolFilterChange?: (filters: EggPoolFilters) => void;
   onResetEggPoolFilters?: () => void;
@@ -144,7 +87,6 @@ function HeaderComponent(props: HeaderProps) {
     lastUpdatedLoading,
     lastUpdatedError,
     isMobile,
-    // Filter props
     activeFilterCount,
     eggPoolFilters,
     onEggPoolFilterChange,
@@ -161,44 +103,21 @@ function HeaderComponent(props: HeaderProps) {
     ...filterProps
   } = props;
 
-  const theme = useTheme();
-  const trigger = useScrollTrigger({ disableHysteresis: true, threshold: 0 });
+  const trigger = useScrollTrigger(0);
   const location = useLocation();
+  const [filterPopoverOpen, setFilterPopoverOpen] = useState(false);
+  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
 
-  const [filterAnchorEl, setFilterAnchorEl] =
-    useState<HTMLButtonElement | null>(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [navMenuAnchorEl, setNavMenuAnchorEl] = useState<HTMLElement | null>(
-    null
-  );
-
-  const handleFilterClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    if (isMobile) setDrawerOpen(true);
-    else setFilterAnchorEl(event.currentTarget);
+  const handleFilterOpenChange = (open: boolean) => {
+    if (isMobile) setFilterSheetOpen(open);
+    else setFilterPopoverOpen(open);
   };
 
-  const handleCloseFilter = () => {
-    setFilterAnchorEl(null);
-    setDrawerOpen(false);
-  };
-
-  const handleNavMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setNavMenuAnchorEl(event.currentTarget);
-  };
-
-  const handleNavMenuClose = () => {
-    setNavMenuAnchorEl(null);
-  };
-
-  // --- Search Logic ---
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     switch (location.pathname) {
       case '/':
-        filterProps.onFilterChange({
-          ...filterProps.filters,
-          searchTerm: value,
-        });
+        filterProps.onFilterChange({ ...filterProps.filters, searchTerm: value });
         break;
       case '/egg-pool':
         onEggPoolFilterChange?.({ ...eggPoolFilters!, pokemonSearch: value });
@@ -207,16 +126,10 @@ function HeaderComponent(props: HeaderProps) {
         onRaidBossFilterChange?.({ ...raidBossFilters!, pokemonSearch: value });
         break;
       case '/research-tasks':
-        onResearchTaskFilterChange?.({
-          ...researchTaskFilters!,
-          taskSearch: value,
-        });
+        onResearchTaskFilterChange?.({ ...researchTaskFilters!, taskSearch: value });
         break;
       case '/rocket-lineup':
-        onRocketLineupFilterChange?.({
-          ...rocketLineupFilters!,
-          pokemonSearch: value,
-        });
+        onRocketLineupFilterChange?.({ ...rocketLineupFilters!, pokemonSearch: value });
         break;
     }
   };
@@ -238,7 +151,6 @@ function HeaderComponent(props: HeaderProps) {
     }
   };
 
-  // --- Filter Content Logic ---
   const getFilterContent = () => {
     switch (location.pathname) {
       case '/':
@@ -317,288 +229,142 @@ function HeaderComponent(props: HeaderProps) {
     }
   };
 
+  const filterCount = getCurrentActiveFilterCount();
+  const currentNavLabel = NAV_ITEMS.find((item) => item.path === location.pathname)?.label || 'Calendar';
+
+  const filterTriggerButton = (
+    <div className="relative">
+      <IconButton onClick={() => handleFilterOpenChange(true)} aria-label="Filters">
+        <Filter />
+      </IconButton>
+      {filterCount > 0 && (
+        <span className="pointer-events-none absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[0.65rem] font-bold text-primary-foreground">
+          {filterCount}
+        </span>
+      )}
+    </div>
+  );
+
   return (
     <>
-      <AppBar
-        position="sticky"
-        elevation={trigger ? 4 : 0}
-        sx={{
-          backgroundColor: trigger
-            ? theme.palette.background.paper
-            : alpha(theme.palette.background.paper, 0.8),
-          backdropFilter: 'blur(12px)',
-          color: theme.palette.text.primary,
-          borderBottom: `1px solid ${theme.palette.divider}`,
-          transition: theme.transitions.create(
-            ['background-color', 'box-shadow'],
-            {
-              duration: theme.transitions.duration.short,
-            }
-          ),
-        }}
+      <header
+        className={cn(
+          'sticky top-0 z-40 border-b border-border backdrop-blur-md transition-colors duration-200',
+          trigger ? 'bg-card shadow-soft-sm' : 'bg-card/80'
+        )}
       >
-        <Toolbar sx={{ gap: 2 }}>
-          {/* Logo Section */}
-          <Stack
-            component={RouterLink}
-            to="/"
-            direction="row"
-            alignItems="center"
-            sx={{ textDecoration: 'none', color: 'inherit', flexShrink: 0 }}
-          >
-            <Box
-              component="img"
-              src={LogoIcon}
-              alt="Logo"
-              sx={{ mr: 1, height: 32, width: 32 }}
-            />
-            <Typography
-              variant="h6"
-              component="div"
-              sx={{ display: { xs: 'none', md: 'block' }, fontWeight: 700 }}
-            >
-              PoGo Calendar
-            </Typography>
-          </Stack>
+        <div className="flex h-16 items-center gap-2 px-3 sm:px-4 md:gap-3 md:px-6">
+          <RouterLink to="/" className="flex shrink-0 items-center gap-2 text-inherit no-underline">
+            <img src={LogoIcon} alt="Logo" className="h-8 w-8" />
+            <span className="hidden text-lg font-bold md:block">PoGo Calendar</span>
+          </RouterLink>
 
-          {/* Search Section with Centering Logic */}
           {location.pathname !== '/faq' ? (
             <>
-              {/* Left Spacer: Pushes search to center on desktop, hidden on mobile to let search grow */}
-              <Box sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }} />
-
-              <Search>
-                <SearchIconWrapper>
-                  <SearchIcon />
-                </SearchIconWrapper>
-                <StyledInputBase
+              <div className="hidden flex-1 sm:block" />
+              <div className="relative flex-1 sm:min-w-[300px] sm:flex-none">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  type="search"
                   placeholder="Search..."
-                  inputProps={{ 'aria-label': 'search' }}
+                  aria-label="search"
                   value={getCurrentSearchValue()}
                   onChange={handleSearchChange}
+                  className="h-9 w-full rounded-md border border-transparent bg-accent/60 pl-9 pr-3 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-border focus:bg-background focus:ring-2 focus:ring-ring"
                 />
-              </Search>
-
-              {/* Right Spacer */}
-              <Box sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }} />
+              </div>
+              <div className="hidden flex-1 sm:block" />
             </>
           ) : (
-            // FAQ Page: Just use a spacer to push actions to the right
-            <Box sx={{ flexGrow: 1 }} />
+            <div className="flex-1" />
           )}
 
-          {/* Actions Section */}
-          <Stack direction="row" alignItems="center" spacing={isMobile ? 0 : 1}>
-            {/* Last Updated (Desktop) */}
+          <div className="flex shrink-0 items-center gap-1">
             {!isMobile && (
-              <Tooltip
-                title={
-                  lastUpdatedError
-                    ? lastUpdatedError
-                    : lastUpdatedLoading
-                    ? 'Refreshing…'
-                    : 'Refresh data'
-                }
-              >
-                <Button
-                  onClick={onRefresh}
-                  color="inherit"
-                  size="small"
-                  startIcon={
-                    <SyncIcon
-                      fontSize="small"
-                      sx={{
-                        animation: lastUpdatedLoading
-                          ? 'spin 1s linear infinite'
-                          : 'none',
-                        '@keyframes spin': {
-                          from: { transform: 'rotate(0deg)' },
-                          to: { transform: 'rotate(360deg)' },
-                        },
-                      }}
-                    />
-                  }
-                  sx={{
-                    color: 'text.secondary',
-                    fontWeight: 500,
-                    px: 1,
-                    '&:hover': { backgroundColor: 'action.hover' },
-                  }}
-                >
-                  {lastUpdatedError
-                    ? 'Update failed'
-                    : lastUpdatedLoading
-                    ? 'Updating…'
-                    : `Updated ${lastUpdated}`}
-                </Button>
-              </Tooltip>
-            )}
-
-            {/* Divider */}
-            <Divider
-              orientation="vertical"
-              flexItem
-              sx={{ display: { xs: 'none', sm: 'block' }, mx: 1 }}
-            />
-
-            {/* Navigation Dropdown Trigger */}
-            {isMobile ? (
-              <Tooltip title="Menu">
-                <IconButton color="inherit" onClick={handleNavMenuOpen}>
-                  <ArrowDropDownIcon />
-                </IconButton>
-              </Tooltip>
-            ) : (
               <Button
-                color="inherit"
-                onClick={handleNavMenuOpen}
-                endIcon={<ArrowDropDownIcon />}
-                sx={{
-                  textTransform: 'none',
-                  fontWeight: 600,
-                  '&:hover': { backgroundColor: 'action.hover' },
-                }}
+                variant="ghost"
+                size="sm"
+                onClick={onRefresh}
+                className="text-muted-foreground"
+                title={lastUpdatedError ? lastUpdatedError : lastUpdatedLoading ? 'Refreshing…' : 'Refresh data'}
               >
-                {NAV_ITEMS.find((item) => item.path === location.pathname)
-                  ?.label || 'Calendar'}
+                <span
+                  className={cn(
+                    'inline-block h-3.5 w-3.5',
+                    lastUpdatedLoading && 'animate-spin'
+                  )}
+                >
+                  ⟳
+                </span>
+                {lastUpdatedError ? 'Update failed' : lastUpdatedLoading ? 'Updating…' : `Updated ${lastUpdated}`}
               </Button>
             )}
 
-            {/* Filters Trigger */}
-            {filterContent && (
-              <Tooltip title="Filters">
-                <IconButton color="inherit" onClick={handleFilterClick}>
-                  <Badge
-                    badgeContent={getCurrentActiveFilterCount()}
-                    color="primary"
-                  >
-                    <FilterListIcon />
-                  </Badge>
-                </IconButton>
-              </Tooltip>
-            )}
+            <div className="mx-1 hidden h-6 w-px bg-border sm:block" />
 
-            {/* Settings Trigger */}
-            <Tooltip title="Settings">
-              <IconButton color="inherit" onClick={onSettingsClick}>
-                <TuneIcon />
-              </IconButton>
-            </Tooltip>
-          </Stack>
-        </Toolbar>
-      </AppBar>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                {isMobile ? (
+                  <IconButton aria-label="Menu">
+                    <ChevronDown />
+                  </IconButton>
+                ) : (
+                  <Button variant="ghost">
+                    {currentNavLabel}
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                )}
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="min-w-[200px]">
+                {NAV_ITEMS.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <DropdownMenuItem key={item.path} asChild>
+                      <RouterLink to={item.path} className="no-underline text-inherit">
+                        <Icon className="h-4 w-4" />
+                        {item.label}
+                      </RouterLink>
+                    </DropdownMenuItem>
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-      {/* Navigation Menu Dropdown */}
-      <Menu
-        anchorEl={navMenuAnchorEl}
-        open={Boolean(navMenuAnchorEl)}
-        onClose={handleNavMenuClose}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-        PaperProps={{ sx: { minWidth: 200, borderRadius: 3, mt: 1 } }}
-      >
-        {NAV_ITEMS.map((item) => {
-          const Icon = item.icon;
-          return (
-            <MenuItem
-              key={item.path}
-              component={RouterLink}
-              to={item.path}
-              onClick={handleNavMenuClose}
-              selected={location.pathname === item.path}
-              sx={{ py: 1.5 }}
-            >
-              <ListItemIcon>
-                <Icon fontSize="small" />
-              </ListItemIcon>
-              <ListItemText primaryTypographyProps={{ fontWeight: 500 }}>
-                {item.label}
-              </ListItemText>
-            </MenuItem>
-          );
-        })}
-      </Menu>
+            {filterContent &&
+              (isMobile ? (
+                <Sheet open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
+                  <SheetTrigger asChild>{filterTriggerButton}</SheetTrigger>
+                  <SheetContent side="bottom">
+                    <SheetHeader>
+                      <SheetTitle>Filters</SheetTitle>
+                      <IconButton onClick={() => setFilterSheetOpen(false)} aria-label="Close filters">
+                        <X className="h-4 w-4" />
+                      </IconButton>
+                    </SheetHeader>
+                    <SheetBody>{filterContent}</SheetBody>
+                  </SheetContent>
+                </Sheet>
+              ) : (
+                <Popover open={filterPopoverOpen} onOpenChange={setFilterPopoverOpen}>
+                  <PopoverTrigger asChild>{filterTriggerButton}</PopoverTrigger>
+                  <PopoverContent align="end" className="flex max-h-[75vh] w-[420px] max-w-[90vw] flex-col p-0">
+                    <div className="flex items-center justify-between border-b border-border px-4 py-3">
+                      <span className="text-sm font-bold">Filters</span>
+                      <IconButton onClick={() => setFilterPopoverOpen(false)} aria-label="Close filters">
+                        <X className="h-4 w-4" />
+                      </IconButton>
+                    </div>
+                    <div className="overflow-y-auto p-4">{filterContent}</div>
+                  </PopoverContent>
+                </Popover>
+              ))}
 
-      {/* Filters Drawer (Mobile) or Popover (Desktop) */}
-      {isMobile ? (
-        <Drawer
-          anchor="bottom"
-          open={drawerOpen}
-          onClose={handleCloseFilter}
-          PaperProps={{
-            sx: {
-              borderRadius: '16px 16px 0 0',
-              maxHeight: '85vh',
-              display: 'flex',
-              flexDirection: 'column',
-            },
-          }}
-        >
-          <Box sx={{ display: 'flex', justifyContent: 'center', pt: 1.5 }}>
-            <Box
-              sx={{
-                width: 36,
-                height: 4,
-                borderRadius: 2,
-                bgcolor: 'divider',
-              }}
-            />
-          </Box>
-          <Stack
-            direction="row"
-            alignItems="center"
-            justifyContent="space-between"
-            sx={{ px: 3, pt: 1, pb: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}
-          >
-            <Typography variant="subtitle1" fontWeight={700}>
-              Filters
-            </Typography>
-            <IconButton size="small" onClick={handleCloseFilter}>
-              <CloseIcon fontSize="small" />
+            <IconButton onClick={onSettingsClick} aria-label="Settings">
+              <Sliders />
             </IconButton>
-          </Stack>
-          <Box sx={{ p: 3, overflowY: 'auto' }}>{filterContent}</Box>
-        </Drawer>
-      ) : (
-        <Popover
-          open={Boolean(filterAnchorEl)}
-          anchorEl={filterAnchorEl}
-          onClose={handleCloseFilter}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-          transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-          PaperProps={{ sx: { mt: 0.5, borderRadius: 2 } }}
-        >
-          <Box
-            sx={{
-              width: 420,
-              maxWidth: '90vw',
-              maxHeight: '75vh',
-              display: 'flex',
-              flexDirection: 'column',
-            }}
-          >
-            <Stack
-              direction="row"
-              alignItems="center"
-              justifyContent="space-between"
-              sx={{
-                px: 2.5,
-                py: 1.5,
-                borderBottom: '1px solid',
-                borderColor: 'divider',
-              }}
-            >
-              <Typography variant="subtitle1" fontWeight={700}>
-                Filters
-              </Typography>
-              <IconButton size="small" onClick={handleCloseFilter}>
-                <CloseIcon fontSize="small" />
-              </IconButton>
-            </Stack>
-            <Box sx={{ p: 2.5, overflowY: 'auto' }}>{filterContent}</Box>
-          </Box>
-        </Popover>
-      )}
+          </div>
+        </div>
+      </header>
     </>
   );
 }

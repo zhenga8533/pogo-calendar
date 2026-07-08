@@ -1,6 +1,7 @@
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import { Box, Button, Container, Paper, Typography } from '@mui/material';
+import { CircleAlert } from 'lucide-react';
 import { Component, type ErrorInfo, type ReactNode } from 'react';
+import { Button } from '../ui/button';
+import { Card } from '../ui/card';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -50,71 +51,30 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
       }
 
       return (
-        <Container maxWidth="md" sx={{ mt: 8 }}>
-          <Paper
-            elevation={3}
-            sx={{
-              p: 4,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              textAlign: 'center',
-            }}
-          >
-            <ErrorOutlineIcon
-              sx={{ fontSize: 80, color: 'error.main', mb: 2 }}
-            />
-            <Typography variant="h4" component="h1" gutterBottom>
-              Oops! Something went wrong
-            </Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-              We apologize for the inconvenience. An unexpected error has
-              occurred.
-            </Typography>
+        <div className="mx-auto mt-16 max-w-2xl px-4">
+          <Card className="flex flex-col items-center p-8 text-center shadow-soft-lg">
+            <CircleAlert className="mb-4 h-20 w-20 text-destructive" />
+            <h1 className="mb-2 text-2xl font-bold">Oops! Something went wrong</h1>
+            <p className="mb-6 text-muted-foreground">
+              We apologize for the inconvenience. An unexpected error has occurred.
+            </p>
             {this.state.error && (
-              <Box
-                sx={{
-                  mb: 3,
-                  p: 2,
-                  backgroundColor: 'action.hover',
-                  borderRadius: 1,
-                  width: '100%',
-                  maxWidth: 600,
-                  textAlign: 'left',
-                }}
-              >
-                <Typography
-                  variant="body2"
-                  component="pre"
-                  sx={{
-                    whiteSpace: 'pre-wrap',
-                    wordBreak: 'break-word',
-                    fontFamily: 'monospace',
-                    fontSize: '0.875rem',
-                  }}
-                >
+              <div className="mb-6 w-full max-w-xl rounded-md bg-muted p-4 text-left">
+                <pre className="whitespace-pre-wrap break-words font-mono text-sm text-muted-foreground">
                   {this.state.error.toString()}
-                </Typography>
-              </Box>
+                </pre>
+              </div>
             )}
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <Button
-                variant="contained"
-                onClick={this.handleReset}
-                size="large"
-              >
+            <div className="flex gap-3">
+              <Button size="lg" onClick={this.handleReset}>
                 Try Again
               </Button>
-              <Button
-                variant="outlined"
-                onClick={() => window.location.reload()}
-                size="large"
-              >
+              <Button size="lg" variant="outline" onClick={() => window.location.reload()}>
                 Reload Page
               </Button>
-            </Box>
-          </Paper>
-        </Container>
+            </div>
+          </Card>
+        </div>
       );
     }
 

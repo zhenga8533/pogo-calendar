@@ -1,11 +1,13 @@
+import { Button } from '../ui/button';
 import {
-  Button,
   Dialog,
-  DialogActions,
+  DialogBody,
   DialogContent,
-  DialogContentText,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
   DialogTitle,
-} from '@mui/material';
+} from '../ui/dialog';
 
 interface UnsavedChangesDialogProps {
   open: boolean;
@@ -23,17 +25,21 @@ export function UnsavedChangesDialog({
   message = 'You have unsaved changes. Are you sure you want to discard them?',
 }: UnsavedChangesDialogProps) {
   return (
-    <Dialog open={open} onClose={onClose}>
-      <DialogTitle>{title}</DialogTitle>
-      <DialogContent>
-        <DialogContentText>{message}</DialogContentText>
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+        </DialogHeader>
+        <DialogBody>
+          <DialogDescription>{message}</DialogDescription>
+        </DialogBody>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button onClick={onConfirm}>Discard</Button>
+        </DialogFooter>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button onClick={onConfirm} color="primary">
-          Discard
-        </Button>
-      </DialogActions>
     </Dialog>
   );
 }

@@ -1,99 +1,49 @@
-import {
-  Box,
-  Container,
-  Divider,
-  Link,
-  Stack,
-  Typography,
-  alpha,
-} from '@mui/material';
 import React, { useMemo } from 'react';
 
 const footerLinks = [
   { href: 'https://github.com/zhenga8533/pogo-calendar', text: 'App Source' },
   { href: 'https://leekduck.com/events/', text: 'Data Source' },
   { href: 'https://github.com/zhenga8533/leak-duck', text: 'Scraper Source' },
-  {
-    href: 'https://github.com/zhenga8533/pogo-calendar/issues',
-    text: 'Send Feedback',
-  },
+  { href: 'https://github.com/zhenga8533/pogo-calendar/issues', text: 'Send Feedback' },
 ];
 
-const FooterLink = React.memo(
-  /**
-   * Renders a styled link for the footer.
-   *
-   * @param param0 Props for the FooterLink component.
-   * @returns A styled link for the footer.
-   */
-  function FooterLink({ href, text }: { href: string; text: string }) {
-    return (
-      <Link
-        href={href}
-        variant="body2"
-        target="_blank"
-        rel="noopener noreferrer"
-        sx={(theme) => ({
-          color: theme.palette.text.secondary,
-          textDecoration: 'none',
-          '&:hover': {
-            textDecoration: 'underline',
-            color: theme.palette.text.primary,
-          },
-        })}
-      >
-        {text}
-      </Link>
-    );
-  }
-);
+const FooterLink = React.memo(function FooterLink({ href, text }: { href: string; text: string }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-sm text-muted-foreground no-underline transition-colors hover:text-foreground hover:underline"
+    >
+      {text}
+    </a>
+  );
+});
 
-/**
- * Renders the footer component for the application.
- *
- * @returns The footer component for the application.
- */
 function FooterComponent() {
   const currentYear = useMemo(() => new Date().getFullYear(), []);
 
   return (
-    <Box
-      component="footer"
-      sx={(theme) => ({
-        py: 3,
-        px: 2,
-        backgroundColor: alpha(theme.palette.background.paper, 0.8),
-        backdropFilter: 'blur(8px)',
-        borderTop: `1px solid ${theme.palette.divider}`,
-      })}
-    >
-      <Container maxWidth="lg">
-        <Stack spacing={3} alignItems="center" sx={{ textAlign: 'center' }}>
-          {/* Render links by mapping over the data array */}
-          <Stack
-            direction="row"
-            spacing={{ xs: 2, sm: 3 }}
-            divider={<Divider orientation="vertical" flexItem />}
-            sx={{ flexWrap: 'wrap', justifyContent: 'center', rowGap: 1 }}
-          >
-            {footerLinks.map((link) => (
-              <FooterLink key={link.href} href={link.href} text={link.text} />
-            ))}
-          </Stack>
+    <footer className="border-t border-border bg-card/80 px-4 py-6 backdrop-blur-md">
+      <div className="mx-auto flex max-w-5xl flex-col items-center gap-4 text-center">
+        <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 sm:gap-x-4">
+          {footerLinks.map((link, i) => (
+            <React.Fragment key={link.href}>
+              {i > 0 && <span className="h-3.5 w-px bg-border" aria-hidden="true" />}
+              <FooterLink href={link.href} text={link.text} />
+            </React.Fragment>
+          ))}
+        </div>
 
-          {/* App info and copyright */}
-          <Box sx={{ maxWidth: '550px', opacity: 0.7 }}>
-            <Typography variant="caption" display="block" gutterBottom>
-              Built with React, TypeScript, and Material-UI. Fan project not
-              affiliated with Niantic, Inc.
-            </Typography>
-            <Typography variant="caption">
-              © {currentYear} PoGo Calendar
-            </Typography>
-          </Box>
-        </Stack>
-      </Container>
-    </Box>
+        <div className="max-w-[550px] opacity-70">
+          <p className="mb-1 text-xs">
+            Built with React, TypeScript, and Tailwind CSS. Fan project not affiliated with Niantic,
+            Inc.
+          </p>
+          <p className="text-xs">© {currentYear} PoGo Calendar</p>
+        </div>
+      </div>
+    </footer>
   );
 }
 

@@ -1,45 +1,28 @@
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Alert,
-  Box,
-  Card,
-  Chip,
-  Grid,
-  Stack,
-  Typography,
-} from '@mui/material';
 import React, { useEffect, useMemo } from 'react';
 import { ShinyChip } from '../components/filters/shared';
 import { DataErrorDisplay } from '../components/shared/DataErrorDisplay';
 import { DataLoadingSkeleton } from '../components/shared/DataLoadingSkeleton';
 import { PageHeader } from '../components/shared/PageHeader';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
+import { Alert } from '../components/ui/alert';
+import { Badge } from '../components/ui/badge';
+import { Card } from '../components/ui/card';
 import { usePageData } from '../hooks/usePageData';
 import { fetchResearchTasks } from '../services/dataService';
 import type { ResearchTaskFilters } from '../types/pageFilters';
-import type {
-  ResearchTask,
-  ResearchTaskData,
-  TaskReward,
-} from '../types/researchTasks';
+import type { ResearchTask, ResearchTaskData, TaskReward } from '../types/researchTasks';
 
 interface ResearchTasksPageProps {
   filters: ResearchTaskFilters;
   onSetFilterOptions: (options: { categories: string[] }) => void;
 }
 
-function ResearchTasksPage({
-  filters,
-  onSetFilterOptions,
-}: ResearchTasksPageProps) {
+function ResearchTasksPage({ filters, onSetFilterOptions }: ResearchTasksPageProps) {
   const { data, loading, error, refetch } = usePageData<ResearchTaskData>(
     fetchResearchTasks,
     'Failed to load research task data. Please try again later.'
   );
 
-  // Extract and set available filter options from data
   useEffect(() => {
     if (data) {
       const categories = Object.keys(data);
@@ -47,66 +30,39 @@ function ResearchTasksPage({
     }
   }, [data, onSetFilterOptions]);
 
-  // Filter the data based on filters
   const filteredData = useMemo(() => {
     if (!data) return null;
 
     const result: ResearchTaskData = {};
 
     Object.entries(data).forEach(([category, tasks]) => {
-      // Filter by category
-      if (
-        filters.selectedCategories.length > 0 &&
-        !filters.selectedCategories.includes(category)
-      ) {
+      if (filters.selectedCategories.length > 0 && !filters.selectedCategories.includes(category)) {
         return;
       }
 
-      // Filter tasks within this category
       const filteredTasks = tasks.filter((task) => {
-        // Filter by task description
-        if (
-          filters.taskSearch &&
-          !task.task.toLowerCase().includes(filters.taskSearch.toLowerCase())
-        ) {
+        if (filters.taskSearch && !task.task.toLowerCase().includes(filters.taskSearch.toLowerCase())) {
           return false;
         }
 
-        // Check if task has matching rewards
         const hasMatchingReward = task.rewards.some((reward) => {
-          // Filter by reward type
-          if (
-            filters.rewardTypes.length > 0 &&
-            !filters.rewardTypes.includes(reward.type)
-          ) {
+          if (filters.rewardTypes.length > 0 && !filters.rewardTypes.includes(reward.type)) {
             return false;
           }
-
-          // Filter by pokemon name (for encounter rewards)
           if (
             filters.pokemonSearch &&
             reward.type === 'encounter' &&
-            !reward.name
-              .toLowerCase()
-              .includes(filters.pokemonSearch.toLowerCase())
+            !reward.name.toLowerCase().includes(filters.pokemonSearch.toLowerCase())
           ) {
             return false;
           }
-
-          // Filter by shiny availability
           if (filters.shinyOnly && !reward.shiny_available) {
             return false;
           }
-
           return true;
         });
 
-        // If no rewards match the filter criteria, exclude this task
-        if (
-          filters.rewardTypes.length > 0 ||
-          filters.pokemonSearch ||
-          filters.shinyOnly
-        ) {
+        if (filters.rewardTypes.length > 0 || filters.pokemonSearch || filters.shinyOnly) {
           return hasMatchingReward;
         }
 
@@ -127,171 +83,78 @@ function ResearchTasksPage({
 
   if (error || !data || !filteredData) {
     return (
-      <DataErrorDisplay
-        title="Failed to Load Research Task Data"
-        message={error || undefined}
-        onRetry={refetch}
-      />
+      <DataErrorDisplay title="Failed to Load Research Task Data" message={error || undefined} onRetry={refetch} />
     );
   }
 
   const renderReward = (reward: TaskReward, index: number) => (
-    <Card
-      key={index}
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        p: 2,
-        backgroundColor: 'background.default',
-        minHeight: 80,
-      }}
-    >
-      <Box
-        sx={{
-          width: 64,
-          height: 64,
-          minWidth: 64,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          mr: 2,
-          backgroundColor: 'background.paper',
-          borderRadius: 1,
-          overflow: 'hidden',
-        }}
-      >
-        <Box
-          component="img"
-          src={reward.asset_url}
-          alt={reward.name}
-          sx={{
-            maxWidth: '100%',
-            maxHeight: '100%',
-            objectFit: 'contain',
-          }}
-        />
-      </Box>
-      <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-        <Typography variant="subtitle2" fontWeight={600} noWrap>
+    <Card key={index} className="flex min-h-20 items-center bg-muted p-4">
+      <div className="mr-3 flex h-16 w-16 min-w-16 items-center justify-center overflow-hidden rounded-md bg-card">
+        <img src={reward.asset_url} alt={reward.name} className="max-h-full max-w-full object-contain" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-semibold">
           {reward.name}
           {reward.quantity && reward.quantity > 1 && ` x${reward.quantity}`}
-        </Typography>
-        <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap' }}>
-          <Chip
-            label={reward.type === 'encounter' ? 'Pokémon' : 'Item'}
-            size="small"
-            sx={{
-              height: 20,
-              fontSize: '0.7rem',
-              backgroundColor:
-                reward.type === 'encounter' ? '#4CAF50' : '#2196F3',
-              color: '#fff',
-              fontWeight: 600,
-            }}
-          />
+        </p>
+        <div className="mt-1 flex flex-wrap gap-1">
+          <Badge
+            size="sm"
+            style={{ backgroundColor: reward.type === 'encounter' ? '#4CAF50' : '#2196F3', color: '#fff' }}
+          >
+            {reward.type === 'encounter' ? 'Pokémon' : 'Item'}
+          </Badge>
           {reward.shiny_available && <ShinyChip />}
-        </Box>
-      </Box>
+        </div>
+      </div>
     </Card>
   );
 
   const renderTask = (task: ResearchTask, index: number) => (
-    <Accordion
-      key={index}
-      sx={{
-        mb: 1,
-        '&:before': { display: 'none' },
-        borderRadius: '12px !important',
-        overflow: 'hidden',
-      }}
-    >
-      <AccordionSummary
-        expandIcon={<ExpandMoreIcon />}
-        sx={{
-          backgroundColor: 'background.paper',
-          '&:hover': {
-            backgroundColor: 'action.hover',
-          },
-        }}
-      >
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 2,
-            flexWrap: 'wrap',
-            width: '100%',
-            pr: 2,
-          }}
-        >
-          <Typography variant="body1" fontWeight={600} sx={{ flexGrow: 1 }}>
-            {task.task}
-          </Typography>
-          <Chip
-            label={`${task.rewards.length} Reward${
-              task.rewards.length !== 1 ? 's' : ''
-            }`}
-            size="small"
-            sx={{
-              backgroundColor: 'primary.main',
-              color: '#fff',
-              fontWeight: 600,
-            }}
-          />
-        </Box>
-      </AccordionSummary>
-      <AccordionDetails sx={{ pt: 2 }}>
-        <Grid container spacing={2}>
-          {task.rewards.map((reward, idx) => (
-            <Grid key={idx} size={{ xs: 12, sm: 6, md: 4 }}>
-              {renderReward(reward, idx)}
-            </Grid>
-          ))}
-        </Grid>
-      </AccordionDetails>
-    </Accordion>
+    <AccordionItem key={index} value={String(index)} className="mb-2 overflow-hidden rounded-xl border border-border px-0 last:border-b">
+      <AccordionTrigger className="px-4 hover:no-underline">
+        <div className="flex w-full flex-wrap items-center gap-2 pr-2">
+          <span className="flex-1 text-left text-sm font-semibold">{task.task}</span>
+          <Badge>
+            {task.rewards.length} Reward{task.rewards.length !== 1 ? 's' : ''}
+          </Badge>
+        </div>
+      </AccordionTrigger>
+      <AccordionContent className="px-4 pt-2">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
+          {task.rewards.map((reward, idx) => renderReward(reward, idx))}
+        </div>
+      </AccordionContent>
+    </AccordionItem>
   );
 
   return (
-    <Box sx={{ py: 4 }}>
-      <PageHeader
-        title="Research Tasks"
-        description="Current field research tasks and their rewards"
-      />
+    <div className="py-4">
+      <PageHeader title="Research Tasks" description="Current field research tasks and their rewards" />
 
-      <Alert severity="info" sx={{ mb: 3 }}>
-        Field research tasks are obtained by spinning PokéStops. Complete tasks
-        to earn rewards including Pokémon encounters, items, and Stardust.
+      <Alert variant="info" className="mb-6">
+        Field research tasks are obtained by spinning PokéStops. Complete tasks to earn rewards including
+        Pokémon encounters, items, and Stardust.
       </Alert>
 
-      <Stack spacing={3}>
+      <div className="flex flex-col gap-6">
         {Object.entries(filteredData).map(([category, tasks]) => {
           if (!tasks || tasks.length === 0) return null;
 
           return (
-            <Box key={category}>
-              <Box
-                sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}
-              >
-                <Typography variant="h5" fontWeight={600}>
-                  {category}
-                </Typography>
-                <Chip
-                  label={`${tasks.length} Task${tasks.length !== 1 ? 's' : ''}`}
-                  size="small"
-                  sx={{
-                    backgroundColor: 'primary.main',
-                    color: '#fff',
-                    fontWeight: 600,
-                  }}
-                />
-              </Box>
-              {tasks.map((task, index) => renderTask(task, index))}
-            </Box>
+            <div key={category}>
+              <div className="mb-3 flex items-center gap-2.5">
+                <h2 className="text-xl font-bold">{category}</h2>
+                <Badge>
+                  {tasks.length} Task{tasks.length !== 1 ? 's' : ''}
+                </Badge>
+              </div>
+              <Accordion type="multiple">{tasks.map((task, index) => renderTask(task, index))}</Accordion>
+            </div>
           );
         })}
-      </Stack>
-    </Box>
+      </div>
+    </div>
   );
 }
 

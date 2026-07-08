@@ -1,14 +1,8 @@
-import {
-  Box,
-  Button,
-  Checkbox,
-  Divider,
-  FormControlLabel,
-  FormGroup,
-  Stack,
-} from '@mui/material';
 import React, { useCallback } from 'react';
 import { ColorKeyLabel } from '../filters/ColorKeyLabel';
+import { Button } from '../ui/button';
+import { Checkbox } from '../ui/checkbox';
+import { Separator } from '../ui/separator';
 
 interface CategoryExportPanelProps {
   allCategories: string[];
@@ -32,28 +26,27 @@ export const CategoryExportPanel = React.memo(function CategoryExportPanel({
   );
 
   return (
-    <Box sx={{ pt: 2 }}>
-      <Stack direction="row" justifyContent="flex-end" sx={{ mb: 1 }}>
-        <Button onClick={() => onSelectionChange(allCategories)}>
+    <div className="pt-3">
+      <div className="mb-2 flex justify-end gap-1">
+        <Button size="sm" variant="ghost" onClick={() => onSelectionChange(allCategories)}>
           Select All
         </Button>
-        <Button onClick={() => onSelectionChange([])}>Clear All</Button>
-      </Stack>
-      <Divider />
-      <FormGroup sx={{ mt: 2, maxHeight: '40vh', overflowY: 'auto' }}>
+        <Button size="sm" variant="ghost" onClick={() => onSelectionChange([])}>
+          Clear All
+        </Button>
+      </div>
+      <Separator />
+      <div className="mt-3 flex max-h-[40vh] flex-col gap-2.5 overflow-y-auto">
         {allCategories.map((category) => (
-          <FormControlLabel
-            key={category}
-            control={
-              <Checkbox
-                checked={selectedCategories.includes(category)}
-                onChange={() => handleToggleCategory(category)}
-              />
-            }
-            label={<ColorKeyLabel category={category} />}
-          />
+          <label key={category} className="flex items-center gap-2.5 text-sm">
+            <Checkbox
+              checked={selectedCategories.includes(category)}
+              onCheckedChange={() => handleToggleCategory(category)}
+            />
+            <ColorKeyLabel category={category} />
+          </label>
         ))}
-      </FormGroup>
-    </Box>
+      </div>
+    </div>
   );
 });

@@ -1,26 +1,15 @@
-import ViewListIcon from '@mui/icons-material/ViewList';
-import ViewModuleIcon from '@mui/icons-material/ViewModule';
-import {
-  Alert,
-  Box,
-  Card,
-  CardContent,
-  CardMedia,
-  Chip,
-  Grid,
-  Stack,
-  ToggleButton,
-  ToggleButtonGroup,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material';
+import { LayoutGrid, List } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ShinyChip } from '../components/filters/shared';
 import { DataErrorDisplay } from '../components/shared/DataErrorDisplay';
 import { DataLoadingSkeleton } from '../components/shared/DataLoadingSkeleton';
 import { PageHeader } from '../components/shared/PageHeader';
+import { Alert } from '../components/ui/alert';
+import { Badge } from '../components/ui/badge';
+import { Card } from '../components/ui/card';
+import { ToggleGroup, ToggleGroupItem } from '../components/ui/toggle-group';
 import { EGG_COLORS, RARITY_TIERS } from '../config/colorMapping';
+import { MOBILE_QUERY, useMediaQuery } from '../hooks/useMediaQuery';
 import { usePageData } from '../hooks/usePageData';
 import { fetchEggPool } from '../services/dataService';
 import type { EggPokemon, EggPoolData } from '../types/eggPool';
@@ -28,10 +17,7 @@ import type { EggPoolFilters } from '../types/pageFilters';
 
 interface EggPoolPageProps {
   filters: EggPoolFilters;
-  onSetFilterOptions: (options: {
-    eggTiers: string[];
-    rarityTiers: string[];
-  }) => void;
+  onSetFilterOptions: (options: { eggTiers: string[]; rarityTiers: string[] }) => void;
 }
 
 function EggPoolPage({ filters, onSetFilterOptions }: EggPoolPageProps) {
@@ -39,11 +25,9 @@ function EggPoolPage({ filters, onSetFilterOptions }: EggPoolPageProps) {
     fetchEggPool,
     'Failed to load egg pool data. Please try again later.'
   );
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isMobile = useMediaQuery(MOBILE_QUERY);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-  // Extract and set available filter options from data
   useEffect(() => {
     if (data) {
       const eggTiers = Object.keys(data);
@@ -52,47 +36,29 @@ function EggPoolPage({ filters, onSetFilterOptions }: EggPoolPageProps) {
     }
   }, [data, onSetFilterOptions]);
 
-  // Filter the data based on filters
   const filteredData = useMemo(() => {
     if (!data) return null;
 
     const result: EggPoolData = {};
 
     Object.entries(data).forEach(([tier, pokemon]) => {
-      // Filter by egg tier
-      if (
-        filters.selectedEggTiers.length > 0 &&
-        !filters.selectedEggTiers.includes(tier)
-      ) {
+      if (filters.selectedEggTiers.length > 0 && !filters.selectedEggTiers.includes(tier)) {
         return;
       }
 
-      // Filter pokemon within this tier
       const filteredPokemon = pokemon.filter((p) => {
-        // Filter by pokemon name
-        if (
-          filters.pokemonSearch &&
-          !p.name.toLowerCase().includes(filters.pokemonSearch.toLowerCase())
-        ) {
+        if (filters.pokemonSearch && !p.name.toLowerCase().includes(filters.pokemonSearch.toLowerCase())) {
           return false;
         }
-
-        // Filter by shiny availability
         if (filters.shinyOnly && !p.shiny_available) {
           return false;
         }
-
-        // Filter by rarity tier
         if (filters.selectedRarityTiers.length > 0) {
           const rarityLabel = RARITY_TIERS[p.rarity_tier]?.label;
-          if (
-            !rarityLabel ||
-            !filters.selectedRarityTiers.includes(rarityLabel)
-          ) {
+          if (!rarityLabel || !filters.selectedRarityTiers.includes(rarityLabel)) {
             return false;
           }
         }
-
         return true;
       });
 
@@ -105,208 +71,103 @@ function EggPoolPage({ filters, onSetFilterOptions }: EggPoolPageProps) {
   }, [data, filters]);
 
   if (loading) {
-    return (
-      <DataLoadingSkeleton
-        itemCount={8}
-        gridSize={{ xs: 6, sm: 4, md: 3, lg: 2 }}
-      />
-    );
+    return <DataLoadingSkeleton itemCount={8} gridSize={{ xs: 6, sm: 4, md: 3, lg: 2 }} />;
   }
 
   if (error || !data || !filteredData) {
-    return (
-      <DataErrorDisplay
-        title="Failed to Load Egg Pool Data"
-        message={error || undefined}
-        onRetry={refetch}
-      />
-    );
+    return <DataErrorDisplay title="Failed to Load Egg Pool Data" message={error || undefined} onRetry={refetch} />;
   }
 
   const renderPokemonCard = (pokemon: EggPokemon) => (
     <Card
-      sx={{
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        transition: 'transform 0.2s, box-shadow 0.2s',
-        '&:hover': {
-          transform: 'translateY(-4px)',
-          boxShadow: (theme) => theme.shadows[8],
-        },
-      }}
+      key={pokemon.name}
+      className="flex h-full flex-col transition-all duration-200 hover:-translate-y-1 hover:shadow-soft-xl"
     >
-      <CardMedia
-        component="img"
-        image={pokemon.asset_url}
-        alt={pokemon.name}
-        sx={{
-          height: 120,
-          objectFit: 'contain',
-          backgroundColor: 'background.default',
-          p: 2,
-        }}
-      />
-      <CardContent sx={{ flexGrow: 1, pt: 1 }}>
-        <Typography
-          variant="subtitle1"
-          fontWeight={600}
-          textAlign="center"
-          gutterBottom
-          sx={{ fontSize: isMobile ? '0.875rem' : '1rem' }}
-        >
-          {pokemon.name}
-        </Typography>
-        <Box
-          sx={{
-            display: 'flex',
-            gap: 0.5,
-            justifyContent: 'center',
-            flexWrap: 'wrap',
-          }}
-        >
+      <div className="flex h-[120px] items-center justify-center bg-muted p-4">
+        <img src={pokemon.asset_url} alt={pokemon.name} className="max-h-full max-w-full object-contain" />
+      </div>
+      <div className="flex-1 p-3 pt-2 text-center">
+        <p className="mb-1.5 text-sm font-semibold sm:text-base">{pokemon.name}</p>
+        <div className="flex flex-wrap justify-center gap-1">
           {pokemon.shiny_available && <ShinyChip />}
-          <Chip
-            label={RARITY_TIERS[pokemon.rarity_tier]?.label || 'Unknown'}
-            size="small"
-            sx={{
-              height: 20,
-              fontSize: '0.7rem',
-              backgroundColor:
-                RARITY_TIERS[pokemon.rarity_tier]?.color || '#999',
-              color: '#fff',
-              fontWeight: 600,
-            }}
-          />
-        </Box>
-      </CardContent>
+          <Badge
+            size="sm"
+            style={{ backgroundColor: RARITY_TIERS[pokemon.rarity_tier]?.color || '#999', color: '#fff' }}
+          >
+            {RARITY_TIERS[pokemon.rarity_tier]?.label || 'Unknown'}
+          </Badge>
+        </div>
+      </div>
     </Card>
   );
 
   const renderPokemonListItem = (pokemon: EggPokemon) => (
-    <Card
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        p: 1.5,
-        gap: 2,
-        width: '100%',
-      }}
-    >
-      <Box
-        sx={{
-          width: 50,
-          height: 50,
-          bgcolor: 'background.default',
-          borderRadius: 2,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0,
-        }}
-      >
-        <Box
-          component="img"
-          src={pokemon.asset_url}
-          alt={pokemon.name}
-          sx={{ maxWidth: '80%', maxHeight: '80%' }}
-        />
-      </Box>
-      <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-        <Stack direction="row" alignItems="center" spacing={1} mb={0.5}>
-          <Typography variant="subtitle2" fontWeight={600}>
-            {pokemon.name}
-          </Typography>
+    <Card key={pokemon.name} className="flex w-full items-center gap-3 p-3">
+      <div className="flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-md bg-muted">
+        <img src={pokemon.asset_url} alt={pokemon.name} className="max-h-[80%] max-w-[80%]" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="mb-1 flex items-center gap-2">
+          <p className="text-sm font-semibold">{pokemon.name}</p>
           {pokemon.shiny_available && <ShinyChip />}
-        </Stack>
-      </Box>
-      <Chip
-        label={RARITY_TIERS[pokemon.rarity_tier]?.label || 'Unknown'}
-        size="small"
-        sx={{
-          height: 20,
-          fontSize: '0.7rem',
-          backgroundColor: RARITY_TIERS[pokemon.rarity_tier]?.color || '#999',
-          color: '#fff',
-          fontWeight: 600,
-          minWidth: 80,
-        }}
-      />
+        </div>
+      </div>
+      <Badge
+        size="sm"
+        className="min-w-20 justify-center"
+        style={{ backgroundColor: RARITY_TIERS[pokemon.rarity_tier]?.color || '#999', color: '#fff' }}
+      >
+        {RARITY_TIERS[pokemon.rarity_tier]?.label || 'Unknown'}
+      </Badge>
     </Card>
   );
 
   return (
-    <Box sx={{ py: 4, pb: isMobile ? 8 : 4 }}>
-      <Stack
-        direction={{ xs: 'column', sm: 'row' }}
-        justifyContent="space-between"
-        alignItems={{ xs: 'flex-start', sm: 'flex-start' }}
-        spacing={2}
-        mb={3}
-      >
-        <PageHeader
-          title="Egg Pool"
-          description="Current Pokémon available from different egg types"
-        />
-        <ToggleButtonGroup
+    <div className={`py-4 ${isMobile ? 'pb-16' : ''}`}>
+      <div className="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row">
+        <PageHeader title="Egg Pool" description="Current Pokémon available from different egg types" />
+        <ToggleGroup
+          type="single"
           value={viewMode}
-          exclusive
-          onChange={(_, newView) => newView && setViewMode(newView)}
-          size="small"
-          aria-label="view mode"
+          onValueChange={(v) => v && setViewMode(v as 'grid' | 'list')}
         >
-          <ToggleButton value="grid" aria-label="grid view">
-            <ViewModuleIcon />
-          </ToggleButton>
-          <ToggleButton value="list" aria-label="list view">
-            <ViewListIcon />
-          </ToggleButton>
-        </ToggleButtonGroup>
-      </Stack>
+          <ToggleGroupItem value="grid" aria-label="grid view">
+            <LayoutGrid className="h-4 w-4" />
+          </ToggleGroupItem>
+          <ToggleGroupItem value="list" aria-label="list view">
+            <List className="h-4 w-4" />
+          </ToggleGroupItem>
+        </ToggleGroup>
+      </div>
 
-      <Alert severity="info" sx={{ mb: 3 }}>
-        Egg contents are updated regularly based on current in-game events.
-        Rarity tiers indicate the relative hatch chance.
+      <Alert variant="info" className="mb-6">
+        Egg contents are updated regularly based on current in-game events. Rarity tiers indicate the
+        relative hatch chance.
       </Alert>
 
       {Object.entries(filteredData).map(([tier, pokemon]) => {
         if (!pokemon || pokemon.length === 0) return null;
 
         return (
-          <Box key={tier} sx={{ mb: 4 }}>
-            <Stack direction="row" spacing={2} alignItems="center" mb={2}>
-              <Typography variant="h5" fontWeight={600}>
-                {tier}
-              </Typography>
-              <Chip
-                label={`${pokemon.length} Pokémon`}
-                size="small"
-                sx={{
-                  backgroundColor: (theme) =>
-                    EGG_COLORS[tier] || theme.palette.primary.main,
-                  color: '#fff',
-                  fontWeight: 600,
-                }}
-              />
-            </Stack>
+          <div key={tier} className="mb-8">
+            <div className="mb-3 flex items-center gap-2.5">
+              <h2 className="text-xl font-bold">{tier}</h2>
+              <Badge style={{ backgroundColor: EGG_COLORS[tier] || 'hsl(var(--primary))', color: '#fff' }}>
+                {pokemon.length} Pokémon
+              </Badge>
+            </div>
 
             {viewMode === 'grid' ? (
-              <Grid container spacing={2}>
-                {pokemon.map((p) => (
-                  <Grid key={p.name} size={{ xs: 6, sm: 4, md: 3, lg: 2 }}>
-                    {renderPokemonCard(p)}
-                  </Grid>
-                ))}
-              </Grid>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+                {pokemon.map((p) => renderPokemonCard(p))}
+              </div>
             ) : (
-              <Stack spacing={1}>
-                {pokemon.map((p) => renderPokemonListItem(p))}
-              </Stack>
+              <div className="flex flex-col gap-2">{pokemon.map((p) => renderPokemonListItem(p))}</div>
             )}
-          </Box>
+          </div>
         );
       })}
-    </Box>
+    </div>
   );
 }
 

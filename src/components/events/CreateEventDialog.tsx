@@ -1,19 +1,12 @@
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Stack,
-  TextField,
-} from '@mui/material';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { useCallback, useEffect, useState } from 'react';
 import type { CalendarEvent, NewEventData } from '../../types/events';
 import { formatToLocalTime } from '../../utils/dateUtils';
 import { UnsavedChangesDialog } from '../shared/UnsavedChangesDialog';
+import { Button } from '../ui/button';
+import { DateTimePickerField } from '../ui/date-picker';
+import { Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
 
 interface CreateEventDialogProps {
   open: boolean;
@@ -33,17 +26,11 @@ const getInitialErrors = () => ({
   end: null as string | null,
 });
 
-function CreateEventDialog({
-  open,
-  eventToEdit,
-  onClose,
-  onSave,
-}: CreateEventDialogProps) {
+function CreateEventDialog({ open, eventToEdit, onClose, onSave }: CreateEventDialogProps) {
   const [formData, setFormData] = useState(getInitialFormData());
   const [errors, setErrors] = useState(getInitialErrors());
   const [isDirty, setIsDirty] = useState(false);
-  const [isUnsavedChangesDialogOpen, setUnsavedChangesDialogOpen] =
-    useState(false);
+  const [isUnsavedChangesDialogOpen, setUnsavedChangesDialogOpen] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -117,59 +104,46 @@ function CreateEventDialog({
 
   return (
     <>
-      <LocalizationProvider dateAdapter={AdapterDateFns}>
-        <Dialog open={open} onClose={handleClose} fullWidth maxWidth="xs">
-          <DialogTitle>
-            {eventToEdit ? 'Edit Custom Event' : 'Create Custom Event'}
-          </DialogTitle>
-          <DialogContent>
-            <Stack spacing={3} sx={{ mt: 1 }}>
-              <TextField
+      <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>{eventToEdit ? 'Edit Custom Event' : 'Create Custom Event'}</DialogTitle>
+          </DialogHeader>
+          <DialogBody className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="event-title">Event Title</Label>
+              <Input
+                id="event-title"
                 autoFocus
-                label="Event Title"
-                fullWidth
-                variant="outlined"
                 value={formData.title}
                 onChange={(e) => handleChange('title', e.target.value)}
-                error={!!errors.title}
-                helperText={errors.title}
               />
-              <DateTimePicker
-                label="Start Time"
+              {errors.title && <p className="text-xs text-destructive">{errors.title}</p>}
+            </div>
+            <div className="space-y-1.5">
+              <Label>Start Time</Label>
+              <DateTimePickerField
                 value={(formData.start && new Date(formData.start)) || null}
-                onChange={(newValue) =>
-                  handleChange(
-                    'start',
-                    newValue ? formatToLocalTime(newValue) : ''
-                  )
-                }
+                onChange={(newValue) => handleChange('start', newValue ? formatToLocalTime(newValue) : '')}
               />
-              <DateTimePicker
-                label="End Time"
+            </div>
+            <div className="space-y-1.5">
+              <Label>End Time</Label>
+              <DateTimePickerField
                 value={(formData.end && new Date(formData.end)) || null}
-                onChange={(newValue) =>
-                  handleChange(
-                    'end',
-                    newValue ? formatToLocalTime(newValue) : ''
-                  )
-                }
-                slotProps={{
-                  textField: {
-                    error: !!errors.end,
-                    helperText: errors.end,
-                  },
-                }}
+                onChange={(newValue) => handleChange('end', newValue ? formatToLocalTime(newValue) : '')}
               />
-            </Stack>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose}>Cancel</Button>
-            <Button onClick={handleSave} variant="contained">
-              Save
+              {errors.end && <p className="text-xs text-destructive">{errors.end}</p>}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleClose}>
+              Cancel
             </Button>
-          </DialogActions>
-        </Dialog>
-      </LocalizationProvider>
+            <Button onClick={handleSave}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <UnsavedChangesDialog
         open={isUnsavedChangesDialogOpen}
         onClose={() => setUnsavedChangesDialogOpen(false)}

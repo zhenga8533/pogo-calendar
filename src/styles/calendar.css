@@ -1,0 +1,97 @@
+.fc {
+  --fc-border-color: hsl(var(--border));
+  --fc-page-bg-color: transparent;
+  --fc-neutral-bg-color: hsl(var(--muted));
+  --fc-list-event-hover-bg-color: hsl(var(--accent));
+  --fc-today-bg-color: hsl(var(--primary) / 0.08);
+  --fc-day-other-bg-color: transparent;
+  --fc-list-day-bg-color: hsl(var(--muted));
+  --fc-list-day-side-bg-color: hsl(var(--muted));
+  font-family: var(--font-sans);
+}
+
+.fc .fc-col-header-cell {
+  background-color: hsl(var(--card));
+}
+
+.fc .fc-col-header-cell-cushion,
+.fc .fc-timegrid-axis-cushion {
+  color: hsl(var(--muted-foreground));
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.fc .fc-timegrid-axis {
+  background-color: hsl(var(--card));
+}
+
+.fc .fc-daygrid-day-number,
+.fc .fc-list-day-text,
+.fc .fc-list-day-side-text {
+  color: hsl(var(--foreground));
+  font-weight: 600;
+}
+
+.fc-theme-standard td,
+.fc-theme-standard th,
+.fc-theme-standard .fc-scrollgrid {
+  border-color: hsl(var(--border));
+}
+
+.fc .fc-list-event:hover td {
+  background-color: hsl(var(--accent));
+}
+
+.fc-event:hover,
+.event-highlight {
+  filter: brightness(1.1) saturate(1.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 50;
+  position: relative;
+  transition: all 0.1s ease;
+}
+
+.dark .fc-event:hover,
+.dark .event-highlight {
+  filter: brightness(1.3);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+}
+
+/* FullCalendar's list view sizes the title <td> to fit its content by
+   default, which pushes our pill past the container edge instead of
+   letting it shrink and ellipsize. Forcing width:100% with max-width:0
+   makes the cell shrink to the space actually available. */
+.fc-list-event-title {
+  width: 100%;
+  max-width: 0;
+}
+
+.fc .fc-toolbar-title {
+  font-weight: 700;
+  color: hsl(var(--foreground));
+}
+
+.fc .fc-button-primary {
+  background-color: hsl(var(--card));
+  border-color: hsl(var(--border));
+  color: hsl(var(--foreground));
+  text-transform: capitalize;
+  box-shadow: none;
+}
+
+.fc .fc-button-primary:hover {
+  background-color: hsl(var(--accent));
+  border-color: hsl(var(--border));
+}
+
+.fc .fc-button-primary:disabled {
+  opacity: 0.5;
+}
+
+.fc .fc-button-primary:not(:disabled).fc-button-active {
+  background-color: hsl(var(--primary));
+  border-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}

@@ -1,12 +1,3 @@
-import {
-  Alert,
-  Box,
-  Container,
-  CssBaseline,
-  Snackbar,
-  ThemeProvider,
-  useMediaQuery,
-} from '@mui/material';
 import { lazy, Suspense, useCallback, useMemo, useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import CreateEventDialog from './components/events/CreateEventDialog';
@@ -17,19 +8,20 @@ import ErrorBoundary from './components/shared/ErrorBoundary';
 import { PageLoader } from './components/shared/PageLoader';
 import ScrollToTop from './components/shared/ScrollToTop';
 import { SettingsDialog } from './components/shared/SettingsDialog';
+import { Toaster } from './components/ui/toaster';
 import { useCalendarContext } from './contexts/CalendarContext';
 import { useSettingsContext } from './contexts/SettingsContext';
 import { useDialogs } from './hooks/useDialogs';
 import { useLastUpdated } from './hooks/useLastUpdated';
+import { MOBILE_QUERY, useMediaQuery } from './hooks/useMediaQuery';
 import {
   useEggPoolFilters,
   useRaidBossFilters,
   useResearchTaskFilters,
   useRocketLineupFilters,
 } from './hooks/usePageFilters';
+import { useThemeMode } from './hooks/useThemeMode';
 import { useToast } from './hooks/useToast';
-import { CalendarDarkStyles } from './styles/calendarDarkStyles';
-import { getTheme } from './theme';
 import type { CalendarEvent, NewEventData } from './types/events';
 import type { Settings } from './types/settings';
 import { downloadIcsForEvents } from './utils/calendarUtils';
@@ -44,11 +36,8 @@ const RocketLineupPage = lazy(() => import('./pages/RocketLineup'));
 
 function App() {
   const { settings, setSettings } = useSettingsContext();
-  const muiTheme = useMemo(
-    () => getTheme(settings.theme === 'auto' ? 'light' : settings.theme),
-    [settings.theme]
-  );
-  const isMobile = useMediaQuery(muiTheme.breakpoints.down('md'));
+  useThemeMode(settings.theme);
+  const isMobile = useMediaQuery(MOBILE_QUERY);
   const { activeDialog, openDialog, closeDialog } = useDialogs();
   const { toast, showToast, handleCloseToast } = useToast();
   const [eventToEdit, setEventToEdit] = useState<CalendarEvent | null>(null);
@@ -126,7 +115,7 @@ function App() {
     try {
       await Promise.all([refetchEvents(), refetchLastUpdated()]);
       showToast('Data refreshed successfully!', 'success');
-    } catch (error) {
+    } catch {
       showToast('Failed to refresh data.', 'error');
     }
   }, [refetchEvents, refetchLastUpdated, showToast]);
@@ -168,139 +157,120 @@ function App() {
 
   const handleExport = useCallback(
     (eventsToExport: CalendarEvent[]) => {
-      downloadIcsForEvents(eventsToExport, (error) =>
-        showToast(error, 'error')
-      );
+      downloadIcsForEvents(eventsToExport, (error) => showToast(error, 'error'));
       showToast(`Exported ${eventsToExport.length} events!`, 'success');
     },
     [showToast]
   );
 
   return (
-    <ThemeProvider theme={muiTheme}>
-      <CssBaseline />
-      <CalendarDarkStyles />
-      <Box
-        sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}
-      >
-        <Header
-          onSettingsClick={() => openDialog('settings')}
-          onRefresh={handleRefresh}
-          filters={filters}
-          onFilterChange={setFilters}
-          onResetFilters={handleResetFilters}
-          onNewEventClick={() => openDialog('create')}
-          onOpenExportDialog={() => openDialog('export')}
-          allCategories={allCategories}
-          allPokemon={allPokemon}
-          allBonuses={allBonuses}
-          lastUpdated={lastUpdated}
-          lastUpdatedLoading={lastUpdatedLoading}
-          lastUpdatedError={error}
-          activeFilterCount={activeFilterCount}
-          isMobile={isMobile}
-          // Page-specific filters
-          eggPoolFilters={eggPoolFilterState.filters}
-          onEggPoolFilterChange={eggPoolFilterState.setFilters}
-          onResetEggPoolFilters={eggPoolFilterState.resetFilters}
-          eggPoolActiveFilterCount={eggPoolFilterState.activeFilterCount}
-          eggPoolOptions={eggPoolOptions}
-          raidBossFilters={raidBossFilterState.filters}
-          onRaidBossFilterChange={raidBossFilterState.setFilters}
-          onResetRaidBossFilters={raidBossFilterState.resetFilters}
-          raidBossActiveFilterCount={raidBossFilterState.activeFilterCount}
-          raidBossOptions={raidBossOptions}
-          researchTaskFilters={researchTaskFilterState.filters}
-          onResearchTaskFilterChange={researchTaskFilterState.setFilters}
-          onResetResearchTaskFilters={researchTaskFilterState.resetFilters}
-          researchTaskActiveFilterCount={
-            researchTaskFilterState.activeFilterCount
-          }
-          researchTaskOptions={researchTaskOptions}
-          rocketLineupFilters={rocketLineupFilterState.filters}
-          onRocketLineupFilterChange={rocketLineupFilterState.setFilters}
-          onResetRocketLineupFilters={rocketLineupFilterState.resetFilters}
-          rocketLineupActiveFilterCount={
-            rocketLineupFilterState.activeFilterCount
-          }
-          rocketLineupOptions={rocketLineupOptions}
-        />
-        <Box
-          component="main"
-          sx={{
-            flexGrow: 1,
-            p: { xs: 1.5, sm: 2, md: 3 },
-            backgroundColor: 'background.default',
-          }}
-        >
-          <ErrorBoundary>
-            <Suspense fallback={<PageLoader />}>
-              <Routes>
-                <Route
-                  path="/"
-                  element={
-                    <Container maxWidth="xl">
-                      <CalendarPage
-                        isLoading={eventsLoading}
-                        onEditEvent={handleOpenEditDialog}
-                        onDeleteEvent={handleDeleteEvent}
-                        showToast={showToast}
-                        isMobile={isMobile}
-                      />
-                    </Container>
-                  }
-                />
-                <Route
-                  path="/egg-pool"
-                  element={
-                    <Container maxWidth="xl">
-                      <EggPoolPage
-                        filters={eggPoolFilterState.filters}
-                        onSetFilterOptions={setEggPoolOptions}
-                      />
-                    </Container>
-                  }
-                />
-                <Route
-                  path="/raid-bosses"
-                  element={
-                    <Container maxWidth="xl">
-                      <RaidBossesPage
-                        filters={raidBossFilterState.filters}
-                        onSetFilterOptions={setRaidBossOptions}
-                      />
-                    </Container>
-                  }
-                />
-                <Route
-                  path="/research-tasks"
-                  element={
-                    <Container maxWidth="xl">
-                      <ResearchTasksPage
-                        filters={researchTaskFilterState.filters}
-                        onSetFilterOptions={setResearchTaskOptions}
-                      />
-                    </Container>
-                  }
-                />
-                <Route
-                  path="/rocket-lineup"
-                  element={
-                    <Container maxWidth="xl">
-                      <RocketLineupPage
-                        filters={rocketLineupFilterState.filters}
-                        onSetFilterOptions={setRocketLineupOptions}
-                      />
-                    </Container>
-                  }
-                />
-                <Route path="/faq" element={<FaqPage />} />
-              </Routes>
-            </Suspense>
-          </ErrorBoundary>
-        </Box>
-        <Footer />
-      </Box>
+    <div className="flex min-h-screen flex-col bg-background text-foreground">
+      <Header
+        onSettingsClick={() => openDialog('settings')}
+        onRefresh={handleRefresh}
+        filters={filters}
+        onFilterChange={setFilters}
+        onResetFilters={handleResetFilters}
+        onNewEventClick={() => openDialog('create')}
+        onOpenExportDialog={() => openDialog('export')}
+        allCategories={allCategories}
+        allPokemon={allPokemon}
+        allBonuses={allBonuses}
+        lastUpdated={lastUpdated}
+        lastUpdatedLoading={lastUpdatedLoading}
+        lastUpdatedError={error}
+        activeFilterCount={activeFilterCount}
+        isMobile={isMobile}
+        // Page-specific filters
+        eggPoolFilters={eggPoolFilterState.filters}
+        onEggPoolFilterChange={eggPoolFilterState.setFilters}
+        onResetEggPoolFilters={eggPoolFilterState.resetFilters}
+        eggPoolActiveFilterCount={eggPoolFilterState.activeFilterCount}
+        eggPoolOptions={eggPoolOptions}
+        raidBossFilters={raidBossFilterState.filters}
+        onRaidBossFilterChange={raidBossFilterState.setFilters}
+        onResetRaidBossFilters={raidBossFilterState.resetFilters}
+        raidBossActiveFilterCount={raidBossFilterState.activeFilterCount}
+        raidBossOptions={raidBossOptions}
+        researchTaskFilters={researchTaskFilterState.filters}
+        onResearchTaskFilterChange={researchTaskFilterState.setFilters}
+        onResetResearchTaskFilters={researchTaskFilterState.resetFilters}
+        researchTaskActiveFilterCount={researchTaskFilterState.activeFilterCount}
+        researchTaskOptions={researchTaskOptions}
+        rocketLineupFilters={rocketLineupFilterState.filters}
+        onRocketLineupFilterChange={rocketLineupFilterState.setFilters}
+        onResetRocketLineupFilters={rocketLineupFilterState.resetFilters}
+        rocketLineupActiveFilterCount={rocketLineupFilterState.activeFilterCount}
+        rocketLineupOptions={rocketLineupOptions}
+      />
+      <main className="flex-1 px-3 py-4 sm:px-4 sm:py-5 md:px-6 md:py-6">
+        <ErrorBoundary>
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <div className="mx-auto max-w-7xl">
+                    <CalendarPage
+                      isLoading={eventsLoading}
+                      onEditEvent={handleOpenEditDialog}
+                      onDeleteEvent={handleDeleteEvent}
+                      showToast={showToast}
+                      isMobile={isMobile}
+                    />
+                  </div>
+                }
+              />
+              <Route
+                path="/egg-pool"
+                element={
+                  <div className="mx-auto max-w-7xl">
+                    <EggPoolPage
+                      filters={eggPoolFilterState.filters}
+                      onSetFilterOptions={setEggPoolOptions}
+                    />
+                  </div>
+                }
+              />
+              <Route
+                path="/raid-bosses"
+                element={
+                  <div className="mx-auto max-w-7xl">
+                    <RaidBossesPage
+                      filters={raidBossFilterState.filters}
+                      onSetFilterOptions={setRaidBossOptions}
+                    />
+                  </div>
+                }
+              />
+              <Route
+                path="/research-tasks"
+                element={
+                  <div className="mx-auto max-w-7xl">
+                    <ResearchTasksPage
+                      filters={researchTaskFilterState.filters}
+                      onSetFilterOptions={setResearchTaskOptions}
+                    />
+                  </div>
+                }
+              />
+              <Route
+                path="/rocket-lineup"
+                element={
+                  <div className="mx-auto max-w-7xl">
+                    <RocketLineupPage
+                      filters={rocketLineupFilterState.filters}
+                      onSetFilterOptions={setRocketLineupOptions}
+                    />
+                  </div>
+                }
+              />
+              <Route path="/faq" element={<FaqPage />} />
+            </Routes>
+          </Suspense>
+        </ErrorBoundary>
+      </main>
+      <Footer />
 
       <SettingsDialog
         open={activeDialog === 'settings'}
@@ -321,21 +291,9 @@ function App() {
         filteredEvents={filteredEvents}
         savedEventIds={savedEventIds}
       />
-      <Snackbar
-        open={toast.open}
-        autoHideDuration={6000}
-        onClose={handleCloseToast}
-      >
-        <Alert
-          onClose={handleCloseToast}
-          severity={toast.severity}
-          sx={{ width: '100%' }}
-        >
-          {toast.message}
-        </Alert>
-      </Snackbar>
+      <Toaster toast={toast} onClose={handleCloseToast} />
       <ScrollToTop />
-    </ThemeProvider>
+    </div>
   );
 }
 

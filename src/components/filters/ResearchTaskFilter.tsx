@@ -1,15 +1,10 @@
-import {
-  Button,
-  Checkbox,
-  Divider,
-  FormControlLabel,
-  FormGroup,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material';
 import { useCallback } from 'react';
 import type { ResearchTaskFilters } from '../../types/pageFilters';
+import { Button } from '../ui/button';
+import { Checkbox } from '../ui/checkbox';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { Separator } from '../ui/separator';
 import { FilterActions, FilterSection } from './shared';
 
 interface ResearchTaskFilterProps {
@@ -20,11 +15,10 @@ interface ResearchTaskFilterProps {
 }
 
 function ResearchTaskFilter(props: ResearchTaskFilterProps) {
-  const { filters, onFilterChange, onResetFilters, availableCategories } =
-    props;
+  const { filters, onFilterChange, onResetFilters, availableCategories } = props;
 
   const handleFilterChange = useCallback(
-    (field: keyof ResearchTaskFilters, value: any) => {
+    <K extends keyof ResearchTaskFilters>(field: K, value: ResearchTaskFilters[K]) => {
       onFilterChange({ ...filters, [field]: value });
     },
     [filters, onFilterChange]
@@ -50,114 +44,84 @@ function ResearchTaskFilter(props: ResearchTaskFilterProps) {
     [filters.selectedCategories, handleFilterChange]
   );
 
-  const handleSelectAllCategories = useCallback(() => {
-    handleFilterChange('selectedCategories', availableCategories);
-  }, [availableCategories, handleFilterChange]);
-
-  const handleClearAllCategories = useCallback(() => {
-    handleFilterChange('selectedCategories', []);
-  }, [handleFilterChange]);
-
   return (
-    <Stack spacing={4}>
-      {/* Search Section */}
+    <div className="flex flex-col gap-4">
       <FilterSection title="Search">
-        <TextField
-          fullWidth
-          label="Search by Task Description"
-          variant="outlined"
-          value={filters.taskSearch}
-          onChange={(e) => handleFilterChange('taskSearch', e.target.value)}
-        />
-        <TextField
-          fullWidth
-          label="Search by Pokémon Reward"
-          variant="outlined"
-          value={filters.pokemonSearch}
-          onChange={(e) => handleFilterChange('pokemonSearch', e.target.value)}
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={filters.shinyOnly}
-              onChange={(e) =>
-                handleFilterChange('shinyOnly', e.target.checked)
-              }
-            />
-          }
-          label="Show Shiny Available Only"
-        />
+        <div className="space-y-1.5">
+          <Label htmlFor="research-task-search">Search by Task Description</Label>
+          <Input
+            id="research-task-search"
+            value={filters.taskSearch}
+            onChange={(e) => handleFilterChange('taskSearch', e.target.value)}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="research-pokemon-search">Search by Pokémon Reward</Label>
+          <Input
+            id="research-pokemon-search"
+            value={filters.pokemonSearch}
+            onChange={(e) => handleFilterChange('pokemonSearch', e.target.value)}
+          />
+        </div>
+        <label className="flex items-center gap-2.5 text-sm">
+          <Checkbox
+            checked={filters.shinyOnly}
+            onCheckedChange={(checked) => handleFilterChange('shinyOnly', checked === true)}
+          />
+          Show Shiny Available Only
+        </label>
       </FilterSection>
 
-      {/* Reward Type Section */}
-      <Divider />
+      <Separator />
       <FilterSection title="Reward Types">
-        <FormGroup>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={filters.rewardTypes.includes('encounter')}
-                onChange={(e) =>
-                  handleRewardTypeChange('encounter', e.target.checked)
-                }
-              />
-            }
-            label="Pokémon Encounters"
+        <label className="flex items-center gap-2.5 text-sm">
+          <Checkbox
+            checked={filters.rewardTypes.includes('encounter')}
+            onCheckedChange={(checked) => handleRewardTypeChange('encounter', checked === true)}
           />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={filters.rewardTypes.includes('item')}
-                onChange={(e) =>
-                  handleRewardTypeChange('item', e.target.checked)
-                }
-              />
-            }
-            label="Items"
+          Pokémon Encounters
+        </label>
+        <label className="flex items-center gap-2.5 text-sm">
+          <Checkbox
+            checked={filters.rewardTypes.includes('item')}
+            onCheckedChange={(checked) => handleRewardTypeChange('item', checked === true)}
           />
-        </FormGroup>
+          Items
+        </label>
       </FilterSection>
 
-      {/* Categories Section */}
-      <Divider />
+      <Separator />
       <FilterSection title="Task Categories">
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-        >
-          <Typography variant="body2" color="text.secondary">
-            Select task categories
-          </Typography>
-          <Stack direction="row" spacing={1}>
-            <Button size="small" onClick={handleSelectAllCategories}>
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-muted-foreground">Select task categories</span>
+          <div className="flex gap-1">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => handleFilterChange('selectedCategories', availableCategories)}
+            >
               Select All
             </Button>
-            <Button size="small" onClick={handleClearAllCategories}>
+            <Button size="sm" variant="ghost" onClick={() => handleFilterChange('selectedCategories', [])}>
               Clear All
             </Button>
-          </Stack>
-        </Stack>
-        <FormGroup>
+          </div>
+        </div>
+        <div className="flex flex-col gap-2">
           {availableCategories.map((category) => (
-            <FormControlLabel
-              key={category}
-              control={
-                <Checkbox
-                  checked={filters.selectedCategories.includes(category)}
-                  onChange={(e) =>
-                    handleCategoryChange(category, e.target.checked)
-                  }
-                />
-              }
-              label={category}
-            />
+            <label key={category} className="flex items-center gap-2.5 text-sm">
+              <Checkbox
+                checked={filters.selectedCategories.includes(category)}
+                onCheckedChange={(checked) => handleCategoryChange(category, checked === true)}
+              />
+              {category}
+            </label>
           ))}
-        </FormGroup>
+        </div>
       </FilterSection>
 
       <FilterActions onReset={onResetFilters} />
-    </Stack>
+    </div>
   );
 }
 

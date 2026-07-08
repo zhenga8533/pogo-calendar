@@ -54,10 +54,10 @@ You can view the live application here: `https://zhenga8533.github.io/pogo-calen
 ## Tech Stack
 
 - **Frontend:** React, TypeScript
-- **UI Library:** Material-UI (MUI) v5
+- **Styling:** Tailwind CSS with a hand-built component kit on Radix UI primitives
 - **Calendar:** FullCalendar
 - **State Management:** React Hooks (including custom hooks for logic separation)
-- **Date Handling:** `date-fns` & `@mui/x-date-pickers`
+- **Date Handling:** `date-fns` & `react-day-picker`
 - **Client-Side Storage:** `localStorage`
 - **Utilities:** `uuid` (for unique IDs), `ics` (for calendar file generation)
 - **Build Tool:** Vite
@@ -72,7 +72,7 @@ The project is organized into a clean, scalable structure that separates concern
 src/
 ├── App.tsx               # Main application component with routing
 ├── main.tsx              # Application entry point
-├── theme.ts              # MUI theme configuration
+├── index.css             # Tailwind entry point and design tokens
 ├── vite-env.d.ts         # Vite environment type definitions
 ├── assets/images/        # Static images
 │   └── default-banner.jpg

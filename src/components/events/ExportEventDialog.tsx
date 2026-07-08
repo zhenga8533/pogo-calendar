@@ -1,18 +1,9 @@
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Tab,
-  Tabs,
-  TextField,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { CalendarEvent } from '../../types/events';
+import { Button } from '../ui/button';
+import { Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
+import { Input } from '../ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { CategoryExportPanel } from './CategoryExportPanel';
 import { SpecificEventExportPanel } from './SpecificEventExportPanel';
 
@@ -33,16 +24,14 @@ export function ExportEventDialog({
   filteredEvents,
   savedEventIds,
 }: ExportEventDialogProps) {
-  const theme = useTheme();
-  const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
-  const [tab, setTab] = useState(0);
+  const [tab, setTab] = useState<'category' | 'specific'>('category');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedEventIds, setSelectedEventIds] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     if (open) {
-      setTab(0);
+      setTab('category');
       setSelectedCategories([]);
       setSelectedEventIds([]);
       setSearchTerm('');
@@ -50,113 +39,74 @@ export function ExportEventDialog({
   }, [open]);
 
   const allCategories = useMemo(
-    () =>
-      Array.from(
-        new Set(allEvents.map((e) => e.extendedProps.category))
-      ).sort(),
+    () => Array.from(new Set(allEvents.map((e) => e.extendedProps.category))).sort(),
     [allEvents]
   );
 
   const eventsToList = useMemo(
-    () =>
-      filteredEvents.filter((event) =>
-        event.title.toLowerCase().includes(searchTerm.toLowerCase())
-      ),
+    () => filteredEvents.filter((event) => event.title.toLowerCase().includes(searchTerm.toLowerCase())),
     [filteredEvents, searchTerm]
-  );
-
-  const handleTabChange = useCallback(
-    (_: React.SyntheticEvent, newValue: number) => {
-      setTab(newValue);
-    },
-    []
   );
 
   const handleExportClick = useCallback(() => {
     let eventsToExport: CalendarEvent[];
-    if (tab === 0) {
-      eventsToExport = allEvents.filter((event) =>
-        selectedCategories.includes(event.extendedProps.category)
-      );
+    if (tab === 'category') {
+      eventsToExport = allEvents.filter((event) => selectedCategories.includes(event.extendedProps.category));
     } else {
-      eventsToExport = allEvents.filter((event) =>
-        selectedEventIds.includes(event.extendedProps.article_url)
-      );
+      eventsToExport = allEvents.filter((event) => selectedEventIds.includes(event.extendedProps.article_url));
     }
     onExport(eventsToExport);
     onClose();
   }, [tab, allEvents, selectedCategories, selectedEventIds, onExport, onClose]);
 
-  const exportCount =
-    tab === 0 ? selectedCategories.length : selectedEventIds.length;
+  const exportCount = tab === 'category' ? selectedCategories.length : selectedEventIds.length;
   const isExportDisabled = exportCount === 0;
 
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      fullWidth
-      maxWidth="sm"
-      fullScreen={fullScreen}
-    >
-      <DialogTitle>Select Events to Export</DialogTitle>
-      <DialogContent sx={{ display: 'flex', flexDirection: 'column' }}>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs
-            value={tab}
-            onChange={handleTabChange}
-            aria-label="Export mode tabs"
-          >
-            <Tab label="By Category" id="tab-0" aria-controls="tabpanel-0" />
-            <Tab
-              label="By Specific Event"
-              id="tab-1"
-              aria-controls="tabpanel-1"
-            />
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-lg" fullScreenOnMobile>
+        <DialogHeader>
+          <DialogTitle>Select Events to Export</DialogTitle>
+        </DialogHeader>
+        <DialogBody>
+          <Tabs value={tab} onValueChange={(v) => setTab(v as 'category' | 'specific')}>
+            <TabsList>
+              <TabsTrigger value="category">By Category</TabsTrigger>
+              <TabsTrigger value="specific">By Specific Event</TabsTrigger>
+            </TabsList>
+            <TabsContent value="category">
+              <CategoryExportPanel
+                allCategories={allCategories}
+                selectedCategories={selectedCategories}
+                onSelectionChange={setSelectedCategories}
+              />
+            </TabsContent>
+            <TabsContent value="specific">
+              <Input
+                placeholder="Search within filtered events..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="mt-2"
+              />
+              <SpecificEventExportPanel
+                eventsToList={eventsToList}
+                filteredEvents={filteredEvents}
+                savedEventIds={savedEventIds}
+                selectedEventIds={selectedEventIds}
+                onSelectionChange={setSelectedEventIds}
+              />
+            </TabsContent>
           </Tabs>
-        </Box>
-
-        {tab === 0 && (
-          <Box id="tabpanel-0" role="tabpanel" aria-labelledby="tab-0">
-            <CategoryExportPanel
-              allCategories={allCategories}
-              selectedCategories={selectedCategories}
-              onSelectionChange={setSelectedCategories}
-            />
-          </Box>
-        )}
-
-        {tab === 1 && (
-          <Box id="tabpanel-1" role="tabpanel" aria-labelledby="tab-1">
-            <TextField
-              fullWidth
-              variant="outlined"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              label="Search within filtered events..."
-              sx={{ mt: 2 }}
-            />
-            <SpecificEventExportPanel
-              eventsToList={eventsToList}
-              filteredEvents={filteredEvents}
-              savedEventIds={savedEventIds}
-              selectedEventIds={selectedEventIds}
-              onSelectionChange={setSelectedEventIds}
-            />
-          </Box>
-        )}
+        </DialogBody>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button onClick={handleExportClick} disabled={isExportDisabled}>
+            Export ({exportCount})
+          </Button>
+        </DialogFooter>
       </DialogContent>
-
-      <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button
-          onClick={handleExportClick}
-          variant="contained"
-          disabled={isExportDisabled}
-        >
-          Export ({exportCount})
-        </Button>
-      </DialogActions>
     </Dialog>
   );
 }

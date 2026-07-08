@@ -1,15 +1,10 @@
-import {
-  Button,
-  Checkbox,
-  Divider,
-  FormControlLabel,
-  FormGroup,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material';
 import { useCallback } from 'react';
 import type { RocketLineupFilters } from '../../types/pageFilters';
+import { Button } from '../ui/button';
+import { Checkbox } from '../ui/checkbox';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { Separator } from '../ui/separator';
 import { FilterActions, FilterSection } from './shared';
 
 interface RocketLineupFilterProps {
@@ -23,7 +18,7 @@ function RocketLineupFilter(props: RocketLineupFilterProps) {
   const { filters, onFilterChange, onResetFilters, availableLeaders } = props;
 
   const handleFilterChange = useCallback(
-    (field: keyof RocketLineupFilters, value: any) => {
+    <K extends keyof RocketLineupFilters>(field: K, value: RocketLineupFilters[K]) => {
       onFilterChange({ ...filters, [field]: value });
     },
     [filters, onFilterChange]
@@ -49,109 +44,81 @@ function RocketLineupFilter(props: RocketLineupFilterProps) {
     [filters.selectedSlots, handleFilterChange]
   );
 
-  const handleSelectAllLeaders = useCallback(() => {
-    handleFilterChange('selectedLeaders', availableLeaders);
-  }, [availableLeaders, handleFilterChange]);
-
-  const handleClearAllLeaders = useCallback(() => {
-    handleFilterChange('selectedLeaders', []);
-  }, [handleFilterChange]);
-
   return (
-    <Stack spacing={4}>
-      {/* Search Section */}
+    <div className="flex flex-col gap-4">
       <FilterSection title="Search">
-        <TextField
-          fullWidth
-          label="Search by Pokémon Name"
-          variant="outlined"
-          value={filters.pokemonSearch}
-          onChange={(e) => handleFilterChange('pokemonSearch', e.target.value)}
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={filters.encounterOnly}
-              onChange={(e) =>
-                handleFilterChange('encounterOnly', e.target.checked)
-              }
-            />
-          }
-          label="Show Encounter Pokémon Only"
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={filters.shinyOnly}
-              onChange={(e) =>
-                handleFilterChange('shinyOnly', e.target.checked)
-              }
-            />
-          }
-          label="Show Shiny Available Only"
-        />
+        <div className="space-y-1.5">
+          <Label htmlFor="rocket-pokemon-search">Search by Pokémon Name</Label>
+          <Input
+            id="rocket-pokemon-search"
+            value={filters.pokemonSearch}
+            onChange={(e) => handleFilterChange('pokemonSearch', e.target.value)}
+          />
+        </div>
+        <label className="flex items-center gap-2.5 text-sm">
+          <Checkbox
+            checked={filters.encounterOnly}
+            onCheckedChange={(checked) => handleFilterChange('encounterOnly', checked === true)}
+          />
+          Show Encounter Pokémon Only
+        </label>
+        <label className="flex items-center gap-2.5 text-sm">
+          <Checkbox
+            checked={filters.shinyOnly}
+            onCheckedChange={(checked) => handleFilterChange('shinyOnly', checked === true)}
+          />
+          Show Shiny Available Only
+        </label>
       </FilterSection>
 
-      {/* Leaders Section */}
-      <Divider />
+      <Separator />
       <FilterSection title="Leaders">
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-        >
-          <Typography variant="body2" color="text.secondary">
-            Select leaders to display
-          </Typography>
-          <Stack direction="row" spacing={1}>
-            <Button size="small" onClick={handleSelectAllLeaders}>
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-muted-foreground">Select leaders to display</span>
+          <div className="flex gap-1">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => handleFilterChange('selectedLeaders', availableLeaders)}
+            >
               Select All
             </Button>
-            <Button size="small" onClick={handleClearAllLeaders}>
+            <Button size="sm" variant="ghost" onClick={() => handleFilterChange('selectedLeaders', [])}>
               Clear All
             </Button>
-          </Stack>
-        </Stack>
-        <FormGroup>
+          </div>
+        </div>
+        <div className="flex flex-col gap-2">
           {availableLeaders.map((leader) => (
-            <FormControlLabel
-              key={leader}
-              control={
-                <Checkbox
-                  checked={filters.selectedLeaders.includes(leader)}
-                  onChange={(e) => handleLeaderChange(leader, e.target.checked)}
-                />
-              }
-              label={leader}
-            />
+            <label key={leader} className="flex items-center gap-2.5 text-sm">
+              <Checkbox
+                checked={filters.selectedLeaders.includes(leader)}
+                onCheckedChange={(checked) => handleLeaderChange(leader, checked === true)}
+              />
+              {leader}
+            </label>
           ))}
-        </FormGroup>
+        </div>
       </FilterSection>
 
-      {/* Slots Section */}
-      <Divider />
+      <Separator />
       <FilterSection title="Battle Slots">
-        <Typography variant="body2" color="text.secondary">
-          Filter by battle slot position
-        </Typography>
-        <FormGroup>
+        <p className="text-sm text-muted-foreground">Filter by battle slot position</p>
+        <div className="flex flex-col gap-2">
           {[1, 2, 3].map((slot) => (
-            <FormControlLabel
-              key={slot}
-              control={
-                <Checkbox
-                  checked={filters.selectedSlots.includes(slot)}
-                  onChange={(e) => handleSlotChange(slot, e.target.checked)}
-                />
-              }
-              label={`Slot ${slot}${slot === 3 ? ' (Encounter Slot)' : ''}`}
-            />
+            <label key={slot} className="flex items-center gap-2.5 text-sm">
+              <Checkbox
+                checked={filters.selectedSlots.includes(slot)}
+                onCheckedChange={(checked) => handleSlotChange(slot, checked === true)}
+              />
+              {`Slot ${slot}${slot === 3 ? ' (Encounter Slot)' : ''}`}
+            </label>
           ))}
-        </FormGroup>
+        </div>
       </FilterSection>
 
       <FilterActions onReset={onResetFilters} />
-    </Stack>
+    </div>
   );
 }
 

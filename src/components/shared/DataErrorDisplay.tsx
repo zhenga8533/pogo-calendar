@@ -1,6 +1,6 @@
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import { Box, Button, Paper, Typography } from '@mui/material';
+import { CircleAlert, RefreshCw } from 'lucide-react';
+import { Button } from '../ui/button';
+import { Card } from '../ui/card';
 
 interface DataErrorDisplayProps {
   title: string;
@@ -8,58 +8,22 @@ interface DataErrorDisplayProps {
   onRetry?: () => void;
 }
 
-export const DataErrorDisplay = ({
-  title,
-  message,
-  onRetry,
-}: DataErrorDisplayProps) => {
-  const defaultMessage =
-    message || 'An unexpected error occurred. Please try again later.';
+export const DataErrorDisplay = ({ title, message, onRetry }: DataErrorDisplayProps) => {
+  const defaultMessage = message || 'An unexpected error occurred. Please try again later.';
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '60vh',
-      }}
-    >
-      <Paper
-        elevation={0}
-        sx={{
-          p: 4,
-          textAlign: 'center',
-          backgroundColor: 'background.paper',
-          border: '1px solid',
-          borderColor: 'divider',
-          maxWidth: 400,
-        }}
-      >
-        <ErrorOutlineIcon
-          sx={{
-            fontSize: 64,
-            color: 'error.main',
-            mb: 2,
-          }}
-        />
-        <Typography variant="h5" color="text.primary" gutterBottom>
-          {title}
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-          {defaultMessage}
-        </Typography>
+    <div className="flex min-h-[60vh] items-center justify-center">
+      <Card className="max-w-sm p-8 text-center">
+        <CircleAlert className="mx-auto mb-4 h-16 w-16 text-destructive" />
+        <h2 className="mb-2 text-xl font-bold">{title}</h2>
+        <p className="mb-6 text-sm text-muted-foreground">{defaultMessage}</p>
         {onRetry && (
-          <Button
-            variant="contained"
-            startIcon={<RefreshIcon />}
-            onClick={onRetry}
-            sx={{ mt: 1 }}
-          >
+          <Button onClick={onRetry}>
+            <RefreshCw className="h-4 w-4" />
             Retry
           </Button>
         )}
-      </Paper>
-    </Box>
+      </Card>
+    </div>
   );
 };

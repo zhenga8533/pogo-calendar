@@ -1,39 +1,20 @@
-import DarkModeOutlinedIcon from '@mui/icons-material/DarkModeOutlined';
-import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined';
-import PublicIcon from '@mui/icons-material/Public';
-import SettingsBrightnessOutlinedIcon from '@mui/icons-material/SettingsBrightnessOutlined';
-import {
-  Button,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  type SelectChangeEvent,
-  Stack,
-  ToggleButton,
-  ToggleButtonGroup,
-  Typography,
-  useTheme,
-} from '@mui/material';
+import { MonitorCog, Moon, Sun } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { dayOptions } from '../../config/eventFilter';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { fetchTimezones } from '../../services/eventService';
 import type { Settings, ThemeSetting, Timezone } from '../../types/settings';
+import { Button } from '../ui/button';
+import { Combobox } from '../ui/combobox';
+import { Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
+import { Label } from '../ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group';
 
-const themeOptions: {
-  value: ThemeSetting;
-  text: string;
-  Icon: React.ElementType;
-}[] = [
-  { value: 'light', text: 'Light', Icon: LightModeOutlinedIcon },
-  { value: 'dark', text: 'Dark', Icon: DarkModeOutlinedIcon },
-  { value: 'auto', text: 'Auto', Icon: SettingsBrightnessOutlinedIcon },
+const themeOptions: { value: ThemeSetting; text: string; Icon: React.ElementType }[] = [
+  { value: 'light', text: 'Light', Icon: Sun },
+  { value: 'dark', text: 'Dark', Icon: Moon },
+  { value: 'auto', text: 'Auto', Icon: MonitorCog },
 ];
 
 interface SettingsDialogProps {
@@ -42,12 +23,7 @@ interface SettingsDialogProps {
   onSettingsChange: (newSettings: Partial<Settings>) => void;
 }
 
-function SettingsDialogComponent({
-  open,
-  onClose,
-  onSettingsChange,
-}: SettingsDialogProps) {
-  const theme = useTheme();
+function SettingsDialogComponent({ open, onClose, onSettingsChange }: SettingsDialogProps) {
   const { settings } = useSettingsContext();
   const [timezones, setTimezones] = useState<Timezone[]>([
     { text: settings.timezone, value: settings.timezone },
@@ -61,15 +37,10 @@ function SettingsDialogComponent({
         try {
           const tzData = await fetchTimezones();
           const userTimezone = settings.timezone;
-          const userTimezoneInList = tzData.some(
-            (tz) => tz.value === userTimezone
-          );
+          const userTimezoneInList = tzData.some((tz) => tz.value === userTimezone);
 
           if (!userTimezoneInList) {
-            setTimezones([
-              { text: userTimezone, value: userTimezone },
-              ...tzData,
-            ]);
+            setTimezones([{ text: userTimezone, value: userTimezone }, ...tzData]);
           } else {
             setTimezones(tzData);
           }
@@ -83,176 +54,98 @@ function SettingsDialogComponent({
     }
   }, [open, settings.timezone]);
 
-  const handleSettingChange = (
-    field: keyof Settings,
-    value: string | number | boolean
-  ) => {
+  const handleSettingChange = (field: keyof Settings, value: string | number | boolean) => {
     onSettingsChange({ [field]: value });
   };
 
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      fullWidth
-      maxWidth="xs"
-    >
-      <DialogTitle>
-        <Typography variant="h6" component="div" fontWeight={600}>
-          Settings
-        </Typography>
-      </DialogTitle>
-      <DialogContent dividers>
-        <Stack spacing={4} sx={{ pt: 1 }}>
-          <Stack spacing={2}>
-            <Typography variant="subtitle1" fontWeight={500}>
-              Appearance
-            </Typography>
-            <ToggleButtonGroup
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle>Settings</DialogTitle>
+        </DialogHeader>
+        <DialogBody className="space-y-6">
+          <div className="space-y-2.5">
+            <Label>Appearance</Label>
+            <ToggleGroup
+              type="single"
               value={settings.theme}
-              exclusive
-              onChange={(_, value) =>
-                value && handleSettingChange('theme', value)
-              }
-              fullWidth
+              onValueChange={(value) => value && handleSettingChange('theme', value)}
+              className="grid w-full grid-cols-3 gap-2 bg-transparent p-0"
             >
               {themeOptions.map(({ value, text, Icon }) => (
-                <ToggleButton
+                <ToggleGroupItem
                   key={value}
                   value={value}
-                  sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 0.5,
-                    textTransform: 'none',
-                    borderRadius: 2,
-                    border: `1px solid ${theme.palette.divider}`,
-                    '&.Mui-selected': {
-                      bgcolor: 'action.selected',
-                      '&:hover': {
-                        bgcolor: 'action.selected',
-                      },
-                    },
-                  }}
+                  className="flex flex-col gap-1 rounded-lg border border-border py-3 data-[state=on]:border-primary data-[state=on]:bg-accent"
                 >
-                  <Icon fontSize="medium" />
+                  <Icon className="h-5 w-5" />
                   {text}
-                </ToggleButton>
+                </ToggleGroupItem>
               ))}
-            </ToggleButtonGroup>
-          </Stack>
+            </ToggleGroup>
+          </div>
 
-          <Stack spacing={1.5}>
-            <Typography variant="subtitle1" fontWeight={500}>
-              Calendar Display
-            </Typography>
-            <FormControl fullWidth>
-              <InputLabel id="first-day-select-label">
-                Week Starts On
-              </InputLabel>
+          <div className="space-y-2.5">
+            <Label>Calendar Display</Label>
+            <div className="space-y-1.5">
+              <span className="text-xs text-muted-foreground">Week Starts On</span>
               <Select
-                labelId="first-day-select-label"
-                value={settings.firstDay}
-                label="Week Starts On"
-                onChange={(e: SelectChangeEvent<number>) =>
-                  handleSettingChange('firstDay', e.target.value)
-                }
+                value={String(settings.firstDay)}
+                onValueChange={(value) => handleSettingChange('firstDay', Number(value))}
               >
-                {dayOptions.map((day) => (
-                  <MenuItem key={day.value} value={day.value}>
-                    {day.label}
-                  </MenuItem>
-                ))}
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {dayOptions.map((day) => (
+                    <SelectItem key={day.value} value={String(day.value)}>
+                      {day.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
-            </FormControl>
-          </Stack>
+            </div>
+          </div>
 
-          <Stack spacing={1.5}>
-            <Typography variant="subtitle1" fontWeight={500}>
-              Time & Date
-            </Typography>
-            <FormControl fullWidth>
-              <InputLabel id="timezone-select-label">Time Zone</InputLabel>
-              <Select
-                labelId="timezone-select-label"
+          <div className="space-y-2.5">
+            <Label>Time & Date</Label>
+            <div className="space-y-1.5">
+              <span className="text-xs text-muted-foreground">Time Zone</span>
+              <Combobox
                 value={settings.timezone}
-                label="Time Zone"
-                onChange={(e: SelectChangeEvent<string>) =>
-                  handleSettingChange('timezone', e.target.value)
-                }
-                MenuProps={{
-                  PaperProps: {
-                    style: {
-                      maxHeight: 300,
-                    },
-                  },
-                }}
-                renderValue={(selectedValue) => {
-                  const selectedTimezone = timezones.find(
-                    (tz) => tz.value === selectedValue
-                  );
-                  return (
-                    <Typography noWrap>
-                      {selectedTimezone ? selectedTimezone.text : selectedValue}
-                    </Typography>
-                  );
-                }}
+                onChange={(value) => handleSettingChange('timezone', value)}
+                loading={loadingTimezones && timezones.length === 1}
+                options={timezones.map((tz) => ({ value: tz.value, label: tz.text }))}
+                placeholder="Select timezone"
+                searchPlaceholder="Search timezones..."
+              />
+            </div>
+            <ToggleGroup
+              type="single"
+              value={String(settings.hour12)}
+              onValueChange={(value) => value && handleSettingChange('hour12', value === 'true')}
+              className="grid w-full grid-cols-2 gap-2 bg-transparent p-0"
+            >
+              <ToggleGroupItem
+                value="true"
+                className="rounded-lg border border-border py-2 data-[state=on]:border-primary data-[state=on]:bg-accent"
               >
-                {loadingTimezones && timezones.length === 1 && (
-                  <MenuItem disabled>
-                    <Stack direction="row" spacing={1.5} alignItems="center">
-                      <CircularProgress size={20} />
-                      <Typography>Loading timezones...</Typography>
-                    </Stack>
-                  </MenuItem>
-                )}
-                {timezones.map((tz, index) => (
-                  <MenuItem key={`${tz.value}-${index}`} value={tz.value}>
-                    <Stack
-                      direction="row"
-                      spacing={1.5}
-                      alignItems="center"
-                      sx={{ overflow: 'hidden' }}
-                    >
-                      <PublicIcon
-                        fontSize="small"
-                        sx={{ opacity: 0.6, flexShrink: 0 }}
-                      />
-                      <Typography noWrap sx={{ flex: 1 }}>
-                        {tz.text}
-                      </Typography>
-                    </Stack>
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl fullWidth>
-              <ToggleButtonGroup
-                value={settings.hour12}
-                exclusive
-                onChange={(_, value) => {
-                  if (value !== null) {
-                    handleSettingChange('hour12', value);
-                  }
-                }}
-                fullWidth
+                12-hour
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                value="false"
+                className="rounded-lg border border-border py-2 data-[state=on]:border-primary data-[state=on]:bg-accent"
               >
-                <ToggleButton value={true} sx={{ textTransform: 'none' }}>
-                  12-hour
-                </ToggleButton>
-                <ToggleButton value={false} sx={{ textTransform: 'none' }}>
-                  24-hour
-                </ToggleButton>
-              </ToggleButtonGroup>
-            </FormControl>
-          </Stack>
-        </Stack>
+                24-hour
+              </ToggleGroupItem>
+            </ToggleGroup>
+          </div>
+        </DialogBody>
+        <DialogFooter>
+          <Button onClick={onClose}>Done</Button>
+        </DialogFooter>
       </DialogContent>
-      <DialogActions sx={{ p: 2 }}>
-        <Button onClick={onClose} variant="contained">
-          Done
-        </Button>
-      </DialogActions>
     </Dialog>
   );
 }

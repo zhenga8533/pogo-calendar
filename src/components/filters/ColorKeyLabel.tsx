@@ -1,5 +1,6 @@
-import { Box, Typography, useTheme } from '@mui/material';
 import React, { useMemo } from 'react';
+import { useSettingsContext } from '../../contexts/SettingsContext';
+import { useResolvedThemeMode } from '../../hooks/useThemeMode';
 import { getColorForCategory } from '../../utils/colorUtils';
 
 interface ColorKeyLabelProps {
@@ -9,40 +10,21 @@ interface ColorKeyLabelProps {
 
 /**
  * Renders a label with a colored dot representing the category.
- *
- * @param param0 Props for the ColorKeyLabel component.
- * @returns A label with a colored dot representing the category.
  */
-function ColorKeyLabelComponent({
-  category,
-  showText = true,
-}: ColorKeyLabelProps) {
-  const theme = useTheme();
+function ColorKeyLabelComponent({ category, showText = true }: ColorKeyLabelProps) {
+  const { settings } = useSettingsContext();
+  const mode = useResolvedThemeMode(settings.theme);
 
-  const backgroundColor = useMemo(
-    () => getColorForCategory(category, theme.palette.mode),
-    [category, theme.palette.mode]
-  );
+  const backgroundColor = useMemo(() => getColorForCategory(category, mode), [category, mode]);
 
-  // Render the color key label.
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-      <Box
-        component="span"
-        sx={{
-          width: 14,
-          height: 14,
-          borderRadius: '50%',
-          backgroundColor,
-          border: `1px solid ${theme.palette.divider}`,
-        }}
+    <span className="flex items-center gap-2.5">
+      <span
+        className="inline-block h-3.5 w-3.5 shrink-0 rounded-full border border-border"
+        style={{ backgroundColor }}
       />
-      {showText && (
-        <Typography ml={1.5} variant="body2">
-          {category}
-        </Typography>
-      )}
-    </Box>
+      {showText && <span className="text-sm">{category}</span>}
+    </span>
   );
 }
 

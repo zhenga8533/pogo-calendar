@@ -1,18 +1,8 @@
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Box,
-  Button,
-  Container,
-  Stack,
-  Typography,
-} from '@mui/material';
-import React from 'react';
+import { ArrowLeft } from 'lucide-react';
 import { Link as RouterLink } from 'react-router-dom';
 import { PageHeader } from '../components/shared/PageHeader';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
+import { Button } from '../components/ui/button';
 
 interface FaqLink {
   text: string;
@@ -39,11 +29,7 @@ const faqData: FaqDataItem[] = [
         content:
           'This is a single-page application built to help players track Pokémon GO events. It was created with ',
       },
-      {
-        type: 'link',
-        content: 'React',
-        link: { text: 'React', url: 'https://react.dev/' },
-      },
+      { type: 'link', content: 'React', link: { text: 'React', url: 'https://react.dev/' } },
       { type: 'text', content: ', ' },
       {
         type: 'link',
@@ -51,17 +37,9 @@ const faqData: FaqDataItem[] = [
         link: { text: 'TypeScript', url: 'https://www.typescriptlang.org/' },
       },
       { type: 'text', content: ', and ' },
-      {
-        type: 'link',
-        content: 'Material-UI',
-        link: { text: 'Material-UI', url: 'https://mui.com/' },
-      },
+      { type: 'link', content: 'Tailwind CSS', link: { text: 'Tailwind CSS', url: 'https://tailwindcss.com/' } },
       { type: 'text', content: '. The interactive calendar is powered by ' },
-      {
-        type: 'link',
-        content: 'FullCalendar',
-        link: { text: 'FullCalendar', url: 'https://fullcalendar.io/' },
-      },
+      { type: 'link', content: 'FullCalendar', link: { text: 'FullCalendar', url: 'https://fullcalendar.io/' } },
       { type: 'text', content: '.' },
     ],
   },
@@ -78,15 +56,8 @@ const faqData: FaqDataItem[] = [
   {
     question: 'Where does the event data come from?',
     answer: [
-      {
-        type: 'text',
-        content: 'All event information is gratefully sourced from ',
-      },
-      {
-        type: 'link',
-        content: 'LeekDuck.com',
-        link: { text: 'LeekDuck.com', url: 'https://leekduck.com/events/' },
-      },
+      { type: 'text', content: 'All event information is gratefully sourced from ' },
+      { type: 'link', content: 'LeekDuck.com', link: { text: 'LeekDuck.com', url: 'https://leekduck.com/events/' } },
       {
         type: 'text',
         content:
@@ -105,8 +76,7 @@ const faqData: FaqDataItem[] = [
     ],
   },
   {
-    question:
-      'What are the Egg Pool, Raid Bosses, Research Tasks, and Rocket Lineup pages?',
+    question: 'What are the Egg Pool, Raid Bosses, Research Tasks, and Rocket Lineup pages?',
     answer: [
       {
         type: 'text',
@@ -186,116 +156,69 @@ const faqData: FaqDataItem[] = [
   {
     question: 'How can I suggest a feature or report a bug?',
     answer: [
-      {
-        type: 'text',
-        content: "Feedback is always welcome! Please visit the project's ",
-      },
+      { type: 'text', content: "Feedback is always welcome! Please visit the project's " },
       {
         type: 'link',
         content: 'GitHub Issues page',
-        link: {
-          text: 'GitHub Issues page',
-          url: 'https://github.com/zhenga8533/pogo-calendar/issues',
-        },
+        link: { text: 'GitHub Issues page', url: 'https://github.com/zhenga8533/pogo-calendar/issues' },
       },
       { type: 'text', content: ' to report a bug or suggest a new feature.' },
     ],
   },
 ];
 
-const FaqItem = React.memo(
-  ({ question, answer }: { question: string; answer: FaqAnswer[] }) => {
-    return (
-      <Accordion
-        sx={{
-          '&:before': { display: 'none' },
-          border: 1,
-          borderColor: 'divider',
-          borderRadius: 2,
-        }}
-      >
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="h6" component="h3">
-            {question}
-          </Typography>
-        </AccordionSummary>
-        <AccordionDetails sx={{ borderTop: 1, borderColor: 'divider' }}>
-          <Typography>
-            {answer.map((part, index) => {
-              if (part.type === 'link' && part.link) {
-                return (
-                  <Typography
-                    key={index}
-                    component="a"
-                    href={part.link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    sx={{
-                      color: 'primary.main',
-                      textDecoration: 'none',
-                      '&:hover': { textDecoration: 'underline' },
-                    }}
-                  >
-                    {part.link.text}
-                  </Typography>
-                );
-              } else if (part.type === 'code') {
-                return (
-                  <Typography
-                    key={index}
-                    component="code"
-                    sx={{
-                      backgroundColor: 'action.hover',
-                      px: 0.5,
-                      borderRadius: 0.5,
-                    }}
-                  >
-                    {part.content}
-                  </Typography>
-                );
-              } else {
-                return part.content;
-              }
-            })}
-          </Typography>
-        </AccordionDetails>
-      </Accordion>
-    );
-  }
-);
-
-FaqItem.displayName = 'FaqItem';
-
 function FaqPage() {
   return (
-    <Container maxWidth="md">
-      <Box sx={{ py: 4 }}>
-        <PageHeader
-          title="Frequently Asked Questions"
-          description="Here are answers to some common questions about the PoGo Event Calendar."
-        />
-        <Stack spacing={2} sx={{ mb: 4 }}>
-          {faqData.map((item) => (
-            <FaqItem
-              key={item.question}
-              question={item.question}
-              answer={item.answer}
-            />
-          ))}
-        </Stack>
-
-        <Box sx={{ textAlign: 'center', pt: 2 }}>
-          <Button
-            component={RouterLink}
-            to="/"
-            variant="contained"
-            startIcon={<ArrowBackIcon />}
+    <div className="mx-auto max-w-3xl py-4">
+      <PageHeader
+        title="Frequently Asked Questions"
+        description="Here are answers to some common questions about the PoGo Event Calendar."
+      />
+      <Accordion type="single" collapsible className="mb-8 flex flex-col gap-2">
+        {faqData.map((item) => (
+          <AccordionItem
+            key={item.question}
+            value={item.question}
+            className="rounded-lg border border-border px-4 last:border-b"
           >
+            <AccordionTrigger className="text-base">{item.question}</AccordionTrigger>
+            <AccordionContent className="border-t border-border pt-3 leading-relaxed text-muted-foreground">
+              {item.answer.map((part, index) => {
+                if (part.type === 'link' && part.link) {
+                  return (
+                    <a
+                      key={index}
+                      href={part.link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary no-underline hover:underline"
+                    >
+                      {part.link.text}
+                    </a>
+                  );
+                } else if (part.type === 'code') {
+                  return (
+                    <code key={index} className="rounded bg-accent px-1.5 py-0.5">
+                      {part.content}
+                    </code>
+                  );
+                }
+                return part.content;
+              })}
+            </AccordionContent>
+          </AccordionItem>
+        ))}
+      </Accordion>
+
+      <div className="pt-2 text-center">
+        <Button asChild>
+          <RouterLink to="/">
+            <ArrowLeft className="h-4 w-4" />
             Back to Calendar
-          </Button>
-        </Box>
-      </Box>
-    </Container>
+          </RouterLink>
+        </Button>
+      </div>
+    </div>
   );
 }
 

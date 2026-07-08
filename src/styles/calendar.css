@@ -34,6 +34,27 @@
   font-weight: 600;
 }
 
+.fc .fc-daygrid-day-frame {
+  padding: 0.125rem;
+}
+
+.fc .fc-daygrid-day-top {
+  line-height: 1;
+}
+
+.fc .fc-daygrid-day-number {
+  padding: 0.25rem 0.35rem;
+  font-size: 0.8125rem;
+}
+
+.fc .fc-daygrid-event {
+  margin-top: 1px;
+}
+
+.fc .fc-daygrid-event-harness {
+  margin-inline: 1px;
+}
+
 .fc-theme-standard td,
 .fc-theme-standard th,
 .fc-theme-standard .fc-scrollgrid {
@@ -148,6 +169,30 @@
   .fc .fc-button {
     font-size: 0.75rem;
     padding: 0.4rem 0.55rem;
+  }
+
+  .calendar-scroll-shell {
+    margin-inline: -0.25rem;
+    overflow-x: auto;
+    padding-inline: 0.25rem;
+    scrollbar-gutter: stable;
+  }
+
+  .calendar-scroll-shell .fc-dayGridMonth-view {
+    min-width: 42rem;
+  }
+
+  .fc .fc-col-header-cell-cushion {
+    font-size: 0.6875rem;
+  }
+
+  .fc .fc-daygrid-day-number {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.3rem;
+  }
+
+  .fc .fc-daygrid-day-frame {
+    padding: 0.0625rem;
   }
 }
 

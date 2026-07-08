@@ -28,17 +28,17 @@ export const CalendarEventContent = React.memo(function CalendarEventContent({
 
   return (
     <div
-      className="group box-border flex h-full w-full cursor-pointer items-center justify-between overflow-hidden rounded px-1.5 transition-all duration-200 hover:-translate-y-px"
+      className="group box-border flex min-h-5 w-full cursor-pointer items-center justify-between overflow-hidden rounded px-1 py-0.5 transition-all duration-200 hover:-translate-y-px sm:px-1.5"
       style={{
         backgroundColor: colorWithAlpha(baseColor, 0.15),
-        borderLeft: `4px solid ${baseColor}`,
+        borderLeft: `3px solid ${baseColor}`,
       }}
       onMouseEnter={(e) => onMouseEnter(e, eventInfo.event as unknown as CalendarEvent)}
       onMouseLeave={onMouseLeave}
     >
-      <div className="flex items-center gap-1.5 overflow-hidden whitespace-nowrap">
-        <span className="min-w-fit text-[0.7rem] font-bold opacity-80">{eventInfo.timeText}</span>
-        <span className="overflow-hidden text-ellipsis whitespace-nowrap text-[0.7rem] font-medium">
+      <div className="flex items-center gap-1 overflow-hidden whitespace-nowrap sm:gap-1.5">
+        <span className="min-w-fit text-[0.65rem] font-bold opacity-80 sm:text-[0.7rem]">{eventInfo.timeText}</span>
+        <span className="overflow-hidden text-ellipsis whitespace-nowrap text-[0.65rem] font-medium sm:text-[0.7rem]">
           {eventInfo.event.title}
         </span>
       </div>
@@ -52,7 +52,7 @@ export const CalendarEventContent = React.memo(function CalendarEventContent({
         className="flex shrink-0 items-center justify-center p-0.5 text-muted-foreground transition-colors hover:text-primary"
       >
         <Star
-          className="h-3.5 w-3.5"
+          className="h-3 w-3 sm:h-3.5 sm:w-3.5"
           fill={isSaved ? 'hsl(var(--warning))' : 'none'}
           style={{ color: isSaved ? 'hsl(var(--warning))' : undefined }}
         />

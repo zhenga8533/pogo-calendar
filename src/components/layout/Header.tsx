@@ -207,7 +207,7 @@ function HeaderComponent(props: HeaderProps) {
         trigger ? 'bg-card shadow-soft-sm' : 'bg-card/80'
       )}
     >
-      <div className="mx-auto flex h-16 max-w-7xl items-center gap-2 px-3 sm:px-4 md:gap-3 md:px-6">
+      <div className="flex h-16 w-full items-center gap-2 px-3 sm:px-4 md:gap-3 md:px-6">
         <RouterLink
           to="/"
           className="flex shrink-0 items-center gap-2 text-inherit no-underline"

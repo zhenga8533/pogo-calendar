@@ -188,35 +188,40 @@ function EventCalendar({
   return (
     <>
       <Card className="p-2 shadow-soft-lg md:p-4" onMouseMove={handleMouseMove}>
-        <FullCalendar
-          key={timezone}
-          ref={calendarRef}
-          plugins={[dayGridPlugin, listPlugin, interactionPlugin]}
-          headerToolbar={{
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,listWeek',
-          }}
-          initialView="dayGridMonth"
-          events={events}
-          eventClick={handleEventClick}
-          eventContent={renderEventContent}
-          height={isMobile ? '75vh' : 'auto'}
-          aspectRatio={isMobile ? 1.2 : 1.75}
-          eventBackgroundColor="transparent"
-          eventBorderColor="transparent"
-          datesSet={(dateInfo) => onViewChange(dateInfo.view.type)}
-          titleFormat={isMobile ? { month: 'short', year: 'numeric' } : { month: 'long', year: 'numeric' }}
-          firstDay={firstDay}
-          selectable={true}
-          select={handleDateSelect}
-          unselectAuto={false}
-          eventTimeFormat={eventTimeFormat}
-          timeZone={timezone}
-          eventClassNames={(arg) => {
-            return getEventClassSelector(arg.event.extendedProps.article_url);
-          }}
-        />
+        <div className="calendar-scroll-shell">
+          <FullCalendar
+            key={timezone}
+            ref={calendarRef}
+            plugins={[dayGridPlugin, listPlugin, interactionPlugin]}
+            headerToolbar={{
+              left: 'prev,next today',
+              center: 'title',
+              right: 'dayGridMonth,listWeek',
+            }}
+            initialView="dayGridMonth"
+            events={events}
+            eventClick={handleEventClick}
+            eventContent={renderEventContent}
+            height="auto"
+            aspectRatio={isMobile ? 1.15 : 1.75}
+            dayMaxEvents={false}
+            dayMaxEventRows={false}
+            expandRows={false}
+            eventBackgroundColor="transparent"
+            eventBorderColor="transparent"
+            datesSet={(dateInfo) => onViewChange(dateInfo.view.type)}
+            titleFormat={isMobile ? { month: 'short', year: 'numeric' } : { month: 'long', year: 'numeric' }}
+            firstDay={firstDay}
+            selectable={true}
+            select={handleDateSelect}
+            unselectAuto={false}
+            eventTimeFormat={eventTimeFormat}
+            timeZone={timezone}
+            eventClassNames={(arg) => {
+              return getEventClassSelector(arg.event.extendedProps.article_url);
+            }}
+          />
+        </div>
       </Card>
 
       <EventHoverDetails

@@ -210,7 +210,7 @@ function App() {
               <Route
                 path="/"
                 element={
-                  <div className="mx-auto max-w-7xl">
+                  <div className="w-full">
                     <CalendarPage
                       isLoading={eventsLoading}
                       onEditEvent={handleOpenEditDialog}

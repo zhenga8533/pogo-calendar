@@ -1,14 +1,14 @@
-import { LayoutGrid, List } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ShinyChip } from '../components/filters/shared';
 import { DataErrorDisplay } from '../components/shared/DataErrorDisplay';
 import { DataLoadingSkeleton } from '../components/shared/DataLoadingSkeleton';
+import { NoResults } from '../components/shared/NoResults';
 import { PageHeader } from '../components/shared/PageHeader';
 import { SectionHeader } from '../components/shared/SectionHeader';
+import { ViewModeToggle, type ViewMode } from '../components/shared/ViewModeToggle';
 import { Alert } from '../components/ui/alert';
 import { Badge } from '../components/ui/badge';
 import { Card } from '../components/ui/card';
-import { ToggleGroup, ToggleGroupItem } from '../components/ui/toggle-group';
 import { EGG_COLORS, RARITY_TIERS } from '../config/colorMapping';
 import { MOBILE_QUERY, useMediaQuery } from '../hooks/useMediaQuery';
 import { usePageData } from '../hooks/usePageData';
@@ -27,7 +27,7 @@ function EggPoolPage({ filters, onSetFilterOptions }: EggPoolPageProps) {
     'Failed to load egg pool data. Please try again later.'
   );
   const isMobile = useMediaQuery(MOBILE_QUERY);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
 
   useEffect(() => {
     if (data) {
@@ -103,7 +103,10 @@ function EggPoolPage({ filters, onSetFilterOptions }: EggPoolPageProps) {
   );
 
   const renderPokemonListItem = (pokemon: EggPokemon) => (
-    <Card key={pokemon.name} className="flex w-full items-center gap-3 p-3">
+    <Card
+      key={pokemon.name}
+      className="flex w-full items-center gap-3 p-3 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-soft-lg"
+    >
       <div className="flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-md bg-muted">
         <img src={pokemon.asset_url} alt={pokemon.name} className="max-h-[80%] max-w-[80%]" />
       </div>
@@ -128,26 +131,15 @@ function EggPoolPage({ filters, onSetFilterOptions }: EggPoolPageProps) {
       <PageHeader
         title="Egg Pool"
         description="Current Pokémon available from different egg types"
-        actions={
-          <ToggleGroup
-            type="single"
-            value={viewMode}
-            onValueChange={(v) => v && setViewMode(v as 'grid' | 'list')}
-          >
-            <ToggleGroupItem value="grid" aria-label="grid view">
-              <LayoutGrid className="h-4 w-4" />
-            </ToggleGroupItem>
-            <ToggleGroupItem value="list" aria-label="list view">
-              <List className="h-4 w-4" />
-            </ToggleGroupItem>
-          </ToggleGroup>
-        }
+        actions={<ViewModeToggle value={viewMode} onChange={setViewMode} />}
       />
 
       <Alert variant="info" className="mb-6">
         Egg contents are updated regularly based on current in-game events. Rarity tiers indicate the
         relative hatch chance.
       </Alert>
+
+      {Object.keys(filteredData).length === 0 && <NoResults />}
 
       {Object.entries(filteredData).map(([tier, pokemon]) => {
         if (!pokemon || pokemon.length === 0) return null;

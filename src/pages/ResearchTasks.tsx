@@ -1,13 +1,16 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ShinyChip } from '../components/filters/shared';
 import { DataErrorDisplay } from '../components/shared/DataErrorDisplay';
 import { DataLoadingSkeleton } from '../components/shared/DataLoadingSkeleton';
+import { NoResults } from '../components/shared/NoResults';
 import { PageHeader } from '../components/shared/PageHeader';
 import { SectionHeader } from '../components/shared/SectionHeader';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
+import { ViewModeToggle, type ViewMode } from '../components/shared/ViewModeToggle';
 import { Alert } from '../components/ui/alert';
 import { Badge } from '../components/ui/badge';
 import { Card } from '../components/ui/card';
+import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover';
+import { MOBILE_QUERY, useMediaQuery } from '../hooks/useMediaQuery';
 import { usePageData } from '../hooks/usePageData';
 import { fetchResearchTasks } from '../services/dataService';
 import type { ResearchTaskFilters } from '../types/pageFilters';
@@ -23,6 +26,8 @@ function ResearchTasksPage({ filters, onSetFilterOptions }: ResearchTasksPagePro
     fetchResearchTasks,
     'Failed to load research task data. Please try again later.'
   );
+  const isMobile = useMediaQuery(MOBILE_QUERY);
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
 
   useEffect(() => {
     if (data) {
@@ -89,7 +94,7 @@ function ResearchTasksPage({ filters, onSetFilterOptions }: ResearchTasksPagePro
   }
 
   const renderReward = (reward: TaskReward, index: number) => (
-    <Card key={index} className="flex min-h-20 items-center bg-muted p-4">
+    <div key={index} className="flex min-h-20 items-center rounded-lg border border-border bg-muted p-4">
       <div className="mr-3 flex h-16 w-16 min-w-16 items-center justify-center overflow-hidden rounded-md bg-card">
         <img src={reward.asset_url} alt={reward.name} className="max-h-full max-w-full object-contain" />
       </div>
@@ -108,39 +113,89 @@ function ResearchTasksPage({ filters, onSetFilterOptions }: ResearchTasksPagePro
           {reward.shiny_available && <ShinyChip />}
         </div>
       </div>
+    </div>
+  );
+
+  const renderTaskListItem = (task: ResearchTask, index: number) => (
+    <Card
+      key={index}
+      className="flex w-full items-center gap-3 p-3 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-soft-lg"
+    >
+      <p className="min-w-0 flex-1 text-sm font-semibold">{task.task}</p>
+      <Popover>
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            className="-m-1 flex shrink-0 items-center gap-1.5 rounded-md p-1 hover:bg-muted"
+            aria-label={`View all ${task.rewards.length} rewards for ${task.task}`}
+          >
+            {task.rewards.slice(0, 4).map((reward, idx) => (
+              <div
+                key={idx}
+                className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-md bg-muted"
+                title={reward.name}
+              >
+                <img src={reward.asset_url} alt={reward.name} className="max-h-full max-w-full object-contain" />
+              </div>
+            ))}
+            {task.rewards.length > 4 && (
+              <span className="text-xs text-muted-foreground">+{task.rewards.length - 4}</span>
+            )}
+          </button>
+        </PopoverTrigger>
+        <PopoverContent align="end" className="w-72 p-3">
+          <p className="mb-2 text-xs font-semibold text-muted-foreground">All Rewards</p>
+          <div className="flex flex-col gap-2">
+            {task.rewards.map((reward, idx) => (
+              <div key={idx} className="flex items-center gap-2">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted">
+                  <img src={reward.asset_url} alt={reward.name} className="max-h-full max-w-full object-contain" />
+                </div>
+                <p className="min-w-0 flex-1 truncate text-xs font-medium">
+                  {reward.name}
+                  {reward.quantity && reward.quantity > 1 && ` x${reward.quantity}`}
+                </p>
+                {reward.shiny_available && <ShinyChip />}
+              </div>
+            ))}
+          </div>
+        </PopoverContent>
+      </Popover>
+      <Badge size="sm" className="min-w-20 shrink-0 justify-center">
+        {task.rewards.length} Reward{task.rewards.length !== 1 ? 's' : ''}
+      </Badge>
     </Card>
   );
 
-  const renderTask = (task: ResearchTask, index: number) => (
-    <AccordionItem
+  const renderTaskCard = (task: ResearchTask, index: number) => (
+    <Card
       key={index}
-      value={String(index)}
-      className="mb-2 overflow-hidden rounded-lg border border-border px-0 shadow-soft-xs transition-shadow hover:shadow-soft-sm last:border-b"
+      className="mb-4 flex break-inside-avoid flex-col p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-soft-lg"
     >
-      <AccordionTrigger className="px-4 hover:no-underline">
-        <div className="flex w-full flex-wrap items-center gap-2 pr-2">
-          <span className="flex-1 text-left text-sm font-semibold">{task.task}</span>
-          <Badge>
-            {task.rewards.length} Reward{task.rewards.length !== 1 ? 's' : ''}
-          </Badge>
-        </div>
-      </AccordionTrigger>
-      <AccordionContent className="px-4 pt-2">
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
-          {task.rewards.map((reward, idx) => renderReward(reward, idx))}
-        </div>
-      </AccordionContent>
-    </AccordionItem>
+      <div className="mb-3 flex items-start justify-between gap-3">
+        <p className="text-sm font-semibold leading-6">{task.task}</p>
+        <Badge className="shrink-0">
+          {task.rewards.length} Reward{task.rewards.length !== 1 ? 's' : ''}
+        </Badge>
+      </div>
+      <div className="grid grid-cols-1 gap-2">{task.rewards.map((reward, idx) => renderReward(reward, idx))}</div>
+    </Card>
   );
 
   return (
-    <div className="py-4">
-      <PageHeader title="Research Tasks" description="Current field research tasks and their rewards" />
+    <div className={`py-4 ${isMobile ? 'pb-16' : ''}`}>
+      <PageHeader
+        title="Research Tasks"
+        description="Current field research tasks and their rewards"
+        actions={<ViewModeToggle value={viewMode} onChange={setViewMode} />}
+      />
 
       <Alert variant="info" className="mb-6">
         Field research tasks are obtained by spinning PokéStops. Complete tasks to earn rewards including
         Pokémon encounters, items, and Stardust.
       </Alert>
+
+      {Object.keys(filteredData).length === 0 && <NoResults />}
 
       <div className="flex flex-col gap-6">
         {Object.entries(filteredData).map(([category, tasks]) => {
@@ -153,7 +208,15 @@ function ResearchTasksPage({ filters, onSetFilterOptions }: ResearchTasksPagePro
                 count={tasks.length}
                 label={`Task${tasks.length !== 1 ? 's' : ''}`}
               />
-              <Accordion type="multiple">{tasks.map((task, index) => renderTask(task, index))}</Accordion>
+              {viewMode === 'grid' ? (
+                <div className="columns-1 gap-4 lg:columns-2">
+                  {tasks.map((task, index) => renderTaskCard(task, index))}
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  {tasks.map((task, index) => renderTaskListItem(task, index))}
+                </div>
+              )}
             </div>
           );
         })}

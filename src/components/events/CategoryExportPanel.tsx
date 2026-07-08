@@ -36,7 +36,7 @@ export const CategoryExportPanel = React.memo(function CategoryExportPanel({
         </Button>
       </div>
       <Separator />
-      <div className="mt-3 flex max-h-[40vh] flex-col gap-2.5 overflow-y-auto">
+      <div className="mt-3 flex max-h-[min(52vh,32rem)] flex-col gap-2.5 overflow-y-auto max-sm:max-h-none">
         {allCategories.map((category) => (
           <label key={category} className="flex items-center gap-2.5 text-sm">
             <Checkbox

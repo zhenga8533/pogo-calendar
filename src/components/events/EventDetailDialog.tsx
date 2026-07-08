@@ -141,7 +141,7 @@ function EventDetailDialog({
   return (
     <>
       <Dialog open onOpenChange={(o) => !o && handleClose()}>
-        <DialogContent className="max-w-lg" fullScreenOnMobile hideClose>
+        <DialogContent className="max-w-2xl" fullScreenOnMobile hideClose>
           <div className="relative h-[200px] w-full shrink-0">
             <img src={bannerUrl} alt={title} className="h-full w-full object-cover" />
             <div

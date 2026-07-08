@@ -64,7 +64,7 @@ export function ExportEventDialog({
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-lg" fullScreenOnMobile>
+      <DialogContent className="max-w-2xl" fullScreenOnMobile>
         <DialogHeader>
           <DialogTitle>Select Events to Export</DialogTitle>
         </DialogHeader>

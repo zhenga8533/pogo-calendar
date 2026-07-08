@@ -55,7 +55,7 @@ export const SpecificEventExportPanel = React.memo(function SpecificEventExportP
         </Button>
       </div>
       <Separator />
-      <div className="max-h-[40vh] overflow-y-auto p-1">
+      <div className="max-h-[min(52vh,32rem)] overflow-y-auto p-1 max-sm:max-h-none">
         {eventsToList.length > 0 ? (
           <div className="flex flex-col gap-2.5">
             {eventsToList.map((event) => (

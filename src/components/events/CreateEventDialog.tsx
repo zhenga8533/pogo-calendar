@@ -62,7 +62,7 @@ function CreateEventDialog({ open, eventToEdit, onClose, onSave }: CreateEventDi
     [errors.title, errors.end]
   );
 
-  const validateForm = () => {
+  const validateForm = useCallback(() => {
     const newErrors = getInitialErrors();
     let isValid = true;
 
@@ -80,14 +80,14 @@ function CreateEventDialog({ open, eventToEdit, onClose, onSave }: CreateEventDi
 
     setErrors(newErrors);
     return isValid;
-  };
+  }, [formData]);
 
   const handleSave = useCallback(() => {
     if (validateForm()) {
       onSave(formData, eventToEdit?.extendedProps.article_url);
       setIsDirty(false);
     }
-  }, [formData, eventToEdit, onSave]);
+  }, [formData, eventToEdit, onSave, validateForm]);
 
   const handleClose = () => {
     if (isDirty) {
@@ -105,7 +105,7 @@ function CreateEventDialog({ open, eventToEdit, onClose, onSave }: CreateEventDi
   return (
     <>
       <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
-        <DialogContent className="max-w-sm">
+        <DialogContent className="max-w-md" fullScreenOnMobile>
           <DialogHeader>
             <DialogTitle>{eventToEdit ? 'Edit Custom Event' : 'Create Custom Event'}</DialogTitle>
           </DialogHeader>

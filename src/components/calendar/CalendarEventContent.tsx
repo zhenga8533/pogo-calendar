@@ -1,7 +1,7 @@
 import type { EventContentArg } from '@fullcalendar/core';
 import { Star } from 'lucide-react';
 import React from 'react';
-import { useSettingsContext } from '../../contexts/SettingsContext';
+import { useSettingsContext } from '../../hooks/useSettingsContext';
 import { useResolvedThemeMode } from '../../hooks/useThemeMode';
 import type { CalendarEvent } from '../../types/events';
 import { colorWithAlpha, getColorForCategory } from '../../utils/colorUtils';

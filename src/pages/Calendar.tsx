@@ -1,7 +1,7 @@
 import { CalendarSkeleton } from '../components/calendar/CalendarSkeleton';
 import EventCalendar from '../components/calendar/EventCalendar';
 import { DataErrorDisplay } from '../components/shared/DataErrorDisplay';
-import { useCalendarContext } from '../contexts/CalendarContext';
+import { useCalendarContext } from '../hooks/useCalendarContext';
 import type { ToastSeverity } from '../hooks/useToast';
 import type { CalendarEvent } from '../types/events';
 

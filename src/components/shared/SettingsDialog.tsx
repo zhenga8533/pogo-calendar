@@ -1,7 +1,7 @@
 import { MonitorCog, Moon, Sun, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { dayOptions } from '../../config/eventFilter';
-import { useSettingsContext } from '../../contexts/SettingsContext';
+import { useSettingsContext } from '../../hooks/useSettingsContext';
 import { fetchTimezones } from '../../services/eventService';
 import type { Settings, ThemeSetting, Timezone } from '../../types/settings';
 import { Button } from '../ui/button';

@@ -1,26 +1,9 @@
-import { createContext, useContext, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useEventData } from '../hooks/useEventData';
 import { useEventNotes } from '../hooks/useEventNotes';
+import { useSettingsContext } from '../hooks/useSettingsContext';
 import type { CalendarEvent } from '../types/events';
-import { useSettingsContext } from './SettingsContext';
-
-interface EventDataContextType {
-  loading: boolean;
-  error: string | null;
-  allEvents: CalendarEvent[];
-  eventNotes: Record<string, string>;
-  selectedEvent: CalendarEvent | null;
-  setSelectedEvent: (event: CalendarEvent | null) => void;
-  refetchEvents: () => Promise<void>;
-  updateNote: (eventId: string, noteText: string) => void;
-  allCategories: string[];
-  allPokemon: string[];
-  allBonuses: string[];
-}
-
-const EventDataContext = createContext<EventDataContextType | undefined>(
-  undefined
-);
+import { EventDataContext } from './eventDataContextValue';
 
 export function EventDataProvider({ children }: { children: React.ReactNode }) {
   const { settings } = useSettingsContext();
@@ -103,14 +86,4 @@ export function EventDataProvider({ children }: { children: React.ReactNode }) {
       {children}
     </EventDataContext.Provider>
   );
-}
-
-export function useEventDataContext() {
-  const context = useContext(EventDataContext);
-  if (!context) {
-    throw new Error(
-      'useEventDataContext must be used within an EventDataProvider'
-    );
-  }
-  return context;
 }

@@ -5,7 +5,7 @@ import listPlugin from '@fullcalendar/list';
 import FullCalendar from '@fullcalendar/react';
 import { CalendarX } from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useSettingsContext } from '../../contexts/SettingsContext';
+import { useSettingsContext } from '../../hooks/useSettingsContext';
 import type { ToastSeverity } from '../../hooks/useToast';
 import type { CalendarEvent } from '../../types/events';
 import { Button } from '../ui/button';

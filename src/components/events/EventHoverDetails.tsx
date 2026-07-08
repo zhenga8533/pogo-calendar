@@ -1,6 +1,6 @@
 import { CalendarDays, Clock } from 'lucide-react';
 import { useMemo } from 'react';
-import { useSettingsContext } from '../../contexts/SettingsContext';
+import { useSettingsContext } from '../../hooks/useSettingsContext';
 import { cn } from '../../lib/utils';
 import type { CalendarEvent } from '../../types/events';
 import { formatDateLine } from '../../utils/dateUtils';

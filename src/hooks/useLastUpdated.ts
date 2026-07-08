@@ -2,6 +2,14 @@ import { format } from 'date-fns';
 import { useCallback, useEffect, useState } from 'react';
 import { GITHUB_LAST_UPDATED_API_URL } from '../config/api';
 
+interface GitHubCommitResponseItem {
+  commit: {
+    committer: {
+      date: string;
+    };
+  };
+}
+
 /**
  * Custom hook to fetch and manage the last updated time of a resource from GitHub.
  *
@@ -22,7 +30,7 @@ export function useLastUpdated() {
       if (!response.ok) {
         throw new Error(`GitHub API responded with status ${response.status}`);
       }
-      const data = await response.json();
+      const data: GitHubCommitResponseItem[] = await response.json();
       if (data && data.length > 0) {
         const lastCommitDate = new Date(data[0].commit.committer.date);
         const formattedDate = format(lastCommitDate, 'MMM d, h:mm a');
@@ -30,7 +38,7 @@ export function useLastUpdated() {
       } else {
         setLastUpdated('N/A');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError('Could not load update time.');
       console.error(err);
       throw err; // Re-throw error for the caller to handle

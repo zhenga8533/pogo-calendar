@@ -1,17 +1,8 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { SETTINGS_KEY } from '../config/constants';
 import type { Settings, ThemeSetting } from '../types/settings';
 import { safeGetJSON, safeSetJSON } from '../utils/storageUtils';
-
-interface SettingsContextType {
-  settings: Settings;
-  setSettings: React.Dispatch<React.SetStateAction<Settings>>;
-  changeTheme: (theme: ThemeSetting) => void;
-}
-
-const SettingsContext = createContext<SettingsContextType | undefined>(
-  undefined
-);
+import { SettingsContext } from './settingsContextValue';
 
 const initialSettings: Settings = {
   theme: 'auto',
@@ -35,13 +26,13 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     safeSetJSON(SETTINGS_KEY, settings);
   }, [settings]);
 
-  const changeTheme = (theme: ThemeSetting) => {
+  const changeTheme = useCallback((theme: ThemeSetting) => {
     setSettings((prev) => ({ ...prev, theme }));
-  };
+  }, []);
 
   const value = useMemo(
     () => ({ settings, setSettings, changeTheme }),
-    [settings]
+    [settings, changeTheme]
   );
 
   return (
@@ -49,14 +40,4 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       {children}
     </SettingsContext.Provider>
   );
-}
-
-export function useSettingsContext() {
-  const context = useContext(SettingsContext);
-  if (!context) {
-    throw new Error(
-      'useSettingsContext must be used within a SettingsProvider'
-    );
-  }
-  return context;
 }

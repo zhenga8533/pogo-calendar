@@ -20,8 +20,6 @@ type SetFilters = Dispatch<SetStateAction<Filters>>;
 
 const defaultAllFilters: Record<string, Filters> = {
   dayGridMonth: initialFilters,
-  timeGridWeek: initialFilters,
-  timeGridDay: initialFilters,
   listWeek: initialFilters,
 };
 
@@ -209,7 +207,7 @@ export function useFilters(
         passesPokemonFilter(event, pokemonSearch) &&
         passesBonusFilter(event, bonusSearch)
     );
-  }, [allEvents, allFilters, currentView, savedEventIds]);
+  }, [allEvents, filtersForCurrentView, savedEventIds]);
 
   return {
     filters: filtersForCurrentView,

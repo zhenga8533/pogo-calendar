@@ -1,7 +1,7 @@
 import { CalendarDays, Clock, ExternalLink, Pencil, Star, Trash2 } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { CUSTOM_EVENT_CATEGORY } from '../../config/constants';
-import { useSettingsContext } from '../../contexts/SettingsContext';
+import { useSettingsContext } from '../../hooks/useSettingsContext';
 import { useNoteEditor } from '../../hooks/useNoteEditor';
 import type { ToastSeverity } from '../../hooks/useToast';
 import type { CalendarEvent } from '../../types/events';

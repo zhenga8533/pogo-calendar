@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { useSettingsContext } from '../../contexts/SettingsContext';
+import { useSettingsContext } from '../../hooks/useSettingsContext';
 import { useResolvedThemeMode } from '../../hooks/useThemeMode';
 import { contrastColor, getColorForCategory } from '../../utils/colorUtils';
 import { Badge } from '../ui/badge';

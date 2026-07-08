@@ -5,6 +5,11 @@ import type { Timezone } from '../types/settings';
 
 type ApiResponse = Record<string, ApiEvent[]>;
 
+interface TimezoneApiItem {
+  text: string;
+  utc: string[];
+}
+
 function parseApiTime(
   time: string | number,
   isLocal: boolean,
@@ -163,9 +168,9 @@ export const fetchTimezones = async (): Promise<Timezone[]> => {
       `Timezone API request failed with status ${response.status}`
     );
   }
-  const data = await response.json();
+  const data: TimezoneApiItem[] = await response.json();
   // Map the fetched data to a format that's easier to use in the Select component
-  return data.map((tz: any) => ({
+  return data.map((tz) => ({
     text: tz.text,
     value: tz.utc[0],
   }));

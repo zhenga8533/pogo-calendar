@@ -5,7 +5,6 @@ import {
   Egg,
   Filter,
   HelpCircle,
-  Search,
   Ship,
   Sliders,
   X,
@@ -113,44 +112,6 @@ function HeaderComponent(props: HeaderProps) {
     else setFilterPopoverOpen(open);
   };
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    switch (location.pathname) {
-      case '/':
-        filterProps.onFilterChange({ ...filterProps.filters, searchTerm: value });
-        break;
-      case '/egg-pool':
-        onEggPoolFilterChange?.({ ...eggPoolFilters!, pokemonSearch: value });
-        break;
-      case '/raid-bosses':
-        onRaidBossFilterChange?.({ ...raidBossFilters!, pokemonSearch: value });
-        break;
-      case '/research-tasks':
-        onResearchTaskFilterChange?.({ ...researchTaskFilters!, taskSearch: value });
-        break;
-      case '/rocket-lineup':
-        onRocketLineupFilterChange?.({ ...rocketLineupFilters!, pokemonSearch: value });
-        break;
-    }
-  };
-
-  const getCurrentSearchValue = () => {
-    switch (location.pathname) {
-      case '/':
-        return filterProps.filters.searchTerm;
-      case '/egg-pool':
-        return eggPoolFilters?.pokemonSearch || '';
-      case '/raid-bosses':
-        return raidBossFilters?.pokemonSearch || '';
-      case '/research-tasks':
-        return researchTaskFilters?.taskSearch || '';
-      case '/rocket-lineup':
-        return rocketLineupFilters?.pokemonSearch || '';
-      default:
-        return '';
-    }
-  };
-
   const getFilterContent = () => {
     switch (location.pathname) {
       case '/':
@@ -234,7 +195,7 @@ function HeaderComponent(props: HeaderProps) {
 
   const filterTriggerButton = (
     <div className="relative">
-      <IconButton onClick={() => handleFilterOpenChange(true)} aria-label="Filters">
+      <IconButton onClick={() => handleFilterOpenChange(true)} aria-label="Search & filters">
         <Filter />
       </IconButton>
       {filterCount > 0 && (
@@ -246,126 +207,128 @@ function HeaderComponent(props: HeaderProps) {
   );
 
   return (
-    <>
-      <header
-        className={cn(
-          'sticky top-0 z-40 border-b border-border backdrop-blur-md transition-colors duration-200',
-          trigger ? 'bg-card shadow-soft-sm' : 'bg-card/80'
-        )}
-      >
-        <div className="flex h-16 items-center gap-2 px-3 sm:px-4 md:gap-3 md:px-6">
-          <RouterLink to="/" className="flex shrink-0 items-center gap-2 text-inherit no-underline">
-            <img src={LogoIcon} alt="Logo" className="h-8 w-8" />
-            <span className="hidden text-lg font-bold md:block">PoGo Calendar</span>
-          </RouterLink>
+    <header
+      className={cn(
+        'sticky top-0 z-40 border-b border-border backdrop-blur-md transition-colors duration-200',
+        trigger ? 'bg-card shadow-soft-sm' : 'bg-card/80'
+      )}
+    >
+      <div className="mx-auto flex h-16 max-w-7xl items-center gap-2 px-3 sm:px-4 md:gap-3 md:px-6">
+        <RouterLink
+          to="/"
+          className="flex shrink-0 items-center gap-2 text-inherit no-underline"
+        >
+          <img src={LogoIcon} alt="Logo" className="h-8 w-8" />
+          <span className="hidden text-lg font-bold tracking-tight md:block">
+            PoGo Calendar
+          </span>
+        </RouterLink>
 
-          {location.pathname !== '/faq' ? (
-            <>
-              <div className="hidden flex-1 sm:block" />
-              <div className="relative flex-1 sm:min-w-[300px] sm:flex-none">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  type="search"
-                  placeholder="Search..."
-                  aria-label="search"
-                  value={getCurrentSearchValue()}
-                  onChange={handleSearchChange}
-                  className="h-9 w-full rounded-md border border-transparent bg-accent/60 pl-9 pr-3 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-border focus:bg-background focus:ring-2 focus:ring-ring"
-                />
-              </div>
-              <div className="hidden flex-1 sm:block" />
-            </>
-          ) : (
-            <div className="flex-1" />
+        <nav className="ml-2 hidden shrink-0 items-center gap-0.5 lg:flex">
+          {NAV_ITEMS.map((item) => {
+            const isActive = item.path === location.pathname;
+            return (
+              <RouterLink
+                key={item.path}
+                to={item.path}
+                className={cn(
+                  'rounded-full px-3 py-1.5 text-sm font-semibold text-muted-foreground no-underline transition-colors duration-150 hover:bg-accent hover:text-foreground',
+                  isActive && 'bg-accent text-primary'
+                )}
+              >
+                {item.label}
+              </RouterLink>
+            );
+          })}
+        </nav>
+
+        <div className="flex-1" />
+
+        <div className="flex shrink-0 items-center gap-1">
+          {!isMobile && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onRefresh}
+              className="hidden text-muted-foreground md:inline-flex"
+              title={lastUpdatedError ? lastUpdatedError : lastUpdatedLoading ? 'Refreshing…' : 'Refresh data'}
+            >
+              <span
+                className={cn('inline-block h-3.5 w-3.5', lastUpdatedLoading && 'animate-spin')}
+              >
+                ⟳
+              </span>
+              <span className="hidden lg:inline">
+                {lastUpdatedError ? 'Update failed' : lastUpdatedLoading ? 'Updating…' : `Updated ${lastUpdated}`}
+              </span>
+            </Button>
           )}
 
-          <div className="flex shrink-0 items-center gap-1">
-            {!isMobile && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onRefresh}
-                className="text-muted-foreground"
-                title={lastUpdatedError ? lastUpdatedError : lastUpdatedLoading ? 'Refreshing…' : 'Refresh data'}
-              >
-                <span
-                  className={cn(
-                    'inline-block h-3.5 w-3.5',
-                    lastUpdatedLoading && 'animate-spin'
-                  )}
-                >
-                  ⟳
-                </span>
-                {lastUpdatedError ? 'Update failed' : lastUpdatedLoading ? 'Updating…' : `Updated ${lastUpdated}`}
-              </Button>
-            )}
+          <div className="mx-1 hidden h-6 w-px bg-border md:block" />
 
-            <div className="mx-1 hidden h-6 w-px bg-border sm:block" />
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                {isMobile ? (
-                  <IconButton aria-label="Menu">
-                    <ChevronDown />
-                  </IconButton>
-                ) : (
-                  <Button variant="ghost">
-                    {currentNavLabel}
-                    <ChevronDown className="h-4 w-4" />
-                  </Button>
-                )}
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="min-w-[200px]">
-                {NAV_ITEMS.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <DropdownMenuItem key={item.path} asChild>
-                      <RouterLink to={item.path} className="no-underline text-inherit">
-                        <Icon className="h-4 w-4" />
-                        {item.label}
-                      </RouterLink>
-                    </DropdownMenuItem>
-                  );
-                })}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {filterContent &&
-              (isMobile ? (
-                <Sheet open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
-                  <SheetTrigger asChild>{filterTriggerButton}</SheetTrigger>
-                  <SheetContent side="bottom">
-                    <SheetHeader>
-                      <SheetTitle>Filters</SheetTitle>
-                      <IconButton onClick={() => setFilterSheetOpen(false)} aria-label="Close filters">
-                        <X className="h-4 w-4" />
-                      </IconButton>
-                    </SheetHeader>
-                    <SheetBody>{filterContent}</SheetBody>
-                  </SheetContent>
-                </Sheet>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              {isMobile ? (
+                <IconButton aria-label="Menu">
+                  <ChevronDown />
+                </IconButton>
               ) : (
-                <Popover open={filterPopoverOpen} onOpenChange={setFilterPopoverOpen}>
-                  <PopoverTrigger asChild>{filterTriggerButton}</PopoverTrigger>
-                  <PopoverContent align="end" className="flex max-h-[75vh] w-[420px] max-w-[90vw] flex-col p-0">
-                    <div className="flex items-center justify-between border-b border-border px-4 py-3">
-                      <span className="text-sm font-bold">Filters</span>
-                      <IconButton onClick={() => setFilterPopoverOpen(false)} aria-label="Close filters">
-                        <X className="h-4 w-4" />
-                      </IconButton>
-                    </div>
-                    <div className="overflow-y-auto p-4">{filterContent}</div>
-                  </PopoverContent>
-                </Popover>
-              ))}
+                <Button variant="ghost" className="lg:hidden">
+                  {currentNavLabel}
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              )}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="min-w-[200px]">
+              {NAV_ITEMS.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <DropdownMenuItem key={item.path} asChild>
+                    <RouterLink to={item.path} className="no-underline text-inherit">
+                      <Icon className="h-4 w-4" />
+                      {item.label}
+                    </RouterLink>
+                  </DropdownMenuItem>
+                );
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-            <IconButton onClick={onSettingsClick} aria-label="Settings">
-              <Sliders />
-            </IconButton>
-          </div>
+          {filterContent &&
+            (isMobile ? (
+              <Sheet open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
+                <SheetTrigger asChild>{filterTriggerButton}</SheetTrigger>
+                <SheetContent side="bottom">
+                  <SheetHeader>
+                    <SheetTitle>Filters</SheetTitle>
+                    <IconButton onClick={() => setFilterSheetOpen(false)} aria-label="Close filters">
+                      <X className="h-4 w-4" />
+                    </IconButton>
+                  </SheetHeader>
+                  <SheetBody>{filterContent}</SheetBody>
+                </SheetContent>
+              </Sheet>
+            ) : (
+              <Popover open={filterPopoverOpen} onOpenChange={setFilterPopoverOpen}>
+                <PopoverTrigger asChild>{filterTriggerButton}</PopoverTrigger>
+                <PopoverContent align="end" className="flex max-h-[75vh] w-[420px] max-w-[90vw] flex-col p-0">
+                  <div className="flex items-center justify-between border-b border-border px-4 py-3">
+                    <span className="text-sm font-bold">Filters</span>
+                    <IconButton onClick={() => setFilterPopoverOpen(false)} aria-label="Close filters">
+                      <X className="h-4 w-4" />
+                    </IconButton>
+                  </div>
+                  <div className="overflow-y-auto p-4">{filterContent}</div>
+                </PopoverContent>
+              </Popover>
+            ))}
+
+          <IconButton onClick={onSettingsClick} aria-label="Settings">
+            <Sliders />
+          </IconButton>
         </div>
-      </header>
-    </>
+      </div>
+    </header>
   );
 }
 

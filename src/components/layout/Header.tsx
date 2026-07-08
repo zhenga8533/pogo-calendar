@@ -5,6 +5,7 @@ import {
   Egg,
   Filter,
   HelpCircle,
+  RefreshCw,
   Ship,
   Sliders,
   X,
@@ -34,7 +35,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Sheet, SheetBody, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '../ui/sheet';
 import { Button } from '../ui/button';
 import LogoIcon from '/icon.svg';
@@ -88,28 +88,22 @@ function HeaderComponent(props: HeaderProps) {
     isMobile,
     activeFilterCount,
     eggPoolFilters,
-    onEggPoolFilterChange,
     eggPoolActiveFilterCount,
     raidBossFilters,
-    onRaidBossFilterChange,
     raidBossActiveFilterCount,
     researchTaskFilters,
-    onResearchTaskFilterChange,
     researchTaskActiveFilterCount,
     rocketLineupFilters,
-    onRocketLineupFilterChange,
     rocketLineupActiveFilterCount,
     ...filterProps
   } = props;
 
   const trigger = useScrollTrigger(0);
   const location = useLocation();
-  const [filterPopoverOpen, setFilterPopoverOpen] = useState(false);
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
 
   const handleFilterOpenChange = (open: boolean) => {
-    if (isMobile) setFilterSheetOpen(open);
-    else setFilterPopoverOpen(open);
+    setFilterSheetOpen(open);
   };
 
   const getFilterContent = () => {
@@ -253,11 +247,7 @@ function HeaderComponent(props: HeaderProps) {
               className="hidden text-muted-foreground md:inline-flex"
               title={lastUpdatedError ? lastUpdatedError : lastUpdatedLoading ? 'Refreshing…' : 'Refresh data'}
             >
-              <span
-                className={cn('inline-block h-3.5 w-3.5', lastUpdatedLoading && 'animate-spin')}
-              >
-                ⟳
-              </span>
+              <RefreshCw className={cn(lastUpdatedLoading && 'animate-spin')} />
               <span className="hidden lg:inline">
                 {lastUpdatedError ? 'Update failed' : lastUpdatedLoading ? 'Updating…' : `Updated ${lastUpdated}`}
               </span>
@@ -295,33 +285,18 @@ function HeaderComponent(props: HeaderProps) {
           </DropdownMenu>
 
           {filterContent &&
-            (isMobile ? (
-              <Sheet open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
-                <SheetTrigger asChild>{filterTriggerButton}</SheetTrigger>
-                <SheetContent side="bottom">
-                  <SheetHeader>
-                    <SheetTitle>Filters</SheetTitle>
-                    <IconButton onClick={() => setFilterSheetOpen(false)} aria-label="Close filters">
-                      <X className="h-4 w-4" />
-                    </IconButton>
-                  </SheetHeader>
-                  <SheetBody>{filterContent}</SheetBody>
-                </SheetContent>
-              </Sheet>
-            ) : (
-              <Popover open={filterPopoverOpen} onOpenChange={setFilterPopoverOpen}>
-                <PopoverTrigger asChild>{filterTriggerButton}</PopoverTrigger>
-                <PopoverContent align="end" className="flex max-h-[75vh] w-[420px] max-w-[90vw] flex-col p-0">
-                  <div className="flex items-center justify-between border-b border-border px-4 py-3">
-                    <span className="text-sm font-bold">Filters</span>
-                    <IconButton onClick={() => setFilterPopoverOpen(false)} aria-label="Close filters">
-                      <X className="h-4 w-4" />
-                    </IconButton>
-                  </div>
-                  <div className="overflow-y-auto p-4">{filterContent}</div>
-                </PopoverContent>
-              </Popover>
-            ))}
+            <Sheet open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
+              <SheetTrigger asChild>{filterTriggerButton}</SheetTrigger>
+              <SheetContent side="right" className="max-w-md">
+                <SheetHeader>
+                  <SheetTitle>Filters</SheetTitle>
+                  <IconButton onClick={() => setFilterSheetOpen(false)} aria-label="Close filters">
+                    <X className="h-4 w-4" />
+                  </IconButton>
+                </SheetHeader>
+                <SheetBody>{filterContent}</SheetBody>
+              </SheetContent>
+            </Sheet>}
 
           <IconButton onClick={onSettingsClick} aria-label="Settings">
             <Sliders />

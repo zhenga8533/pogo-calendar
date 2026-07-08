@@ -3,6 +3,7 @@ import { ShinyChip } from '../components/filters/shared';
 import { DataErrorDisplay } from '../components/shared/DataErrorDisplay';
 import { DataLoadingSkeleton } from '../components/shared/DataLoadingSkeleton';
 import { PageHeader } from '../components/shared/PageHeader';
+import { SectionHeader } from '../components/shared/SectionHeader';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
 import { Alert } from '../components/ui/alert';
 import { Badge } from '../components/ui/badge';
@@ -111,7 +112,11 @@ function ResearchTasksPage({ filters, onSetFilterOptions }: ResearchTasksPagePro
   );
 
   const renderTask = (task: ResearchTask, index: number) => (
-    <AccordionItem key={index} value={String(index)} className="mb-2 overflow-hidden rounded-xl border border-border px-0 last:border-b">
+    <AccordionItem
+      key={index}
+      value={String(index)}
+      className="mb-2 overflow-hidden rounded-lg border border-border px-0 shadow-soft-xs transition-shadow hover:shadow-soft-sm last:border-b"
+    >
       <AccordionTrigger className="px-4 hover:no-underline">
         <div className="flex w-full flex-wrap items-center gap-2 pr-2">
           <span className="flex-1 text-left text-sm font-semibold">{task.task}</span>
@@ -143,12 +148,11 @@ function ResearchTasksPage({ filters, onSetFilterOptions }: ResearchTasksPagePro
 
           return (
             <div key={category}>
-              <div className="mb-3 flex items-center gap-2.5">
-                <h2 className="text-xl font-bold">{category}</h2>
-                <Badge>
-                  {tasks.length} Task{tasks.length !== 1 ? 's' : ''}
-                </Badge>
-              </div>
+              <SectionHeader
+                title={category}
+                count={tasks.length}
+                label={`Task${tasks.length !== 1 ? 's' : ''}`}
+              />
               <Accordion type="multiple">{tasks.map((task, index) => renderTask(task, index))}</Accordion>
             </div>
           );

@@ -3,6 +3,7 @@ import { ShinyChip } from '../components/filters/shared';
 import { DataErrorDisplay } from '../components/shared/DataErrorDisplay';
 import { DataLoadingSkeleton } from '../components/shared/DataLoadingSkeleton';
 import { PageHeader } from '../components/shared/PageHeader';
+import { SectionHeader } from '../components/shared/SectionHeader';
 import { Alert } from '../components/ui/alert';
 import { Badge } from '../components/ui/badge';
 import { Card, CardContent } from '../components/ui/card';
@@ -126,9 +127,16 @@ function RocketLineupPage({ filters, onSetFilterOptions }: RocketLineupPageProps
 
   const renderSlot = (slot: RocketSlot) => (
     <div key={slot.slot} className="mb-4 last:mb-0">
-      <div className="mb-2.5 flex items-center gap-2.5">
-        <Badge>Slot {slot.slot}</Badge>
-        {slot.is_encounter && <Badge style={{ backgroundColor: '#4CAF50', color: '#fff' }}>Possible Encounter</Badge>}
+      <div className="mb-2.5 flex flex-wrap items-center gap-2.5">
+        <SectionHeader
+          title={`Slot ${slot.slot}`}
+          count={slot.pokemons.length}
+          label="Pokémon"
+          className="mb-0"
+        />
+        {slot.is_encounter && (
+          <Badge style={{ backgroundColor: '#4CAF50', color: '#fff' }}>Possible Encounter</Badge>
+        )}
       </div>
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
         {slot.pokemons.map((pokemon, idx) => (
@@ -139,7 +147,7 @@ function RocketLineupPage({ filters, onSetFilterOptions }: RocketLineupPageProps
   );
 
   const renderLeaderCard = (leader: string, lineup: RocketSlot[]) => (
-    <Card key={leader} className="mb-6 overflow-hidden rounded-2xl">
+    <Card key={leader} className="mb-6 overflow-hidden">
       <div
         className="p-6 text-white"
         style={{

@@ -1,4 +1,4 @@
-import { MonitorCog, Moon, Sun } from 'lucide-react';
+import { MonitorCog, Moon, Sun, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { dayOptions } from '../../config/eventFilter';
 import { useSettingsContext } from '../../contexts/SettingsContext';
@@ -6,9 +6,10 @@ import { fetchTimezones } from '../../services/eventService';
 import type { Settings, ThemeSetting, Timezone } from '../../types/settings';
 import { Button } from '../ui/button';
 import { Combobox } from '../ui/combobox';
-import { Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
+import { IconButton } from '../ui/icon-button';
 import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Sheet, SheetBody, SheetContent, SheetHeader, SheetTitle } from '../ui/sheet';
 import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group';
 
 const themeOptions: { value: ThemeSetting; text: string; Icon: React.ElementType }[] = [
@@ -59,12 +60,15 @@ function SettingsDialogComponent({ open, onClose, onSettingsChange }: SettingsDi
   };
 
   return (
-    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-sm">
-        <DialogHeader>
-          <DialogTitle>Settings</DialogTitle>
-        </DialogHeader>
-        <DialogBody className="space-y-6">
+    <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
+      <SheetContent side="right" className="max-w-md">
+        <SheetHeader>
+          <SheetTitle>Settings</SheetTitle>
+          <IconButton onClick={onClose} aria-label="Close settings">
+            <X className="h-4 w-4" />
+          </IconButton>
+        </SheetHeader>
+        <SheetBody className="space-y-6">
           <div className="space-y-2.5">
             <Label>Appearance</Label>
             <ToggleGroup
@@ -141,12 +145,12 @@ function SettingsDialogComponent({ open, onClose, onSettingsChange }: SettingsDi
               </ToggleGroupItem>
             </ToggleGroup>
           </div>
-        </DialogBody>
-        <DialogFooter>
+        </SheetBody>
+        <div className="flex shrink-0 justify-end border-t border-border px-4 py-3">
           <Button onClick={onClose}>Done</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 }
 

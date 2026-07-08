@@ -4,6 +4,7 @@ import { ShinyChip } from '../components/filters/shared';
 import { DataErrorDisplay } from '../components/shared/DataErrorDisplay';
 import { DataLoadingSkeleton } from '../components/shared/DataLoadingSkeleton';
 import { PageHeader } from '../components/shared/PageHeader';
+import { SectionHeader } from '../components/shared/SectionHeader';
 import { Alert } from '../components/ui/alert';
 import { Badge } from '../components/ui/badge';
 import { Card } from '../components/ui/card';
@@ -90,7 +91,7 @@ function RaidBossesPage({ filters, onSetFilterOptions }: RaidBossesPageProps) {
   const renderRaidBossCard = (boss: RaidBoss) => (
     <Card
       key={boss.name}
-      className="flex h-full flex-col transition-all duration-200 hover:-translate-y-1 hover:shadow-soft-xl"
+      className="flex h-full flex-col overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-soft-lg"
     >
       <div className="flex h-[140px] items-center justify-center bg-muted p-4">
         <img src={boss.asset_url} alt={boss.name} className="max-h-full max-w-full object-contain" />
@@ -153,17 +154,20 @@ function RaidBossesPage({ filters, onSetFilterOptions }: RaidBossesPageProps) {
 
   return (
     <div className={`py-4 ${isMobile ? 'pb-16' : ''}`}>
-      <div className="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row">
-        <PageHeader title="Raid Bosses" description="Current raid bosses available in Pokémon GO" />
-        <ToggleGroup type="single" value={viewMode} onValueChange={(v) => v && setViewMode(v as 'grid' | 'list')}>
-          <ToggleGroupItem value="grid" aria-label="grid view">
-            <LayoutGrid className="h-4 w-4" />
-          </ToggleGroupItem>
-          <ToggleGroupItem value="list" aria-label="list view">
-            <List className="h-4 w-4" />
-          </ToggleGroupItem>
-        </ToggleGroup>
-      </div>
+      <PageHeader
+        title="Raid Bosses"
+        description="Current raid bosses available in Pokémon GO"
+        actions={
+          <ToggleGroup type="single" value={viewMode} onValueChange={(v) => v && setViewMode(v as 'grid' | 'list')}>
+            <ToggleGroupItem value="grid" aria-label="grid view">
+              <LayoutGrid className="h-4 w-4" />
+            </ToggleGroupItem>
+            <ToggleGroupItem value="list" aria-label="list view">
+              <List className="h-4 w-4" />
+            </ToggleGroupItem>
+          </ToggleGroup>
+        }
+      />
 
       <Alert variant="info" className="mb-6">
         CP ranges help you identify perfect IV catches. Weather boosted ranges indicate the Pokémon is
@@ -175,12 +179,12 @@ function RaidBossesPage({ filters, onSetFilterOptions }: RaidBossesPageProps) {
 
         return (
           <div key={tier} className="mb-8">
-            <div className="mb-3 flex items-center gap-2.5">
-              <h2 className="text-xl font-bold">{tier}</h2>
-              <Badge style={{ backgroundColor: RAID_TIER_COLORS[tier] || 'hsl(var(--primary))', color: '#fff' }}>
-                {bosses.length} Boss{bosses.length !== 1 ? 'es' : ''}
-              </Badge>
-            </div>
+            <SectionHeader
+              title={tier}
+              count={bosses.length}
+              label={`Boss${bosses.length !== 1 ? 'es' : ''}`}
+              color={RAID_TIER_COLORS[tier] || 'hsl(var(--primary))'}
+            />
 
             {viewMode === 'grid' ? (
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">

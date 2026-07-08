@@ -8,7 +8,7 @@ import { SectionHeader } from '../components/shared/SectionHeader';
 import { ViewModeToggle, type ViewMode } from '../components/shared/ViewModeToggle';
 import { Alert } from '../components/ui/alert';
 import { Badge } from '../components/ui/badge';
-import { Card } from '../components/ui/card';
+import { Card, INTERACTIVE_CARD_CLASSNAME } from '../components/ui/card';
 import { EGG_COLORS, RARITY_TIERS } from '../config/colorMapping';
 import { MOBILE_QUERY, useMediaQuery } from '../hooks/useMediaQuery';
 import { usePageData } from '../hooks/usePageData';
@@ -82,9 +82,9 @@ function EggPoolPage({ filters, onSetFilterOptions }: EggPoolPageProps) {
   const renderPokemonCard = (pokemon: EggPokemon) => (
     <Card
       key={pokemon.name}
-      className="flex h-full flex-col overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-soft-lg"
+      className={`flex h-full flex-col overflow-hidden ${INTERACTIVE_CARD_CLASSNAME}`}
     >
-      <div className="flex h-[120px] items-center justify-center bg-muted p-4">
+      <div className="flex h-32 items-center justify-center bg-muted p-4">
         <img src={pokemon.asset_url} alt={pokemon.name} className="max-h-full max-w-full object-contain" />
       </div>
       <div className="flex-1 p-3 pt-2 text-center">
@@ -103,12 +103,9 @@ function EggPoolPage({ filters, onSetFilterOptions }: EggPoolPageProps) {
   );
 
   const renderPokemonListItem = (pokemon: EggPokemon) => (
-    <Card
-      key={pokemon.name}
-      className="flex w-full items-center gap-3 p-3 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-soft-lg"
-    >
-      <div className="flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-md bg-muted">
-        <img src={pokemon.asset_url} alt={pokemon.name} className="max-h-[80%] max-w-[80%]" />
+    <Card key={pokemon.name} className={`flex w-full items-center gap-3 p-3 ${INTERACTIVE_CARD_CLASSNAME}`}>
+      <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted">
+        <img src={pokemon.asset_url} alt={pokemon.name} className="max-h-full max-w-full object-contain" />
       </div>
       <div className="min-w-0 flex-1">
         <div className="mb-1 flex items-center gap-2">

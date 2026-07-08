@@ -1,3 +1,4 @@
+import { ChevronDown } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ShinyChip } from '../components/filters/shared';
 import { DataErrorDisplay } from '../components/shared/DataErrorDisplay';
@@ -8,7 +9,7 @@ import { SectionHeader } from '../components/shared/SectionHeader';
 import { ViewModeToggle, type ViewMode } from '../components/shared/ViewModeToggle';
 import { Alert } from '../components/ui/alert';
 import { Badge } from '../components/ui/badge';
-import { Card } from '../components/ui/card';
+import { Card, INTERACTIVE_CARD_CLASSNAME } from '../components/ui/card';
 import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover';
 import { MOBILE_QUERY, useMediaQuery } from '../hooks/useMediaQuery';
 import { usePageData } from '../hooks/usePageData';
@@ -104,10 +105,7 @@ function ResearchTasksPage({ filters, onSetFilterOptions }: ResearchTasksPagePro
           {reward.quantity && reward.quantity > 1 && ` x${reward.quantity}`}
         </p>
         <div className="mt-1 flex flex-wrap gap-1">
-          <Badge
-            size="sm"
-            style={{ backgroundColor: reward.type === 'encounter' ? '#4CAF50' : '#2196F3', color: '#fff' }}
-          >
+          <Badge size="sm" variant={reward.type === 'encounter' ? 'success' : 'secondary'}>
             {reward.type === 'encounter' ? 'Pokémon' : 'Item'}
           </Badge>
           {reward.shiny_available && <ShinyChip />}
@@ -117,10 +115,7 @@ function ResearchTasksPage({ filters, onSetFilterOptions }: ResearchTasksPagePro
   );
 
   const renderTaskListItem = (task: ResearchTask, index: number) => (
-    <Card
-      key={index}
-      className="flex w-full items-center gap-3 p-3 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-soft-lg"
-    >
+    <Card key={index} className={`flex w-full items-center gap-3 p-3 ${INTERACTIVE_CARD_CLASSNAME}`}>
       <p className="min-w-0 flex-1 text-sm font-semibold">{task.task}</p>
       <Popover>
         <PopoverTrigger asChild>
@@ -129,18 +124,24 @@ function ResearchTasksPage({ filters, onSetFilterOptions }: ResearchTasksPagePro
             className="-m-1 flex shrink-0 items-center gap-1.5 rounded-md p-1 hover:bg-muted"
             aria-label={`View all ${task.rewards.length} rewards for ${task.task}`}
           >
-            {task.rewards.slice(0, 4).map((reward, idx) => (
-              <div
-                key={idx}
-                className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-md bg-muted"
-                title={reward.name}
-              >
-                <img src={reward.asset_url} alt={reward.name} className="max-h-full max-w-full object-contain" />
-              </div>
-            ))}
-            {task.rewards.length > 4 && (
-              <span className="text-xs text-muted-foreground">+{task.rewards.length - 4}</span>
-            )}
+            <div className="flex items-center">
+              {task.rewards.slice(0, 4).map((reward, idx) => (
+                <div
+                  key={idx}
+                  className="-ml-2 flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border-2 border-card bg-muted first:ml-0"
+                  style={{ zIndex: 4 - idx }}
+                  title={reward.name}
+                >
+                  <img src={reward.asset_url} alt={reward.name} className="max-h-full max-w-full object-contain p-0.5" />
+                </div>
+              ))}
+              {task.rewards.length > 4 && (
+                <div className="-ml-2 flex h-9 w-9 items-center justify-center rounded-full border-2 border-card bg-muted text-[0.65rem] font-semibold text-muted-foreground">
+                  +{task.rewards.length - 4}
+                </div>
+              )}
+            </div>
+            <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
           </button>
         </PopoverTrigger>
         <PopoverContent align="end" className="w-72 p-3">
@@ -168,10 +169,7 @@ function ResearchTasksPage({ filters, onSetFilterOptions }: ResearchTasksPagePro
   );
 
   const renderTaskCard = (task: ResearchTask, index: number) => (
-    <Card
-      key={index}
-      className="mb-4 flex break-inside-avoid flex-col p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-soft-lg"
-    >
+    <Card key={index} className={`mb-4 flex break-inside-avoid flex-col p-4 ${INTERACTIVE_CARD_CLASSNAME}`}>
       <div className="mb-3 flex items-start justify-between gap-3">
         <p className="text-sm font-semibold leading-6">{task.task}</p>
         <Badge className="shrink-0">

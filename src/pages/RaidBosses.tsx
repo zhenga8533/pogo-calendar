@@ -8,7 +8,7 @@ import { SectionHeader } from '../components/shared/SectionHeader';
 import { ViewModeToggle, type ViewMode } from '../components/shared/ViewModeToggle';
 import { Alert } from '../components/ui/alert';
 import { Badge } from '../components/ui/badge';
-import { Card } from '../components/ui/card';
+import { Card, INTERACTIVE_CARD_CLASSNAME } from '../components/ui/card';
 import { POKEMON_TYPE_COLORS, RAID_TIER_COLORS } from '../config/colorMapping';
 import { MOBILE_QUERY, useMediaQuery } from '../hooks/useMediaQuery';
 import { usePageData } from '../hooks/usePageData';
@@ -91,9 +91,9 @@ function RaidBossesPage({ filters, onSetFilterOptions }: RaidBossesPageProps) {
   const renderRaidBossCard = (boss: RaidBoss) => (
     <Card
       key={boss.name}
-      className="flex h-full flex-col overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-soft-lg"
+      className={`flex h-full flex-col overflow-hidden ${INTERACTIVE_CARD_CLASSNAME}`}
     >
-      <div className="flex h-[140px] items-center justify-center bg-muted p-4">
+      <div className="flex h-36 items-center justify-center bg-muted p-4">
         <img src={boss.asset_url} alt={boss.name} className="max-h-full max-w-full object-contain" />
       </div>
       <div className="flex-1 p-4">
@@ -109,18 +109,19 @@ function RaidBossesPage({ filters, onSetFilterOptions }: RaidBossesPageProps) {
             {boss.shiny_available && <ShinyChip />}
           </div>
 
-          <div className="rounded-md bg-muted p-3">
-            <p className="text-xs text-muted-foreground">Normal CP Range</p>
-            <p className="text-sm font-semibold">
-              {boss.cp_range.min.toLocaleString()} - {boss.cp_range.max.toLocaleString()}
-            </p>
-          </div>
-
-          <div className="rounded-md bg-muted p-3">
-            <p className="text-xs text-muted-foreground">Weather Boosted CP</p>
-            <p className="text-sm font-semibold">
-              {boss.boosted_cp_range.min.toLocaleString()} - {boss.boosted_cp_range.max.toLocaleString()}
-            </p>
+          <div className="grid grid-cols-2 divide-x divide-border overflow-hidden rounded-md bg-muted">
+            <div className="p-3">
+              <p className="text-xs text-muted-foreground">Normal CP</p>
+              <p className="text-sm font-semibold">
+                {boss.cp_range.min.toLocaleString()} - {boss.cp_range.max.toLocaleString()}
+              </p>
+            </div>
+            <div className="p-3">
+              <p className="text-xs text-muted-foreground">Boosted CP</p>
+              <p className="text-sm font-semibold">
+                {boss.boosted_cp_range.min.toLocaleString()} - {boss.boosted_cp_range.max.toLocaleString()}
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -128,12 +129,9 @@ function RaidBossesPage({ filters, onSetFilterOptions }: RaidBossesPageProps) {
   );
 
   const renderRaidBossListItem = (boss: RaidBoss) => (
-    <Card
-      key={boss.name}
-      className="flex w-full items-center gap-3 p-3 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-soft-lg"
-    >
-      <div className="flex h-[60px] w-[60px] shrink-0 items-center justify-center rounded-md bg-muted">
-        <img src={boss.asset_url} alt={boss.name} className="max-h-[80%] max-w-[80%]" />
+    <Card key={boss.name} className={`flex w-full items-center gap-3 p-3 ${INTERACTIVE_CARD_CLASSNAME}`}>
+      <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted">
+        <img src={boss.asset_url} alt={boss.name} className="max-h-full max-w-full object-contain" />
       </div>
       <div className="min-w-0 flex-1">
         <div className="mb-1 flex flex-wrap items-center gap-1.5">

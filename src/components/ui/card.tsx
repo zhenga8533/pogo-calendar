@@ -1,6 +1,9 @@
 import React from 'react';
 import { cn } from '../../lib/utils';
 
+export const INTERACTIVE_CARD_CLASSNAME =
+  'transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-soft-lg';
+
 export const Card = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>

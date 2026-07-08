@@ -8,7 +8,7 @@ import { SectionHeader } from '../components/shared/SectionHeader';
 import { ViewModeToggle, type ViewMode } from '../components/shared/ViewModeToggle';
 import { Alert } from '../components/ui/alert';
 import { Badge } from '../components/ui/badge';
-import { Card, CardContent } from '../components/ui/card';
+import { Card, CardContent, INTERACTIVE_CARD_CLASSNAME } from '../components/ui/card';
 import { Separator } from '../components/ui/separator';
 import { ROCKET_LEADER_COLORS, ROCKET_LEADER_DESCRIPTIONS } from '../config/colorMapping';
 import { MOBILE_QUERY, useMediaQuery } from '../hooks/useMediaQuery';
@@ -141,9 +141,7 @@ function RocketLineupPage({ filters, onSetFilterOptions }: RocketLineupPageProps
           label="Pokémon"
           className="mb-0"
         />
-        {slot.is_encounter && (
-          <Badge style={{ backgroundColor: '#4CAF50', color: '#fff' }}>Possible Encounter</Badge>
-        )}
+        {slot.is_encounter && <Badge variant="success">Possible Encounter</Badge>}
       </div>
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
         {slot.pokemons.map((pokemon, idx) => (
@@ -154,10 +152,7 @@ function RocketLineupPage({ filters, onSetFilterOptions }: RocketLineupPageProps
   );
 
   const renderLeaderCard = (leader: string, lineup: RocketSlot[]) => (
-    <Card
-      key={leader}
-      className="overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-soft-lg"
-    >
+    <Card key={leader} className={`overflow-hidden ${INTERACTIVE_CARD_CLASSNAME}`}>
       <div
         className="p-6 text-white"
         style={{
@@ -185,10 +180,7 @@ function RocketLineupPage({ filters, onSetFilterOptions }: RocketLineupPageProps
   );
 
   const renderLeaderListItem = (leader: string, lineup: RocketSlot[]) => (
-    <Card
-      key={leader}
-      className="flex flex-col gap-3 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-soft-lg"
-    >
+    <Card key={leader} className={`flex flex-col gap-3 p-4 ${INTERACTIVE_CARD_CLASSNAME}`}>
       <div className="flex flex-wrap items-center gap-2">
         <Badge style={{ backgroundColor: ROCKET_LEADER_COLORS[leader] || 'hsl(var(--primary))', color: '#fff' }}>
           {leader}
@@ -197,27 +189,31 @@ function RocketLineupPage({ filters, onSetFilterOptions }: RocketLineupPageProps
           {ROCKET_LEADER_DESCRIPTIONS[leader] || 'Team GO Rocket'}
         </p>
       </div>
-      <div className="flex flex-wrap gap-4">
+      <div className="flex flex-col divide-y divide-border rounded-md border border-border">
         {[...lineup]
           .sort((a, b) => a.slot - b.slot)
           .map((slot) => (
-            <div key={slot.slot} className="flex items-center gap-2">
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs font-medium text-muted-foreground">Slot {slot.slot}</span>
+            <div key={slot.slot} className="flex flex-wrap items-center gap-2.5 p-2.5">
+              <div className="flex w-24 shrink-0 flex-col gap-1">
+                <span className="text-xs font-semibold text-muted-foreground">Slot {slot.slot}</span>
                 {slot.is_encounter && (
-                  <Badge size="sm" style={{ backgroundColor: '#4CAF50', color: '#fff' }}>
+                  <Badge size="sm" variant="success" className="w-fit">
                     Encounter
                   </Badge>
                 )}
               </div>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-1 flex-wrap gap-1.5">
                 {slot.pokemons.map((pokemon, idx) => (
-                  <div
-                    key={idx}
-                    className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-md bg-muted"
-                    title={pokemon.name}
-                  >
-                    <img src={pokemon.asset_url} alt={pokemon.name} className="max-h-full max-w-full object-contain" />
+                  <div key={idx} className="flex items-center gap-1.5 rounded-md bg-muted py-1 pl-1 pr-2.5">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-md bg-card">
+                      <img
+                        src={pokemon.asset_url}
+                        alt={pokemon.name}
+                        className="max-h-full max-w-full object-contain"
+                      />
+                    </div>
+                    <span className="text-xs font-medium">{pokemon.name}</span>
+                    {pokemon.shiny_available && <ShinyChip />}
                   </div>
                 ))}
               </div>
@@ -251,7 +247,7 @@ function RocketLineupPage({ filters, onSetFilterOptions }: RocketLineupPageProps
 
       {orderedLeaders.length === 0 && <NoResults />}
 
-      <div className={viewMode === 'grid' ? 'grid grid-cols-1 gap-6 xl:grid-cols-2' : 'flex flex-col gap-2'}>
+      <div className={viewMode === 'grid' ? 'grid grid-cols-1 gap-6 lg:grid-cols-2' : 'flex flex-col gap-2'}>
         {orderedLeaders.map((leader) => {
           const lineup = filteredData[leader];
           if (!lineup || lineup.length === 0) return null;

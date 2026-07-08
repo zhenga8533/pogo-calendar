@@ -11,6 +11,7 @@ interface SectionHeaderProps {
 
 export const SectionHeader = ({ title, count, label, color, className }: SectionHeaderProps) => (
   <div className={cn('mb-3 flex flex-wrap items-center gap-2.5', className)}>
+    {color && <span className="h-5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: color }} />}
     <h2 className="text-xl font-bold leading-tight">{title}</h2>
     <Badge
       className="min-w-0"

@@ -3,7 +3,6 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import listPlugin from '@fullcalendar/list';
 import FullCalendar from '@fullcalendar/react';
-import timeGridPlugin from '@fullcalendar/timegrid';
 import { CalendarX } from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useSettingsContext } from '../../contexts/SettingsContext';
@@ -192,20 +191,12 @@ function EventCalendar({
         <FullCalendar
           key={timezone}
           ref={calendarRef}
-          plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
-          headerToolbar={
-            isMobile
-              ? {
-                  left: 'prev,next',
-                  center: 'title',
-                  right: 'listWeek,dayGridMonth',
-                }
-              : {
-                  left: 'prev,next today',
-                  center: 'title',
-                  right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek',
-                }
-          }
+          plugins={[dayGridPlugin, listPlugin, interactionPlugin]}
+          headerToolbar={{
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,listWeek',
+          }}
           initialView="dayGridMonth"
           events={events}
           eventClick={handleEventClick}

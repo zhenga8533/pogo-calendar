@@ -3,6 +3,8 @@ import { MS_PER_HOUR } from '../config/timeConstants';
 import type { ApiEvent, CalendarEvent } from '../types/events';
 import type { Timezone } from '../types/settings';
 
+type EventDetails = NonNullable<ApiEvent['details']>;
+
 type ApiResponse = Record<string, ApiEvent[]>;
 
 interface TimezoneApiItem {
@@ -80,7 +82,7 @@ function parseApiTime(
  * @param details The details object from the API event.
  * @returns An object containing all detail fields.
  */
-function extractDetails(details?: { [key: string]: string[] }) {
+function extractDetails(details?: EventDetails) {
   if (!details) {
     return {};
   }

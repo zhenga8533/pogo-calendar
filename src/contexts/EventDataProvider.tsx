@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useEventData } from '../hooks/useEventData';
 import { useEventNotes } from '../hooks/useEventNotes';
 import { useSettingsContext } from '../hooks/useSettingsContext';
-import type { CalendarEvent } from '../types/events';
+import { getPokemonName, type CalendarEvent } from '../types/events';
 import { EventDataContext } from './EventDataContext';
 
 export function EventDataProvider({ children }: { children: React.ReactNode }) {
@@ -41,7 +41,7 @@ export function EventDataProvider({ children }: { children: React.ReactNode }) {
       ];
       Object.entries(event.extendedProps).forEach(([key, value]) => {
         if (!nonPokemonFields.includes(key) && Array.isArray(value)) {
-          value.forEach((item) => pokemon.add(item));
+          value.forEach((item) => pokemon.add(getPokemonName(item)));
         }
       });
     });

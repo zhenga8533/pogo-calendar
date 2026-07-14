@@ -4,7 +4,7 @@ import { CUSTOM_EVENT_CATEGORY } from '../../config/constants';
 import { useSettingsContext } from '../../hooks/useSettingsContext';
 import { useNoteEditor } from '../../hooks/useNoteEditor';
 import type { ToastSeverity } from '../../hooks/useToast';
-import type { CalendarEvent } from '../../types/events';
+import type { CalendarEvent, EventPokemon } from '../../types/events';
 import { downloadIcsFile } from '../../utils/calendarUtils';
 import { formatDateLine } from '../../utils/dateUtils';
 import { CategoryTag } from '../shared/CategoryTag';
@@ -47,11 +47,23 @@ interface EventDetailDialogProps {
   showToast: (message: string, severity?: ToastSeverity) => void;
 }
 
-const ChipList = ({ items }: { items: string[] }) => (
+// Normalizes a Pokemon-list entry to a display-ready shape. Handles both the
+// current object format and the legacy plain-name-string format.
+function toDisplayPokemon(item: string | EventPokemon): EventPokemon {
+  return typeof item === 'string'
+    ? { name: item, asset_url: null, shiny_available: false }
+    : item;
+}
+
+const PokemonChipList = ({ items }: { items: (string | EventPokemon)[] }) => (
   <div className="flex flex-wrap gap-1.5">
-    {items.map((item) => (
-      <Badge key={item} variant="muted" className="rounded-lg">
-        {item}
+    {items.map(toDisplayPokemon).map((pokemon) => (
+      <Badge key={pokemon.name} variant="muted" className="gap-1.5 rounded-lg pl-1">
+        {pokemon.asset_url && (
+          <img src={pokemon.asset_url} alt="" className="h-5 w-5 object-contain" />
+        )}
+        {pokemon.name}
+        {pokemon.shiny_available && <span aria-label="Shiny available">✨</span>}
       </Badge>
     ))}
   </div>
@@ -258,7 +270,7 @@ function EventDetailDialog({
                 .map(([key, value]) => (
                   <div key={key} className="py-4">
                     <DetailSection title={getPokemonFieldTitle(key)}>
-                      <ChipList items={value as string[]} />
+                      <PokemonChipList items={value as (string | EventPokemon)[]} />
                     </DetailSection>
                   </div>
                 ))}

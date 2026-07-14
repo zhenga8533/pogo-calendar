@@ -102,6 +102,3 @@ export const RARITY_TIERS: Record<number, { label: string; color: string }> = {
   4: { label: 'Very Rare', color: '#AB47BC' },
   5: { label: 'Ultra Rare', color: '#FFA726' },
 };
-
-// Shiny indicator color
-export const SHINY_COLOR = '#FFD700';

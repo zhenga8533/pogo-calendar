@@ -12,10 +12,17 @@ interface ResearchTaskFilterProps {
   onFilterChange: (newFilters: ResearchTaskFilters) => void;
   onResetFilters: () => void;
   availableCategories: string[];
+  availableRewardTypes: string[];
 }
 
 function ResearchTaskFilter(props: ResearchTaskFilterProps) {
-  const { filters, onFilterChange, onResetFilters, availableCategories } = props;
+  const {
+    filters,
+    onFilterChange,
+    onResetFilters,
+    availableCategories,
+    availableRewardTypes,
+  } = props;
 
   const handleFilterChange = useCallback(
     <K extends keyof ResearchTaskFilters>(field: K, value: ResearchTaskFilters[K]) => {
@@ -74,20 +81,19 @@ function ResearchTaskFilter(props: ResearchTaskFilterProps) {
 
       <Separator />
       <FilterSection title="Reward Types">
-        <label className="flex items-center gap-2.5 text-sm">
-          <Checkbox
-            checked={filters.rewardTypes.includes('encounter')}
-            onCheckedChange={(checked) => handleRewardTypeChange('encounter', checked === true)}
-          />
-          Pokémon Encounters
-        </label>
-        <label className="flex items-center gap-2.5 text-sm">
-          <Checkbox
-            checked={filters.rewardTypes.includes('item')}
-            onCheckedChange={(checked) => handleRewardTypeChange('item', checked === true)}
-          />
-          Items
-        </label>
+        {availableRewardTypes.map((rewardType) => (
+          <label key={rewardType} className="flex items-center gap-2.5 text-sm">
+            <Checkbox
+              checked={filters.rewardTypes.includes(rewardType)}
+              onCheckedChange={(checked) =>
+                handleRewardTypeChange(rewardType, checked === true)
+              }
+            />
+            {rewardType === 'encounter'
+              ? 'Pokémon Encounters'
+              : `${rewardType.charAt(0).toUpperCase()}${rewardType.slice(1)}s`}
+          </label>
+        ))}
       </FilterSection>
 
       <Separator />

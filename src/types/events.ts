@@ -16,8 +16,16 @@ export interface CalendarEvent {
     banner_url: string;
     description?: string;
     bonuses?: string[];
+    is_local_time?: boolean;
+    start_instant?: string;
+    end_instant?: string;
     // All other fields are Pokemon lists.
-    [key: string]: string | string[] | EventPokemon[] | undefined;
+    [key: string]:
+      | string
+      | boolean
+      | string[]
+      | EventPokemon[]
+      | undefined;
   };
 }
 
@@ -29,8 +37,8 @@ export interface ApiEvent {
   end_time: string | number;
   article_url: string;
   banner_url: string;
-  description?: string;
-  details?: {
+  description: string;
+  details: {
     bonuses?: string[];
     // All other fields (spawns, raids, shiny, features, eggs, moves) are Pokemon lists.
     [key: string]: string[] | EventPokemon[] | undefined;

@@ -1,46 +1,65 @@
 import { createEvent, createEvents, type EventAttributes } from 'ics';
 import type { CalendarEvent } from '../types/events';
+import { getEventInstant } from './eventTimeUtils';
+
+function toIcsDate(
+  date: Date,
+  useUtc: boolean
+): EventAttributes['start'] {
+  return useUtc
+    ? [
+        date.getUTCFullYear(),
+        date.getUTCMonth() + 1,
+        date.getUTCDate(),
+        date.getUTCHours(),
+        date.getUTCMinutes(),
+      ]
+    : [
+        date.getFullYear(),
+        date.getMonth() + 1,
+        date.getDate(),
+        date.getHours(),
+        date.getMinutes(),
+      ];
+}
 
 /**
  * Converts a CalendarEvent to an ICS EventAttributes object.
  *
  * @param event The calendar event to convert.
- * @param onError Optional callback for error handling.
  * @returns The ICS event attributes or null if the event is invalid.
  */
 function eventToIcsAttributes(
-  event: CalendarEvent,
-  onError?: (message: string) => void
+  event: CalendarEvent
 ): EventAttributes | null {
   if (!event.start || !event.end) {
     const errorMsg = 'Cannot create calendar file for event with no start or end date.';
     console.error(errorMsg);
-    onError?.(errorMsg);
     return null;
   }
 
-  const start = new Date(event.start);
-  const end = new Date(event.end);
+  const usesAbsoluteTime = event.extendedProps.is_local_time === false;
+  const start = usesAbsoluteTime
+    ? getEventInstant(event, 'start')
+    : new Date(event.start);
+  const end = usesAbsoluteTime
+    ? getEventInstant(event, 'end')
+    : new Date(event.end);
+
+  if (!start || !end || isNaN(start.getTime()) || isNaN(end.getTime())) {
+    console.error('Cannot create calendar file for event with invalid dates.');
+    return null;
+  }
 
   return {
     title: event.title,
-    start: [
-      start.getFullYear(),
-      start.getMonth() + 1,
-      start.getDate(),
-      start.getHours(),
-      start.getMinutes(),
-    ],
-    end: [
-      end.getFullYear(),
-      end.getMonth() + 1,
-      end.getDate(),
-      end.getHours(),
-      end.getMinutes(),
-    ],
+    start: toIcsDate(start, usesAbsoluteTime),
+    end: toIcsDate(end, usesAbsoluteTime),
     description: `For more details, visit: ${event.extendedProps.article_url}`,
     url: event.extendedProps.article_url,
     calName: 'Pokémon GO Event Calendar',
+    startInputType: usesAbsoluteTime ? 'utc' : 'local',
+    startOutputType: usesAbsoluteTime ? 'utc' : 'local',
   };
 }
 
@@ -71,29 +90,26 @@ function triggerIcsDownload(content: string, filename: string): void {
  * Download an .ics file for a given calendar event.
  *
  * @param event The calendar event to create the .ics file for.
- * @param onError Optional callback for error notification.
- * @returns {void}
+ * @returns A promise that resolves after the download starts.
  */
 export function downloadIcsFile(
-  event: CalendarEvent,
-  onError?: (message: string) => void
-) {
-  const eventAttributes = eventToIcsAttributes(event, onError);
+  event: CalendarEvent
+): Promise<void> {
+  const eventAttributes = eventToIcsAttributes(event);
   if (!eventAttributes) {
-    return;
+    return Promise.reject(new Error('Cannot export an event with invalid dates'));
   }
 
-  // Generate the .ics file content
-  createEvent(eventAttributes, (error, value) => {
-    if (error) {
-      const errorMsg = 'Failed to generate calendar file';
-      console.error(errorMsg, error);
-      onError?.(errorMsg);
-      return;
-    }
-
-    const filename = `${event.title.replace(/[^a-zA-Z0-9]/g, '_')}.ics`;
-    triggerIcsDownload(value, filename);
+  return new Promise((resolve, reject) => {
+    createEvent(eventAttributes, (error, value) => {
+      if (error) {
+        reject(new Error('Failed to generate calendar file', { cause: error }));
+        return;
+      }
+      const filename = `${event.title.replace(/[^a-zA-Z0-9]/g, '_')}.ics`;
+      triggerIcsDownload(value, filename);
+      resolve();
+    });
   });
 }
 
@@ -101,33 +117,31 @@ export function downloadIcsFile(
  * Download an .ics file for multiple calendar events.
  *
  * @param events Array of calendar events to create the .ics file for.
- * @param onError Optional callback for error notification.
+ * @returns A promise that resolves after the download starts.
  */
 export function downloadIcsForEvents(
-  events: CalendarEvent[],
-  onError?: (message: string) => void
-) {
+  events: CalendarEvent[]
+): Promise<void> {
   const eventAttributesList: EventAttributes[] = events
     .map((event) => eventToIcsAttributes(event))
     .filter((attr): attr is EventAttributes => attr !== null);
 
-  if (eventAttributesList.length === 0) {
-    const errorMsg = 'No valid events to export';
+  if (events.length === 0 || eventAttributesList.length !== events.length) {
+    const errorMsg = 'One or more selected events have invalid dates';
     console.error(errorMsg);
-    onError?.(errorMsg);
-    return;
+    return Promise.reject(new Error(errorMsg));
   }
 
-  // Generate the .ics file content
-  createEvents(eventAttributesList, (error, value) => {
-    if (error) {
-      const errorMsg = 'Failed to generate calendar export file';
-      console.error(errorMsg, error);
-      onError?.(errorMsg);
-      return;
-    }
-
-    const filename = 'pogo-calendar-export.ics';
-    triggerIcsDownload(value, filename);
+  return new Promise((resolve, reject) => {
+    createEvents(eventAttributesList, (error, value) => {
+      if (error) {
+        reject(
+          new Error('Failed to generate calendar export file', { cause: error })
+        );
+        return;
+      }
+      triggerIcsDownload(value, 'pogo-calendar-export.ics');
+      resolve();
+    });
   });
 }

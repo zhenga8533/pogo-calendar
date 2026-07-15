@@ -39,7 +39,6 @@ export default defineConfig({
           'fullcalendar-core': ['@fullcalendar/core', '@fullcalendar/react'],
           'fullcalendar-plugins': [
             '@fullcalendar/daygrid',
-            '@fullcalendar/timegrid',
             '@fullcalendar/list',
             '@fullcalendar/interaction',
           ],

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ShinyChip } from '../components/filters/shared';
 import { DataErrorDisplay } from '../components/shared/DataErrorDisplay';
+import { DataImage } from '../components/shared/DataImage';
 import { DataLoadingSkeleton } from '../components/shared/DataLoadingSkeleton';
 import { NoResults } from '../components/shared/NoResults';
 import { PageHeader } from '../components/shared/PageHeader';
@@ -67,7 +68,13 @@ function RaidBossesPage({ filters, onSetFilterOptions }: RaidBossesPageProps) {
             return false;
           }
         }
-        if (boss.cp_range.max < filters.minCP || boss.cp_range.min > filters.maxCP) {
+        const cpFilterActive = filters.minCP > 0 || filters.maxCP < 60000;
+        if (
+          cpFilterActive &&
+          (!boss.cp_range ||
+            boss.cp_range.max < filters.minCP ||
+            boss.cp_range.min > filters.maxCP)
+        ) {
           return false;
         }
         return true;
@@ -95,7 +102,7 @@ function RaidBossesPage({ filters, onSetFilterOptions }: RaidBossesPageProps) {
       className={`flex h-full flex-col overflow-hidden ${INTERACTIVE_CARD_CLASSNAME}`}
     >
       <div className="flex h-36 items-center justify-center bg-muted p-4">
-        <img src={boss.asset_url} alt={boss.name} className="max-h-full max-w-full object-contain" />
+        <DataImage src={boss.asset_url} alt={boss.name} className="max-h-full max-w-full object-contain" />
       </div>
       <div className="flex-1 p-4">
         <p className="mb-2.5 text-center text-base font-semibold sm:text-lg">{boss.name}</p>
@@ -121,13 +128,17 @@ function RaidBossesPage({ filters, onSetFilterOptions }: RaidBossesPageProps) {
             <div className="p-3">
               <p className="text-xs text-muted-foreground">Normal CP</p>
               <p className="text-sm font-semibold">
-                {boss.cp_range.min.toLocaleString()} - {boss.cp_range.max.toLocaleString()}
+                {boss.cp_range
+                  ? `${boss.cp_range.min.toLocaleString()} - ${boss.cp_range.max.toLocaleString()}`
+                  : 'Unknown'}
               </p>
             </div>
             <div className="p-3">
               <p className="text-xs text-muted-foreground">Boosted CP</p>
               <p className="text-sm font-semibold">
-                {boss.boosted_cp_range.min.toLocaleString()} - {boss.boosted_cp_range.max.toLocaleString()}
+                {boss.boosted_cp_range
+                  ? `${boss.boosted_cp_range.min.toLocaleString()} - ${boss.boosted_cp_range.max.toLocaleString()}`
+                  : 'Unknown'}
               </p>
             </div>
           </div>
@@ -139,7 +150,7 @@ function RaidBossesPage({ filters, onSetFilterOptions }: RaidBossesPageProps) {
   const renderRaidBossListItem = (boss: RaidBoss) => (
     <Card key={boss.name} className={`flex w-full items-center gap-3 p-3 ${INTERACTIVE_CARD_CLASSNAME}`}>
       <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted">
-        <img src={boss.asset_url} alt={boss.name} className="max-h-full max-w-full object-contain" />
+        <DataImage src={boss.asset_url} alt={boss.name} className="max-h-full max-w-full object-contain" />
       </div>
       <div className="min-w-0 flex-1">
         <div className="mb-1 flex flex-wrap items-center gap-1.5">
@@ -160,7 +171,9 @@ function RaidBossesPage({ filters, onSetFilterOptions }: RaidBossesPageProps) {
       </div>
       <div className="hidden min-w-[100px] text-right sm:block">
         <p className="text-xs text-muted-foreground">CP Range</p>
-        <p className="text-sm font-semibold">{boss.cp_range.max.toLocaleString()}</p>
+        <p className="text-sm font-semibold">
+          {boss.cp_range ? boss.cp_range.max.toLocaleString() : 'Unknown'}
+        </p>
       </div>
     </Card>
   );

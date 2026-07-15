@@ -1,5 +1,5 @@
 import { lazy, Suspense, useCallback, useMemo, useState } from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import CreateEventDialog from './components/events/CreateEventDialog';
 import { ExportEventDialog } from './components/events/ExportEventDialog';
 import Footer from './components/layout/Footer';
@@ -79,7 +79,8 @@ function App() {
 
   const [researchTaskOptions, setResearchTaskOptions] = useState<{
     categories: string[];
-  }>({ categories: [] });
+    rewardTypes: string[];
+  }>({ categories: [], rewardTypes: [] });
 
   const [rocketLineupOptions, setRocketLineupOptions] = useState<{
     leaders: string[];
@@ -157,9 +158,18 @@ function App() {
   );
 
   const handleExport = useCallback(
-    (eventsToExport: CalendarEvent[]) => {
-      downloadIcsForEvents(eventsToExport, (error) => showToast(error, 'error'));
-      showToast(`Exported ${eventsToExport.length} events!`, 'success');
+    async (eventsToExport: CalendarEvent[]) => {
+      try {
+        await downloadIcsForEvents(eventsToExport);
+        showToast(`Exported ${eventsToExport.length} events!`, 'success');
+      } catch (error) {
+        showToast(
+          error instanceof Error
+            ? error.message
+            : 'Failed to generate calendar export file',
+          'error'
+        );
+      }
     },
     [showToast]
   );
@@ -267,6 +277,7 @@ function App() {
                 }
               />
               <Route path={ROUTES.FAQ} element={<FaqPage />} />
+              <Route path="*" element={<Navigate to={ROUTES.CALENDAR} replace />} />
             </Routes>
           </Suspense>
         </ErrorBoundary>

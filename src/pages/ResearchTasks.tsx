@@ -2,6 +2,7 @@ import { ChevronDown } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { ShinyChip } from '../components/filters/shared';
 import { DataErrorDisplay } from '../components/shared/DataErrorDisplay';
+import { DataImage } from '../components/shared/DataImage';
 import { DataLoadingSkeleton } from '../components/shared/DataLoadingSkeleton';
 import { NoResults } from '../components/shared/NoResults';
 import { PageHeader } from '../components/shared/PageHeader';
@@ -19,7 +20,7 @@ import type { ResearchTask, ResearchTaskData, TaskReward } from '../types/resear
 
 interface ResearchTasksPageProps {
   filters: ResearchTaskFilters;
-  onSetFilterOptions: (options: { categories: string[] }) => void;
+  onSetFilterOptions: (options: { categories: string[]; rewardTypes: string[] }) => void;
 }
 
 function ResearchTasksPage({ filters, onSetFilterOptions }: ResearchTasksPageProps) {
@@ -33,7 +34,14 @@ function ResearchTasksPage({ filters, onSetFilterOptions }: ResearchTasksPagePro
   useEffect(() => {
     if (data) {
       const categories = Object.keys(data);
-      onSetFilterOptions({ categories });
+      const rewardTypes = Array.from(
+        new Set(
+          Object.values(data).flatMap((tasks) =>
+            tasks.flatMap((task) => task.rewards.map((reward) => reward.type))
+          )
+        )
+      ).sort();
+      onSetFilterOptions({ categories, rewardTypes });
     }
   }, [data, onSetFilterOptions]);
 
@@ -97,7 +105,7 @@ function ResearchTasksPage({ filters, onSetFilterOptions }: ResearchTasksPagePro
   const renderReward = (reward: TaskReward, index: number) => (
     <div key={index} className="flex min-h-20 items-center rounded-lg border border-border bg-muted p-4">
       <div className="mr-3 flex h-14 w-14 min-w-14 items-center justify-center overflow-hidden rounded-md bg-card">
-        <img src={reward.asset_url} alt={reward.name} className="max-h-full max-w-full object-contain" />
+        <DataImage src={reward.asset_url} alt={reward.name} className="max-h-full max-w-full object-contain" />
       </div>
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-semibold">
@@ -106,7 +114,9 @@ function ResearchTasksPage({ filters, onSetFilterOptions }: ResearchTasksPagePro
         </p>
         <div className="mt-1 flex flex-wrap gap-1">
           <Badge size="sm" variant={reward.type === 'encounter' ? 'success' : 'secondary'}>
-            {reward.type === 'encounter' ? 'Pokémon' : 'Item'}
+            {reward.type === 'encounter'
+              ? 'Pokémon'
+              : reward.type.charAt(0).toUpperCase() + reward.type.slice(1)}
           </Badge>
           {reward.shiny_available && <ShinyChip />}
         </div>
@@ -132,7 +142,7 @@ function ResearchTasksPage({ filters, onSetFilterOptions }: ResearchTasksPagePro
                   style={{ zIndex: 4 - idx }}
                   title={reward.name}
                 >
-                  <img src={reward.asset_url} alt={reward.name} className="max-h-full max-w-full object-contain p-0.5" />
+                  <DataImage src={reward.asset_url} alt={reward.name} className="max-h-full max-w-full object-contain p-0.5" />
                 </div>
               ))}
               {task.rewards.length > 4 && (
@@ -150,7 +160,7 @@ function ResearchTasksPage({ filters, onSetFilterOptions }: ResearchTasksPagePro
             {task.rewards.map((reward, idx) => (
               <div key={idx} className="flex items-center gap-2">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted">
-                  <img src={reward.asset_url} alt={reward.name} className="max-h-full max-w-full object-contain" />
+                  <DataImage src={reward.asset_url} alt={reward.name} className="max-h-full max-w-full object-contain" />
                 </div>
                 <p className="min-w-0 flex-1 truncate text-xs font-medium">
                   {reward.name}

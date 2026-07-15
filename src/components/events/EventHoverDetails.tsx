@@ -82,7 +82,10 @@ function EventHoverDetails({ open, mousePosition, event }: EventHoverDetailsProp
         <h3 className="mb-2 text-[1.05rem] font-bold leading-snug">{event.title}</h3>
         <div className="flex flex-wrap items-center gap-1.5">
           <CategoryTag category={event.extendedProps.category} />
-          <EventStatusTag start={event.start} end={event.end} />
+          <EventStatusTag
+            start={event.extendedProps.start_instant ?? event.start}
+            end={event.extendedProps.end_instant ?? event.end}
+          />
         </div>
       </div>
 

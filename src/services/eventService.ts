@@ -1,9 +1,13 @@
 import { GITHUB_EVENTS_API_URL, TIMEZONES_API_URL } from '../config/api';
-import { MS_PER_HOUR } from '../config/timeConstants';
 import type { ApiEvent, CalendarEvent } from '../types/events';
 import type { Timezone } from '../types/settings';
+import {
+  formatInstantInTimeZone,
+  localDateTimeToInstant,
+} from '../utils/eventTimeUtils';
+import { parseEventData } from './dataValidation';
 
-type EventDetails = NonNullable<ApiEvent['details']>;
+type EventDetails = ApiEvent['details'];
 
 type ApiResponse = Record<string, ApiEvent[]>;
 
@@ -27,8 +31,8 @@ function parseApiTime(
     }
     return time;
   } else if (typeof time === 'number') {
-    // Validate UNIX timestamp (should be positive and reasonable)
-    if (time < 0 || time > 2147483647) {
+    // Validate a non-negative integer UNIX timestamp.
+    if (!Number.isInteger(time) || time < 0) {
       throw new Error(`Invalid UNIX timestamp: ${time}`);
     }
     date = new Date(time * 1000);
@@ -41,38 +45,17 @@ function parseApiTime(
     );
   }
 
-  // Transform to the specified timezone
-  const options: Intl.DateTimeFormatOptions = {
-    timeZone: timezone,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false,
-  };
+  return formatInstantInTimeZone(date, timezone);
+}
 
-  try {
-    const formatter = new Intl.DateTimeFormat('en-US', options);
-    const parts = formatter.formatToParts(date);
-    const year = parts.find((p) => p.type === 'year')?.value;
-    const month = parts.find((p) => p.type === 'month')?.value;
-    const day = parts.find((p) => p.type === 'day')?.value;
-    const hour = parts.find((p) => p.type === 'hour')?.value;
-    const minute = parts.find((p) => p.type === 'minute')?.value;
-    const second = parts.find((p) => p.type === 'second')?.value;
-
-    if (!year || !month || !day || !hour || !minute || !second) {
-      throw new Error('Failed to format date parts');
-    }
-
-    return `${year}-${month}-${day}T${hour}:${minute}:${second}`;
-  } catch (error) {
-    console.error(`Error formatting date for timezone ${timezone}:`, error);
-    // Fallback to ISO string if timezone formatting fails
-    return date.toISOString();
-  }
+function getApiInstant(
+  time: string | number,
+  isLocal: boolean,
+  timezone: string
+): string {
+  return isLocal
+    ? localDateTimeToInstant(String(time), timezone).toISOString()
+    : new Date(Number(time) * 1000).toISOString();
 }
 
 /**
@@ -82,12 +65,7 @@ function parseApiTime(
  * @param details The details object from the API event.
  * @returns An object containing all detail fields.
  */
-function extractDetails(details?: EventDetails) {
-  if (!details) {
-    return {};
-  }
-
-  // Pass through all fields as-is
+function extractDetails(details: EventDetails) {
   return { ...details };
 }
 
@@ -113,9 +91,21 @@ function transformApiData(
           event.is_local_time,
           timezone
         );
-        const endTime = event.end_time
-          ? parseApiTime(event.end_time, event.is_local_time, timezone)
-          : new Date(new Date(startTime).getTime() + MS_PER_HOUR).toISOString();
+        const endTime = parseApiTime(
+          event.end_time,
+          event.is_local_time,
+          timezone
+        );
+        const startInstant = getApiInstant(
+          event.start_time,
+          event.is_local_time,
+          timezone
+        );
+        const endInstant = getApiInstant(
+          event.end_time,
+          event.is_local_time,
+          timezone
+        );
 
         events.push({
           title: event.title,
@@ -126,6 +116,9 @@ function transformApiData(
             article_url: event.article_url,
             banner_url: event.banner_url,
             description: event.description,
+            is_local_time: event.is_local_time,
+            start_instant: startInstant,
+            end_instant: endInstant,
             ...extractedDetails,
           },
         });
@@ -153,7 +146,7 @@ export const fetchEvents = async (
     throw new Error(`API request failed with status ${response.status}`);
   }
 
-  const data: ApiResponse = await response.json();
+  const data: ApiResponse = parseEventData(await response.json());
 
   return transformApiData(data, timezone);
 };
@@ -170,10 +163,18 @@ export const fetchTimezones = async (): Promise<Timezone[]> => {
       `Timezone API request failed with status ${response.status}`
     );
   }
-  const data: TimezoneApiItem[] = await response.json();
-  // Map the fetched data to a format that's easier to use in the Select component
-  return data.map((tz) => ({
-    text: tz.text,
-    value: tz.utc[0],
-  }));
+  const data: unknown = await response.json();
+  if (!Array.isArray(data)) {
+    throw new Error('Timezone API returned an invalid response');
+  }
+
+  return data.flatMap((item) => {
+    if (!item || typeof item !== 'object') return [];
+    const timezone = item as Partial<TimezoneApiItem>;
+    const value = timezone.utc?.[0];
+    if (typeof timezone.text !== 'string' || typeof value !== 'string') {
+      return [];
+    }
+    return [{ text: timezone.text, value }];
+  });
 };

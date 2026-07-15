@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { GITHUB_LAST_UPDATED_API_URL } from '../config/api';
 
 interface GitHubCommitResponseItem {
@@ -19,8 +19,10 @@ export function useLastUpdated() {
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const requestIdRef = useRef(0);
 
   const refetch = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
     setLoading(true);
     setError(null);
     try {
@@ -34,21 +36,28 @@ export function useLastUpdated() {
       if (data && data.length > 0) {
         const lastCommitDate = new Date(data[0].commit.committer.date);
         const formattedDate = format(lastCommitDate, 'MMM d, h:mm a');
-        setLastUpdated(formattedDate);
+        if (requestId === requestIdRef.current) {
+          setLastUpdated(formattedDate);
+        }
       } else {
-        setLastUpdated('N/A');
+        if (requestId === requestIdRef.current) setLastUpdated('N/A');
       }
     } catch (err: unknown) {
-      setError('Could not load update time.');
+      if (requestId === requestIdRef.current) {
+        setError('Could not load update time.');
+      }
       console.error(err);
       throw err; // Re-throw error for the caller to handle
     } finally {
-      setLoading(false);
+      if (requestId === requestIdRef.current) setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    refetch();
+    void refetch().catch(() => undefined);
+    return () => {
+      requestIdRef.current += 1;
+    };
   }, [refetch]);
 
   return { lastUpdated, loading, error, refetch };

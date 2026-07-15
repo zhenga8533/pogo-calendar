@@ -1,7 +1,7 @@
 export interface RocketPokemon {
   name: string;
   shiny_available: boolean;
-  asset_url: string;
+  asset_url: string | null;
 }
 
 export interface RocketSlot {

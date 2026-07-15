@@ -14,7 +14,7 @@ You can view the live application here: `https://zhenga8533.github.io/pogo-calen
 
 ### Dynamic Calendar & Theming
 
-- **Multiple Views:** View events in a full calendar with Month, Week, Day, and List views, powered by FullCalendar.
+- **Multiple Views:** View events in responsive month and weekly list views, powered by FullCalendar.
 - **Light & Dark Modes:** A theme toggle with persistence in `localStorage`.
 - **Custom Dark Mode Theming:** Thoroughly styled dark mode that covers all aspects of the calendar, including headers and pop-ups.
 - **Responsive Header:** A modern "glassmorphism" header that becomes opaque on scroll and adapts its layout for mobile.
@@ -39,7 +39,7 @@ You can view the live application here: `https://zhenga8533.github.io/pogo-calen
 - **Page-Specific Filters:** Each data page has tailored filters (tiers, types, shiny status, regions, etc.) with search and bulk selection.
 - **Optimized Category Filter:** Modern pop-up menu for category selection with grouping, color keys, "Select All," and "Clear All" actions.
 - **Integrated "Saved" Filter:** Filter by your saved events directly from the category menu.
-- **Persistent State:** All filter settings are preserved in `localStorage`.
+- **Persistent State:** Calendar filters, custom events, saved events, notes, and settings are preserved in `localStorage`.
 
 ### Polished User Experience
 
@@ -93,7 +93,6 @@ src/
 │   │   │   ├── FilterSection.tsx
 │   │   │   ├── FilterActions.tsx
 │   │   │   ├── ShinyChip.tsx
-│   │   │   ├── BaseFilterCard.tsx
 │   │   │   └── index.ts
 │   │   ├── AdvancedFilter.tsx
 │   │   ├── EventFilter.tsx
@@ -113,7 +112,6 @@ src/
 │       ├── PageHeader.tsx
 │       ├── EventStatusTag.tsx
 │       ├── PageLoader.tsx
-│       ├── NextEventTracker.tsx
 │       ├── ScrollToTop.tsx
 │       ├── SettingsDialog.tsx
 │       ├── DeleteConfirmationDialog.tsx
@@ -126,11 +124,15 @@ src/
 │   ├── timeConstants.ts
 │   └── routes.ts
 ├── contexts/             # React contexts for state management
-│   ├── CalendarContext.tsx
-│   ├── EventDataContext.tsx
-│   ├── FilterContext.tsx
-│   ├── CustomEventsContext.tsx
-│   └── SettingsContext.tsx
+│   ├── CalendarProvider.tsx
+│   ├── EventDataContext.ts
+│   ├── EventDataProvider.tsx
+│   ├── FilterContext.ts
+│   ├── FilterProvider.tsx
+│   ├── CustomEventsContext.ts
+│   ├── CustomEventsProvider.tsx
+│   ├── SettingsContext.ts
+│   └── SettingsProvider.tsx
 ├── hooks/                # Custom React hooks
 │   ├── useEventData.ts
 │   ├── useFilters.ts
@@ -140,7 +142,6 @@ src/
 │   ├── useCustomEvents.ts
 │   ├── useEventNotes.ts
 │   ├── useEventStatus.ts
-│   ├── useNextUpcomingEvent.ts
 │   ├── useLastUpdated.ts
 │   ├── useDialogs.ts
 │   ├── useToast.ts
@@ -154,9 +155,10 @@ src/
 │   └── Faq.tsx
 ├── services/             # API services
 │   ├── eventService.ts   # Calendar event fetching
-│   └── dataService.ts    # Game data fetching
+│   ├── dataService.ts    # Game data fetching
+│   └── dataValidation.ts # Runtime validation for leak-duck data
 ├── styles/               # Global styles
-│   └── calendarDarkStyles.tsx
+│   └── calendar.css
 ├── types/                # TypeScript definitions
 │   ├── events.ts
 │   ├── filters.ts
@@ -170,6 +172,7 @@ src/
     ├── colorUtils.ts
     ├── dateUtils.ts
     ├── storageUtils.ts
+    ├── eventTimeUtils.ts
     └── calendarUtils.ts
 ```
 
@@ -178,12 +181,18 @@ src/
 - **Context-based State Management:** Separate contexts for calendar, events, filters, and settings
 - **Custom Hooks:** Business logic separated into reusable hooks
 - **Lazy Loading:** Page components are lazy-loaded for better performance
-- **Centralized Services:** API calls abstracted into service modules
+- **Validated Data Boundaries:** Remote `leak-duck` JSON is parsed and validated before entering application state
+- **GitHub Pages Routing:** Hash-based routes support direct navigation and refreshes on static hosting
 - **Type Safety:** Full TypeScript coverage with comprehensive type definitions
 
 ---
 
 ## Getting Started
+
+### Prerequisites
+
+- Node.js 22
+- npm
 
 ### Installation
 
@@ -204,6 +213,15 @@ src/
 
 ```bash
 npm run dev
+```
+
+### Validation
+
+```bash
+npm run lint
+npm test
+npm run typecheck
+npm run build
 ```
 
 ---

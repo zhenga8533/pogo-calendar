@@ -1,15 +1,14 @@
+export interface CPRange {
+  min: number;
+  max: number;
+}
+
 export interface RaidBoss {
   name: string;
   tier: number;
   shiny_available: boolean;
-  cp_range: {
-    min: number;
-    max: number;
-  };
-  boosted_cp_range: {
-    min: number;
-    max: number;
-  };
+  cp_range: CPRange;
+  boosted_cp_range: CPRange;
   types: string[];
   asset_url: string;
 }

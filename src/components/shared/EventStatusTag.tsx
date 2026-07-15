@@ -1,16 +1,16 @@
 import React, { useMemo } from 'react';
 import { useEventStatus } from '../../hooks/useEventStatus';
-import { cn } from '../../lib/utils';
+import { Badge } from '../ui/badge';
 
 interface EventStatusTagProps {
   start: string | null;
   end: string | null;
 }
 
-const statusClasses: Record<'active' | 'upcoming' | 'finished', string> = {
-  active: 'bg-success text-success-foreground',
-  upcoming: 'bg-warning text-warning-foreground',
-  finished: 'bg-muted text-muted-foreground',
+const statusVariant: Record<'active' | 'upcoming' | 'finished', 'success' | 'warning' | 'muted'> = {
+  active: 'success',
+  upcoming: 'warning',
+  finished: 'muted',
 };
 
 function EventStatusTagComponent({ start, end }: EventStatusTagProps) {
@@ -25,14 +25,9 @@ function EventStatusTagComponent({ start, end }: EventStatusTagProps) {
   if (!status) return null;
 
   return (
-    <span
-      className={cn(
-        'inline-flex h-6 items-center whitespace-nowrap rounded-md px-2.5 text-xs font-semibold',
-        statusClasses[status]
-      )}
-    >
+    <Badge variant={statusVariant[status]} className="h-6 whitespace-nowrap px-2.5">
       {label}
-    </span>
+    </Badge>
   );
 }
 

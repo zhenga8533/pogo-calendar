@@ -3,7 +3,7 @@
  * @param key The localStorage key
  * @returns The stored value or null if not found or error occurred
  */
-export function safeGetItem(key: string): string | null {
+function safeGetItem(key: string): string | null {
   try {
     return localStorage.getItem(key);
   } catch (error) {
@@ -18,7 +18,7 @@ export function safeGetItem(key: string): string | null {
  * @param value The value to store
  * @returns True if successful, false otherwise
  */
-export function safeSetItem(key: string, value: string): boolean {
+function safeSetItem(key: string, value: string): boolean {
   try {
     localStorage.setItem(key, value);
     return true;
@@ -28,24 +28,6 @@ export function safeSetItem(key: string, value: string): boolean {
     if (error instanceof DOMException && error.name === 'QuotaExceededError') {
       console.error('LocalStorage quota exceeded. Consider clearing old data.');
     }
-    return false;
-  }
-}
-
-/**
- * Safely removes an item from localStorage with error handling
- * @param key The localStorage key
- * @returns True if successful, false otherwise
- */
-export function safeRemoveItem(key: string): boolean {
-  try {
-    localStorage.removeItem(key);
-    return true;
-  } catch (error) {
-    console.error(
-      `Failed to remove item from localStorage (key: ${key}):`,
-      error
-    );
     return false;
   }
 }

@@ -11,7 +11,7 @@ import { CUSTOM_EVENT_CATEGORY } from '../../config/constants';
 import { useNoteEditor } from '../../hooks/useNoteEditor';
 import { useSettingsContext } from '../../hooks/useSettingsContext';
 import type { ToastSeverity } from '../../hooks/useToast';
-import type { CalendarEvent, EventPokemon } from '../../types/events';
+import { toDisplayPokemon, type CalendarEvent, type EventPokemon } from '../../types/events';
 import { downloadIcsFile } from '../../utils/calendarUtils';
 import { formatDateLine } from '../../utils/dateUtils';
 import { CategoryTag } from '../shared/CategoryTag';
@@ -54,14 +54,6 @@ interface EventDetailDialogProps {
   eventNotes: Record<string, string>;
   onEditEvent: (event: CalendarEvent) => void;
   showToast: (message: string, severity?: ToastSeverity) => void;
-}
-
-// Normalizes a Pokemon-list entry to a display-ready shape. Handles both the
-// current object format and the legacy plain-name-string format.
-function toDisplayPokemon(item: string | EventPokemon): EventPokemon {
-  return typeof item === 'string'
-    ? { name: item, asset_url: null, shiny_available: false }
-    : item;
 }
 
 const PokemonBadge = ({ pokemon }: { pokemon: EventPokemon }) => {

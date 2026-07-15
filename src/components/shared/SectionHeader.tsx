@@ -1,5 +1,6 @@
 import { Badge } from '../ui/badge';
 import { cn } from '../../lib/utils';
+import { contrastColor } from '../../utils/colorUtils';
 
 interface SectionHeaderProps {
   title: string;
@@ -15,7 +16,7 @@ export const SectionHeader = ({ title, count, label, color, className }: Section
     <h2 className="text-xl font-bold leading-tight">{title}</h2>
     <Badge
       className="min-w-0"
-      style={color ? { backgroundColor: color, color: '#fff' } : undefined}
+      style={color ? { backgroundColor: color, color: contrastColor(color) } : undefined}
     >
       {count} {label}
     </Badge>

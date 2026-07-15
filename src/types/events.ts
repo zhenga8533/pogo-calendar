@@ -44,9 +44,16 @@ export type NewEventData = {
 };
 
 /**
- * Returns the display name for a Pokemon-list entry, which may be a plain
- * name string (legacy format) or an EventPokemon object (current format).
+ * Normalizes a Pokemon-list entry to a display-ready shape, which may be a
+ * plain name string (legacy format) or an EventPokemon object (current format).
+ */
+export function toDisplayPokemon(item: string | EventPokemon): EventPokemon {
+  return typeof item === 'string' ? { name: item, asset_url: null, shiny_available: false } : item;
+}
+
+/**
+ * Returns the display name for a Pokemon-list entry.
  */
 export function getPokemonName(item: string | EventPokemon): string {
-  return typeof item === 'string' ? item : item.name;
+  return toDisplayPokemon(item).name;
 }

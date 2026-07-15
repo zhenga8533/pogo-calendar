@@ -22,6 +22,7 @@ import { UnsavedChangesDialog } from '../shared/UnsavedChangesDialog';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Dialog, DialogContent } from '../ui/dialog';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '../ui/hover-card';
 import { Separator } from '../ui/separator';
 import { Textarea } from '../ui/textarea';
 
@@ -63,26 +64,45 @@ function toDisplayPokemon(item: string | EventPokemon): EventPokemon {
     : item;
 }
 
+const PokemonBadge = ({ pokemon }: { pokemon: EventPokemon }) => {
+  const badge = (
+    <Badge variant="muted" className="gap-1.5 rounded-lg pl-1">
+      {pokemon.asset_url && (
+        <img
+          src={pokemon.asset_url}
+          alt=""
+          className="h-5 w-5 object-contain"
+        />
+      )}
+      {pokemon.name}
+      {pokemon.shiny_available && (
+        <Sparkles className="h-3.5 w-3.5" aria-label="Shiny available" />
+      )}
+    </Badge>
+  );
+
+  if (!pokemon.asset_url) {
+    return badge;
+  }
+
+  return (
+    <HoverCard openDelay={150} closeDelay={0}>
+      <HoverCardTrigger asChild>{badge}</HoverCardTrigger>
+      <HoverCardContent className="flex w-auto items-center justify-center p-2">
+        <img
+          src={pokemon.asset_url}
+          alt={pokemon.name}
+          className="h-20 w-20 object-contain"
+        />
+      </HoverCardContent>
+    </HoverCard>
+  );
+};
+
 const PokemonChipList = ({ items }: { items: (string | EventPokemon)[] }) => (
   <div className="flex flex-wrap gap-1.5">
     {items.map(toDisplayPokemon).map((pokemon) => (
-      <Badge
-        key={pokemon.name}
-        variant="muted"
-        className="gap-1.5 rounded-lg pl-1"
-      >
-        {pokemon.asset_url && (
-          <img
-            src={pokemon.asset_url}
-            alt=""
-            className="h-5 w-5 object-contain"
-          />
-        )}
-        {pokemon.name}
-        {pokemon.shiny_available && (
-          <Sparkles className="h-3.5 w-3.5" aria-label="Shiny available" />
-        )}
-      </Badge>
+      <PokemonBadge key={pokemon.name} pokemon={pokemon} />
     ))}
   </div>
 );

@@ -16,6 +16,7 @@ import { usePageData } from '../hooks/usePageData';
 import { fetchRocketLineup } from '../services/dataService';
 import type { RocketLineupFilters } from '../types/pageFilters';
 import type { RocketLeader, RocketLineupData, RocketPokemon, RocketSlot } from '../types/rocketLineup';
+import { contrastColor } from '../utils/colorUtils';
 
 const LEADER_ORDER: RocketLeader[] = ['Giovanni', 'Cliff', 'Sierra', 'Arlo'];
 
@@ -182,7 +183,12 @@ function RocketLineupPage({ filters, onSetFilterOptions }: RocketLineupPageProps
   const renderLeaderListItem = (leader: string, lineup: RocketSlot[]) => (
     <Card key={leader} className={`flex flex-col gap-3 p-4 ${INTERACTIVE_CARD_CLASSNAME}`}>
       <div className="flex flex-wrap items-center gap-2">
-        <Badge style={{ backgroundColor: ROCKET_LEADER_COLORS[leader] || 'hsl(var(--primary))', color: '#fff' }}>
+        <Badge
+          style={{
+            backgroundColor: ROCKET_LEADER_COLORS[leader] || 'hsl(var(--primary))',
+            color: contrastColor(ROCKET_LEADER_COLORS[leader] || 'hsl(var(--primary))'),
+          }}
+        >
           {leader}
         </Badge>
         <p className="text-xs text-muted-foreground">
@@ -258,4 +264,4 @@ function RocketLineupPage({ filters, onSetFilterOptions }: RocketLineupPageProps
   );
 }
 
-export default React.memo(RocketLineupPage);
+export default RocketLineupPage;

@@ -30,8 +30,6 @@ export default defineConfig({
             '@radix-ui/react-hover-card',
             '@radix-ui/react-label',
             '@radix-ui/react-separator',
-            '@radix-ui/react-scroll-area',
-            '@radix-ui/react-visually-hidden',
             '@radix-ui/react-slot',
           ],
           icons: ['lucide-react'],
@@ -47,7 +45,7 @@ export default defineConfig({
           ],
 
           // Date utilities
-          'date-utils': ['date-fns', 'date-fns-tz'],
+          'date-utils': ['date-fns'],
 
           // Other utilities
           utils: ['ics', 'uuid'],

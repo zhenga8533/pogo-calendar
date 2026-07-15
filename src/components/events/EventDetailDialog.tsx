@@ -1,19 +1,28 @@
-import { CalendarDays, Clock, ExternalLink, Pencil, Star, Trash2 } from 'lucide-react';
+import {
+  CalendarDays,
+  Clock,
+  ExternalLink,
+  Pencil,
+  Star,
+  Trash2,
+} from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { CUSTOM_EVENT_CATEGORY } from '../../config/constants';
-import { useSettingsContext } from '../../hooks/useSettingsContext';
 import { useNoteEditor } from '../../hooks/useNoteEditor';
+import { useSettingsContext } from '../../hooks/useSettingsContext';
 import type { ToastSeverity } from '../../hooks/useToast';
-import type { CalendarEvent } from '../../types/events';
+import { toDisplayPokemon, type CalendarEvent, type EventPokemon } from '../../types/events';
 import { downloadIcsFile } from '../../utils/calendarUtils';
 import { formatDateLine } from '../../utils/dateUtils';
 import { CategoryTag } from '../shared/CategoryTag';
 import { DeleteConfirmationDialog } from '../shared/DeleteConfirmationDialog';
 import { EventStatusTag } from '../shared/EventStatusTag';
+import { ShinyIndicator } from '../shared/ShinyIndicator';
 import { UnsavedChangesDialog } from '../shared/UnsavedChangesDialog';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Dialog, DialogContent } from '../ui/dialog';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '../ui/hover-card';
 import { Separator } from '../ui/separator';
 import { Textarea } from '../ui/textarea';
 
@@ -47,12 +56,43 @@ interface EventDetailDialogProps {
   showToast: (message: string, severity?: ToastSeverity) => void;
 }
 
-const ChipList = ({ items }: { items: string[] }) => (
+const PokemonBadge = ({ pokemon }: { pokemon: EventPokemon }) => {
+  const badge = (
+    <Badge variant="muted" className="gap-1.5 rounded-lg pl-1">
+      {pokemon.asset_url && (
+        <img
+          src={pokemon.asset_url}
+          alt=""
+          className="h-5 w-5 object-contain"
+        />
+      )}
+      {pokemon.name}
+      {pokemon.shiny_available && <ShinyIndicator />}
+    </Badge>
+  );
+
+  if (!pokemon.asset_url) {
+    return badge;
+  }
+
+  return (
+    <HoverCard openDelay={150} closeDelay={0}>
+      <HoverCardTrigger asChild>{badge}</HoverCardTrigger>
+      <HoverCardContent className="flex w-auto items-center justify-center p-2">
+        <img
+          src={pokemon.asset_url}
+          alt={pokemon.name}
+          className="h-20 w-20 object-contain"
+        />
+      </HoverCardContent>
+    </HoverCard>
+  );
+};
+
+const PokemonChipList = ({ items }: { items: (string | EventPokemon)[] }) => (
   <div className="flex flex-wrap gap-1.5">
-    {items.map((item) => (
-      <Badge key={item} variant="muted" className="rounded-lg">
-        {item}
-      </Badge>
+    {items.map(toDisplayPokemon).map((pokemon) => (
+      <PokemonBadge key={pokemon.name} pokemon={pokemon} />
     ))}
   </div>
 );
@@ -123,7 +163,11 @@ function EventDetailDialog({
     handleClose,
     handleConfirmClose,
     closeUnsavedDialog,
-  } = useNoteEditor(eventDetails ? eventNotes[eventDetails.id] || '' : '', onSaveNote, onClose);
+  } = useNoteEditor(
+    eventDetails ? eventNotes[eventDetails.id] || '' : '',
+    onSaveNote,
+    onClose
+  );
 
   const handleDelete = useCallback(() => {
     if (!eventDetails) return;
@@ -136,14 +180,25 @@ function EventDetailDialog({
     return null;
   }
 
-  const { id, title, banner_url: bannerUrl, isCustomEvent, isSaved, category } = eventDetails;
+  const {
+    id,
+    title,
+    banner_url: bannerUrl,
+    isCustomEvent,
+    isSaved,
+    category,
+  } = eventDetails;
 
   return (
     <>
       <Dialog open onOpenChange={(o) => !o && handleClose()}>
         <DialogContent className="max-w-2xl" fullScreenOnMobile hideClose>
           <div className="relative h-[200px] w-full shrink-0">
-            <img src={bannerUrl} alt={title} className="h-full w-full object-cover" />
+            <img
+              src={bannerUrl}
+              alt={title}
+              className="h-full w-full object-cover"
+            />
             <div
               className="absolute inset-0"
               style={{
@@ -158,7 +213,10 @@ function EventDetailDialog({
               onClick={() => onToggleSaveEvent(id)}
               className="absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-full bg-black/30 text-white transition-colors hover:bg-black/50"
             >
-              <Star className="h-5 w-5" fill={isSaved ? 'currentColor' : 'none'} />
+              <Star
+                className="h-5 w-5"
+                fill={isSaved ? 'currentColor' : 'none'}
+              />
             </button>
 
             <div className="absolute bottom-0 left-0 w-full p-4">
@@ -207,18 +265,20 @@ function EventDetailDialog({
                 <div className="pb-4">
                   <DetailSection title="Description">
                     <div className="flex flex-col gap-1">
-                      {eventDetails.description.split('\n').map((line, index) => {
-                        const trimmedLine = line.trim();
-                        if (!trimmedLine) return null;
-                        const displayText = trimmedLine.startsWith('- ')
-                          ? '• ' + trimmedLine.substring(2)
-                          : trimmedLine;
-                        return (
-                          <p key={index} className="leading-relaxed">
-                            {displayText}
-                          </p>
-                        );
-                      })}
+                      {eventDetails.description
+                        .split('\n')
+                        .map((line, index) => {
+                          const trimmedLine = line.trim();
+                          if (!trimmedLine) return null;
+                          const displayText = trimmedLine.startsWith('- ')
+                            ? '• ' + trimmedLine.substring(2)
+                            : trimmedLine;
+                          return (
+                            <p key={index} className="leading-relaxed">
+                              {displayText}
+                            </p>
+                          );
+                        })}
                     </div>
                   </DetailSection>
                 </div>
@@ -253,12 +313,18 @@ function EventDetailDialog({
                     'start',
                     'end',
                   ];
-                  return !nonPokemonFields.includes(key) && Array.isArray(value) && value.length > 0;
+                  return (
+                    !nonPokemonFields.includes(key) &&
+                    Array.isArray(value) &&
+                    value.length > 0
+                  );
                 })
                 .map(([key, value]) => (
                   <div key={key} className="py-4">
                     <DetailSection title={getPokemonFieldTitle(key)}>
-                      <ChipList items={value as string[]} />
+                      <PokemonChipList
+                        items={value as (string | EventPokemon)[]}
+                      />
                     </DetailSection>
                   </div>
                 ))}
@@ -286,7 +352,12 @@ function EventDetailDialog({
                   </a>
                 </Button>
               )}
-              <Button variant="outline" onClick={() => downloadIcsFile(event, (error) => showToast(error, 'error'))}>
+              <Button
+                variant="outline"
+                onClick={() =>
+                  downloadIcsFile(event, (error) => showToast(error, 'error'))
+                }
+              >
                 <CalendarDays className="h-4 w-4" />
                 Add to Calendar
               </Button>
@@ -298,7 +369,11 @@ function EventDetailDialog({
                     <Pencil className="h-4 w-4" />
                     Edit
                   </Button>
-                  <Button variant="ghost" className="text-destructive hover:text-destructive" onClick={() => setConfirmDeleteOpen(true)}>
+                  <Button
+                    variant="ghost"
+                    className="text-destructive hover:text-destructive"
+                    onClick={() => setConfirmDeleteOpen(true)}
+                  >
                     <Trash2 className="h-4 w-4" />
                     Delete
                   </Button>

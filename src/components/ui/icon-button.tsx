@@ -12,7 +12,7 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
       ref={ref}
       type="button"
       className={cn(
-        'inline-flex h-9 w-9 items-center justify-center rounded-full text-foreground/70 transition-colors duration-150 hover:bg-accent hover:text-foreground disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&_svg]:size-[1.15rem] [&_svg]:shrink-0',
+        'inline-flex h-9 w-9 items-center justify-center rounded-md text-foreground/70 transition-colors duration-150 hover:bg-accent hover:text-foreground disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&_svg]:size-[1.15rem] [&_svg]:shrink-0',
         active && 'bg-accent text-primary',
         className
       )}

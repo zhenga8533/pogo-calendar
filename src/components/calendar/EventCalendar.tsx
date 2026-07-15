@@ -12,6 +12,7 @@ import { Button } from '../ui/button';
 import { Card } from '../ui/card';
 import EventDetailDialog from '../events/EventDetailDialog';
 import EventHoverDetails from '../events/EventHoverDetails';
+import { NoResults } from '../shared/NoResults';
 import { CalendarEventContent } from './CalendarEventContent';
 
 interface EventCalendarProps {
@@ -172,16 +173,16 @@ function EventCalendar({
 
   if (events.length === 0) {
     return (
-      <Card className="flex min-h-[60vh] flex-col items-center justify-center p-8 text-center shadow-soft-lg md:p-16">
-        <CalendarX className="mb-4 h-16 w-16 text-muted-foreground" />
-        <h2 className="mb-2 text-xl font-bold">No Events Found</h2>
-        <p className="mb-4 text-muted-foreground">
-          Try adjusting your filters or creating a new custom event.
-        </p>
-        <Button variant="outline" onClick={() => window.location.reload()}>
-          Reset All Filters
-        </Button>
-      </Card>
+      <NoResults
+        title="No Events Found"
+        message="Try adjusting your filters or creating a new custom event."
+        icon={<CalendarX className="mb-3 h-10 w-10 text-muted-foreground" />}
+        action={
+          <Button variant="outline" onClick={() => window.location.reload()}>
+            Reset All Filters
+          </Button>
+        }
+      />
     );
   }
 

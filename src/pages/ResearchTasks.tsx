@@ -1,5 +1,5 @@
 import { ChevronDown } from 'lucide-react';
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ShinyChip } from '../components/filters/shared';
 import { DataErrorDisplay } from '../components/shared/DataErrorDisplay';
 import { DataLoadingSkeleton } from '../components/shared/DataLoadingSkeleton';
@@ -96,7 +96,7 @@ function ResearchTasksPage({ filters, onSetFilterOptions }: ResearchTasksPagePro
 
   const renderReward = (reward: TaskReward, index: number) => (
     <div key={index} className="flex min-h-20 items-center rounded-lg border border-border bg-muted p-4">
-      <div className="mr-3 flex h-16 w-16 min-w-16 items-center justify-center overflow-hidden rounded-md bg-card">
+      <div className="mr-3 flex h-14 w-14 min-w-14 items-center justify-center overflow-hidden rounded-md bg-card">
         <img src={reward.asset_url} alt={reward.name} className="max-h-full max-w-full object-contain" />
       </div>
       <div className="min-w-0 flex-1">
@@ -223,4 +223,4 @@ function ResearchTasksPage({ filters, onSetFilterOptions }: ResearchTasksPagePro
   );
 }
 
-export default React.memo(ResearchTasksPage);
+export default ResearchTasksPage;

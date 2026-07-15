@@ -12,7 +12,7 @@ import {
   ALL_DAY_EVENT_THRESHOLD_HOURS,
   MS_PER_HOUR,
 } from '../config/timeConstants';
-import type { CalendarEvent } from '../types/events';
+import { getPokemonName, type CalendarEvent } from '../types/events';
 import type { Filters } from '../types/filters';
 import { safeGetJSON, safeSetJSON } from '../utils/storageUtils';
 
@@ -112,7 +112,7 @@ const passesPokemonFilter = (event: CalendarEvent, pokemonSearch: string[]) => {
 
   Object.entries(event.extendedProps).forEach(([key, value]) => {
     if (!nonPokemonFields.includes(key) && Array.isArray(value)) {
-      allPokemonInEvent.push(...value);
+      allPokemonInEvent.push(...value.map(getPokemonName));
     }
   });
 

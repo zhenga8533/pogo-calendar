@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ShinyChip } from '../components/filters/shared';
 import { DataErrorDisplay } from '../components/shared/DataErrorDisplay';
 import { DataLoadingSkeleton } from '../components/shared/DataLoadingSkeleton';
@@ -15,6 +15,7 @@ import { usePageData } from '../hooks/usePageData';
 import { fetchEggPool } from '../services/dataService';
 import type { EggPokemon, EggPoolData } from '../types/eggPool';
 import type { EggPoolFilters } from '../types/pageFilters';
+import { contrastColor } from '../utils/colorUtils';
 
 interface EggPoolPageProps {
   filters: EggPoolFilters;
@@ -93,7 +94,10 @@ function EggPoolPage({ filters, onSetFilterOptions }: EggPoolPageProps) {
           {pokemon.shiny_available && <ShinyChip />}
           <Badge
             size="sm"
-            style={{ backgroundColor: RARITY_TIERS[pokemon.rarity_tier]?.color || '#999', color: '#fff' }}
+            style={{
+              backgroundColor: RARITY_TIERS[pokemon.rarity_tier]?.color || '#999',
+              color: contrastColor(RARITY_TIERS[pokemon.rarity_tier]?.color || '#999'),
+            }}
           >
             {RARITY_TIERS[pokemon.rarity_tier]?.label || 'Unknown'}
           </Badge>
@@ -116,7 +120,10 @@ function EggPoolPage({ filters, onSetFilterOptions }: EggPoolPageProps) {
       <Badge
         size="sm"
         className="min-w-20 justify-center"
-        style={{ backgroundColor: RARITY_TIERS[pokemon.rarity_tier]?.color || '#999', color: '#fff' }}
+        style={{
+          backgroundColor: RARITY_TIERS[pokemon.rarity_tier]?.color || '#999',
+          color: contrastColor(RARITY_TIERS[pokemon.rarity_tier]?.color || '#999'),
+        }}
       >
         {RARITY_TIERS[pokemon.rarity_tier]?.label || 'Unknown'}
       </Badge>
@@ -164,4 +171,4 @@ function EggPoolPage({ filters, onSetFilterOptions }: EggPoolPageProps) {
   );
 }
 
-export default React.memo(EggPoolPage);
+export default EggPoolPage;

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ShinyChip } from '../components/filters/shared';
 import { DataErrorDisplay } from '../components/shared/DataErrorDisplay';
 import { DataLoadingSkeleton } from '../components/shared/DataLoadingSkeleton';
@@ -15,6 +15,7 @@ import { usePageData } from '../hooks/usePageData';
 import { fetchRaidBosses } from '../services/dataService';
 import type { RaidBossFilters } from '../types/pageFilters';
 import type { RaidBoss, RaidBossData } from '../types/raidBosses';
+import { contrastColor } from '../utils/colorUtils';
 
 interface RaidBossesPageProps {
   filters: RaidBossFilters;
@@ -102,7 +103,14 @@ function RaidBossesPage({ filters, onSetFilterOptions }: RaidBossesPageProps) {
         <div className="flex flex-col gap-2.5">
           <div className="flex flex-wrap justify-center gap-1">
             {boss.types.map((type) => (
-              <Badge key={type} size="sm" style={{ backgroundColor: POKEMON_TYPE_COLORS[type] || '#999', color: '#fff' }}>
+              <Badge
+                key={type}
+                size="sm"
+                style={{
+                  backgroundColor: POKEMON_TYPE_COLORS[type] || '#999',
+                  color: contrastColor(POKEMON_TYPE_COLORS[type] || '#999'),
+                }}
+              >
                 {type}
               </Badge>
             ))}
@@ -140,7 +148,11 @@ function RaidBossesPage({ filters, onSetFilterOptions }: RaidBossesPageProps) {
         </div>
         <div className="flex flex-wrap gap-1">
           {boss.types.map((t) => (
-            <Badge key={t} size="sm" style={{ backgroundColor: POKEMON_TYPE_COLORS[t], color: '#fff' }}>
+            <Badge
+              key={t}
+              size="sm"
+              style={{ backgroundColor: POKEMON_TYPE_COLORS[t], color: contrastColor(POKEMON_TYPE_COLORS[t] || '#999') }}
+            >
               {t}
             </Badge>
           ))}
@@ -194,4 +206,4 @@ function RaidBossesPage({ filters, onSetFilterOptions }: RaidBossesPageProps) {
   );
 }
 
-export default React.memo(RaidBossesPage);
+export default RaidBossesPage;

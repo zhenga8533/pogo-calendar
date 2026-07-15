@@ -1,13 +1,16 @@
-import { SHINY_COLOR } from '../../../config/colorMapping';
+import { Badge } from '../../ui/badge';
+import { ShinyIndicator } from '../../shared/ShinyIndicator';
 
 /**
  * Reusable shiny indicator chip with consistent styling
  */
 export const ShinyChip = () => (
-  <span
-    className="inline-flex h-5 items-center rounded-md px-1.5 text-[0.7rem] font-semibold text-black"
-    style={{ backgroundColor: SHINY_COLOR }}
+  <Badge
+    variant="muted"
+    size="sm"
+    className="gap-1 bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300"
   >
-    ✨ Shiny
-  </span>
+    <ShinyIndicator />
+    Shiny
+  </Badge>
 );

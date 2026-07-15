@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ShinyChip } from '../components/filters/shared';
 import { DataErrorDisplay } from '../components/shared/DataErrorDisplay';
+import { DataImage } from '../components/shared/DataImage';
 import { DataLoadingSkeleton } from '../components/shared/DataLoadingSkeleton';
 import { NoResults } from '../components/shared/NoResults';
 import { PageHeader } from '../components/shared/PageHeader';
@@ -56,7 +57,9 @@ function EggPoolPage({ filters, onSetFilterOptions }: EggPoolPageProps) {
           return false;
         }
         if (filters.selectedRarityTiers.length > 0) {
-          const rarityLabel = RARITY_TIERS[p.rarity_tier]?.label;
+          const rarityLabel = p.rarity_tier
+            ? RARITY_TIERS[p.rarity_tier]?.label
+            : undefined;
           if (!rarityLabel || !filters.selectedRarityTiers.includes(rarityLabel)) {
             return false;
           }
@@ -86,7 +89,7 @@ function EggPoolPage({ filters, onSetFilterOptions }: EggPoolPageProps) {
       className={`flex h-full flex-col overflow-hidden ${INTERACTIVE_CARD_CLASSNAME}`}
     >
       <div className="flex h-32 items-center justify-center bg-muted p-4">
-        <img src={pokemon.asset_url} alt={pokemon.name} className="max-h-full max-w-full object-contain" />
+        <DataImage src={pokemon.asset_url} alt={pokemon.name} className="max-h-full max-w-full object-contain" />
       </div>
       <div className="flex-1 p-3 pt-2 text-center">
         <p className="mb-1.5 text-sm font-semibold sm:text-base">{pokemon.name}</p>
@@ -95,11 +98,20 @@ function EggPoolPage({ filters, onSetFilterOptions }: EggPoolPageProps) {
           <Badge
             size="sm"
             style={{
-              backgroundColor: RARITY_TIERS[pokemon.rarity_tier]?.color || '#999',
-              color: contrastColor(RARITY_TIERS[pokemon.rarity_tier]?.color || '#999'),
+              backgroundColor:
+                (pokemon.rarity_tier
+                  ? RARITY_TIERS[pokemon.rarity_tier]?.color
+                  : undefined) || '#999',
+              color: contrastColor(
+                (pokemon.rarity_tier
+                  ? RARITY_TIERS[pokemon.rarity_tier]?.color
+                  : undefined) || '#999'
+              ),
             }}
           >
-            {RARITY_TIERS[pokemon.rarity_tier]?.label || 'Unknown'}
+            {(pokemon.rarity_tier
+              ? RARITY_TIERS[pokemon.rarity_tier]?.label
+              : undefined) || 'Unknown'}
           </Badge>
         </div>
       </div>
@@ -109,7 +121,7 @@ function EggPoolPage({ filters, onSetFilterOptions }: EggPoolPageProps) {
   const renderPokemonListItem = (pokemon: EggPokemon) => (
     <Card key={pokemon.name} className={`flex w-full items-center gap-3 p-3 ${INTERACTIVE_CARD_CLASSNAME}`}>
       <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted">
-        <img src={pokemon.asset_url} alt={pokemon.name} className="max-h-full max-w-full object-contain" />
+        <DataImage src={pokemon.asset_url} alt={pokemon.name} className="max-h-full max-w-full object-contain" />
       </div>
       <div className="min-w-0 flex-1">
         <div className="mb-1 flex items-center gap-2">
@@ -121,11 +133,20 @@ function EggPoolPage({ filters, onSetFilterOptions }: EggPoolPageProps) {
         size="sm"
         className="min-w-20 justify-center"
         style={{
-          backgroundColor: RARITY_TIERS[pokemon.rarity_tier]?.color || '#999',
-          color: contrastColor(RARITY_TIERS[pokemon.rarity_tier]?.color || '#999'),
+          backgroundColor:
+            (pokemon.rarity_tier
+              ? RARITY_TIERS[pokemon.rarity_tier]?.color
+              : undefined) || '#999',
+          color: contrastColor(
+            (pokemon.rarity_tier
+              ? RARITY_TIERS[pokemon.rarity_tier]?.color
+              : undefined) || '#999'
+          ),
         }}
       >
-        {RARITY_TIERS[pokemon.rarity_tier]?.label || 'Unknown'}
+        {(pokemon.rarity_tier
+          ? RARITY_TIERS[pokemon.rarity_tier]?.label
+          : undefined) || 'Unknown'}
       </Badge>
     </Card>
   );

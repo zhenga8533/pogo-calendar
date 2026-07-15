@@ -10,9 +10,6 @@ export interface EventDataContextType {
   setSelectedEvent: (event: CalendarEvent | null) => void;
   refetchEvents: () => Promise<void>;
   updateNote: (eventId: string, noteText: string) => void;
-  allCategories: string[];
-  allPokemon: string[];
-  allBonuses: string[];
 }
 
 export const EventDataContext = createContext<EventDataContextType | undefined>(

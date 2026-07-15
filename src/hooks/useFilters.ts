@@ -15,6 +15,7 @@ import {
 import { getPokemonName, type CalendarEvent } from '../types/events';
 import type { Filters } from '../types/filters';
 import { safeGetJSON, safeSetJSON } from '../utils/storageUtils';
+import { getEventInstant } from '../utils/eventTimeUtils';
 
 type SetFilters = Dispatch<SetStateAction<Filters>>;
 
@@ -52,7 +53,6 @@ const passesDateFilter = (
   const eventStart = new Date(event.start);
   const eventEnd = new Date(event.end);
 
-  // Check for invalid dates
   if (isNaN(eventStart.getTime()) || isNaN(eventEnd.getTime())) return false;
 
   return !(
@@ -67,7 +67,6 @@ const passesTimeFilter = (event: CalendarEvent, timeRange: number[]) => {
   const eventStart = new Date(event.start);
   const eventEnd = new Date(event.end);
 
-  // Check for invalid dates
   if (isNaN(eventStart.getTime()) || isNaN(eventEnd.getTime())) return false;
 
   const [startHour, endHour] = timeRange;
@@ -88,11 +87,10 @@ const passesActiveOnlyFilter = (
   if (!event.start || !event.end) return false;
 
   const now = new Date();
-  const eventStart = new Date(event.start);
-  const eventEnd = new Date(event.end);
+  const eventStart = getEventInstant(event, 'start');
+  const eventEnd = getEventInstant(event, 'end');
 
-  // Check for invalid dates
-  if (isNaN(eventStart.getTime()) || isNaN(eventEnd.getTime())) return false;
+  if (!eventStart || !eventEnd) return false;
 
   return now >= eventStart && now <= eventEnd;
 };

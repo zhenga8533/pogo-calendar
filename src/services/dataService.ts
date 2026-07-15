@@ -2,6 +2,12 @@ import type { EggPoolData } from '../types/eggPool';
 import type { RaidBossData } from '../types/raidBosses';
 import type { ResearchTaskData } from '../types/researchTasks';
 import type { RocketLineupData } from '../types/rocketLineup';
+import {
+  parseEggPoolData,
+  parseRaidBossData,
+  parseResearchTaskData,
+  parseRocketLineupData,
+} from './dataValidation';
 
 const GITHUB_BASE_URL =
   'https://raw.githubusercontent.com/zhenga8533/leak-duck/data';
@@ -20,7 +26,7 @@ export const GITHUB_ROCKET_LINEUP_URL = `${GITHUB_BASE_URL}/rocket_lineups.json`
  * @returns An async function that fetches and returns typed data
  */
 export const createDataFetcher =
-  <T>(url: string) =>
+  <T>(url: string, parse: (value: unknown) => T) =>
   async (): Promise<T> => {
     const response = await fetch(url, { cache: 'no-store' });
 
@@ -28,31 +34,37 @@ export const createDataFetcher =
       throw new Error(`API request failed with status ${response.status}`);
     }
 
-    return response.json();
+    return parse(await response.json());
   };
 
 /**
  * Fetch egg pool data from the GitHub repository
  */
-export const fetchEggPool = createDataFetcher<EggPoolData>(GITHUB_EGG_POOL_URL);
+export const fetchEggPool = createDataFetcher<EggPoolData>(
+  GITHUB_EGG_POOL_URL,
+  parseEggPoolData
+);
 
 /**
  * Fetch raid bosses data from the GitHub repository
  */
 export const fetchRaidBosses = createDataFetcher<RaidBossData>(
-  GITHUB_RAID_BOSSES_URL
+  GITHUB_RAID_BOSSES_URL,
+  parseRaidBossData
 );
 
 /**
  * Fetch research tasks data from the GitHub repository
  */
 export const fetchResearchTasks = createDataFetcher<ResearchTaskData>(
-  GITHUB_RESEARCH_TASKS_URL
+  GITHUB_RESEARCH_TASKS_URL,
+  parseResearchTaskData
 );
 
 /**
  * Fetch rocket lineup data from the GitHub repository
  */
 export const fetchRocketLineup = createDataFetcher<RocketLineupData>(
-  GITHUB_ROCKET_LINEUP_URL
+  GITHUB_ROCKET_LINEUP_URL,
+  parseRocketLineupData
 );

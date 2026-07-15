@@ -5,12 +5,12 @@ export interface CPRange {
 
 export interface RaidBoss {
   name: string;
-  tier: number;
+  tier: number | string;
   shiny_available: boolean;
-  cp_range: CPRange;
-  boosted_cp_range: CPRange;
+  cp_range: CPRange | null;
+  boosted_cp_range: CPRange | null;
   types: string[];
-  asset_url: string;
+  asset_url: string | null;
 }
 
 // Using index signature to support any raid tier (Tier 1, Tier 3, Tier 5, Mega Raids, Shadow Raids, etc.)

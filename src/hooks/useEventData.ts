@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { fetchEvents } from '../services/eventService';
 import type { CalendarEvent } from '../types/events';
 
@@ -11,24 +11,31 @@ export function useEventData(timezone: string) {
   const [allEvents, setAllEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const requestIdRef = useRef(0);
 
   const refetch = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
     setLoading(true);
     setError(null);
     try {
       const eventData = await fetchEvents(timezone);
-      setAllEvents(eventData);
+      if (requestId === requestIdRef.current) setAllEvents(eventData);
     } catch (err) {
       console.error('Error fetching events:', err);
-      setError('Failed to load event data. Please try again later.');
+      if (requestId === requestIdRef.current) {
+        setError('Failed to load event data. Please try again later.');
+      }
       throw err; // Re-throw error for the caller to handle
     } finally {
-      setLoading(false);
+      if (requestId === requestIdRef.current) setLoading(false);
     }
   }, [timezone]);
 
   useEffect(() => {
-    refetch();
+    void refetch().catch(() => undefined);
+    return () => {
+      requestIdRef.current += 1;
+    };
   }, [refetch]);
 
   return { allEvents, loading, error, refetch };

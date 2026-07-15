@@ -37,7 +37,7 @@ function formatDurationFromInterval(duration: Duration): string {
 export function useEventStatus(
   startInput: Date | string | null,
   endInput: Date | string | null
-) {
+): { status: EventStatus | null; displayTime: string } {
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
@@ -63,18 +63,18 @@ export function useEventStatus(
   if (now < start) {
     const duration = intervalToDuration({ start: now, end: start });
     return {
-      status: 'upcoming' as EventStatus,
+      status: 'upcoming',
       displayTime: formatDurationFromInterval(duration),
     };
   } else if (now >= start && now <= end) {
     const duration = intervalToDuration({ start: now, end: end });
     return {
-      status: 'active' as EventStatus,
+      status: 'active',
       displayTime: formatDurationFromInterval(duration),
     };
   } else {
     return {
-      status: 'finished' as EventStatus,
+      status: 'finished',
       displayTime: formatDistanceToNowStrict(end, { addSuffix: true }),
     };
   }

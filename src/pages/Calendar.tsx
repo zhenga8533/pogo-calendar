@@ -27,6 +27,7 @@ function CalendarPage(props: CalendarPageProps) {
     setFilters,
     setCurrentView,
     filters,
+    handleResetFilters,
   } = useCalendarContext();
 
   if (isLoading) {
@@ -61,6 +62,7 @@ function CalendarPage(props: CalendarPageProps) {
           }))
         }
         showToast={showToast}
+        onResetFilters={handleResetFilters}
       />
     </div>
   );

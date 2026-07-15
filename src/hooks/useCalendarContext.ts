@@ -1,6 +1,10 @@
 import { useCallback, useMemo } from 'react';
 import { CUSTOM_EVENT_CATEGORY } from '../config/constants';
-import type { CalendarEvent, NewEventData } from '../types/events';
+import {
+  getPokemonName,
+  type CalendarEvent,
+  type NewEventData,
+} from '../types/events';
 import type { Filters } from '../types/filters';
 import { useCustomEventsContext } from './useCustomEventsContext';
 import { useEventDataContext } from './useEventDataContext';
@@ -40,6 +44,38 @@ export function useCalendarContext(): CalendarContextType {
     [eventData.allEvents, customEvents.customEvents]
   );
 
+  const metadata = useMemo(() => {
+    const categories = new Set<string>();
+    const pokemon = new Set<string>();
+    const bonuses = new Set<string>();
+    const nonPokemonFields = new Set([
+      'category',
+      'article_url',
+      'banner_url',
+      'description',
+      'bonuses',
+      'is_local_time',
+      'start_instant',
+      'end_instant',
+    ]);
+
+    combinedEvents.forEach((event) => {
+      categories.add(event.extendedProps.category);
+      event.extendedProps.bonuses?.forEach((bonus) => bonuses.add(bonus));
+      Object.entries(event.extendedProps).forEach(([key, value]) => {
+        if (!nonPokemonFields.has(key) && Array.isArray(value)) {
+          value.forEach((item) => pokemon.add(getPokemonName(item)));
+        }
+      });
+    });
+
+    return {
+      allCategories: Array.from(categories).sort(),
+      allPokemon: Array.from(pokemon).sort(),
+      allBonuses: Array.from(bonuses).sort(),
+    };
+  }, [combinedEvents]);
+
   const handleAddEvent = useCallback(
     (eventData: NewEventData) => {
       customEvents.addEvent(eventData);
@@ -65,9 +101,9 @@ export function useCalendarContext(): CalendarContextType {
       setSelectedEvent: eventData.setSelectedEvent,
       refetchEvents: eventData.refetchEvents,
       updateNote: eventData.updateNote,
-      allCategories: eventData.allCategories,
-      allPokemon: eventData.allPokemon,
-      allBonuses: eventData.allBonuses,
+      allCategories: metadata.allCategories,
+      allPokemon: metadata.allPokemon,
+      allBonuses: metadata.allBonuses,
       savedEventIds: customEvents.savedEventIds,
       addEvent: handleAddEvent,
       updateEvent: customEvents.updateEvent,
@@ -79,6 +115,6 @@ export function useCalendarContext(): CalendarContextType {
       setCurrentView: filters.setCurrentView,
       filteredEvents: filters.filteredEvents,
     }),
-    [eventData, customEvents, filters, combinedEvents, handleAddEvent]
+    [eventData, customEvents, filters, combinedEvents, handleAddEvent, metadata]
   );
 }

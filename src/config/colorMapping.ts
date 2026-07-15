@@ -42,18 +42,22 @@ export const darkCategoryColors: { [key: string]: string } = {
 
 // Egg tier colors
 export const EGG_COLORS: Record<string, string> = {
+  '1 km Eggs': '#81C784',
   '2 km Eggs': '#4CAF50',
   '5 km Eggs': '#FFA726',
+  '5 km Eggs (Adventure Sync Rewards)': '#FB8C00',
   '7 km Eggs': '#FDD835',
+  '7 km Eggs (From Route Gift)': '#FBC02D',
   '10 km Eggs': '#AB47BC',
+  '10 km Eggs (Adventure Sync Rewards)': '#8E24AA',
   '12 km Eggs': '#EF5350',
 };
 
 // Raid tier colors
 export const RAID_TIER_COLORS: Record<string, string> = {
-  'Tier 1': '#F48FB1',
-  'Tier 3': '#FFB74D',
-  'Tier 5': '#BA68C8',
+  '1-Star Raids': '#F48FB1',
+  '3-Star Raids': '#FFB74D',
+  '5-Star Raids': '#BA68C8',
   'Mega Raids': '#4FC3F7',
 };
 

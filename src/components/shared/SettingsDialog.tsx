@@ -32,6 +32,7 @@ function SettingsDialogComponent({ open, onClose, onSettingsChange }: SettingsDi
   const [loadingTimezones, setLoadingTimezones] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
     if (open) {
       const getTimezones = async () => {
         setLoadingTimezones(true);
@@ -40,6 +41,7 @@ function SettingsDialogComponent({ open, onClose, onSettingsChange }: SettingsDi
           const userTimezone = settings.timezone;
           const userTimezoneInList = tzData.some((tz) => tz.value === userTimezone);
 
+          if (cancelled) return;
           if (!userTimezoneInList) {
             setTimezones([{ text: userTimezone, value: userTimezone }, ...tzData]);
           } else {
@@ -48,11 +50,14 @@ function SettingsDialogComponent({ open, onClose, onSettingsChange }: SettingsDi
         } catch (error) {
           console.error('Failed to fetch timezones:', error);
         } finally {
-          setLoadingTimezones(false);
+          if (!cancelled) setLoadingTimezones(false);
         }
       };
-      getTimezones();
+      void getTimezones();
     }
+    return () => {
+      cancelled = true;
+    };
   }, [open, settings.timezone]);
 
   const handleSettingChange = (field: keyof Settings, value: string | number | boolean) => {

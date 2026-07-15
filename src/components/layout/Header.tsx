@@ -72,7 +72,7 @@ type HeaderProps = Omit<EventFilterProps, 'isMobile'> & {
   onResearchTaskFilterChange?: (filters: ResearchTaskFilters) => void;
   onResetResearchTaskFilters?: () => void;
   researchTaskActiveFilterCount?: number;
-  researchTaskOptions?: { categories: string[] };
+  researchTaskOptions?: { categories: string[]; rewardTypes: string[] };
   rocketLineupFilters?: RocketLineupFilters;
   onRocketLineupFilterChange?: (filters: RocketLineupFilters) => void;
   onResetRocketLineupFilters?: () => void;
@@ -115,9 +115,10 @@ function HeaderComponent(props: HeaderProps) {
       case ROUTES.EGG_POOL:
         return (
           props.onEggPoolFilterChange &&
-          props.onResetEggPoolFilters && (
+          props.onResetEggPoolFilters &&
+          eggPoolFilters && (
             <EggPoolFilter
-              filters={eggPoolFilters!}
+              filters={eggPoolFilters}
               onFilterChange={props.onEggPoolFilterChange}
               onResetFilters={props.onResetEggPoolFilters}
               availableEggTiers={props.eggPoolOptions?.eggTiers || []}
@@ -128,9 +129,10 @@ function HeaderComponent(props: HeaderProps) {
       case ROUTES.RAID_BOSSES:
         return (
           props.onRaidBossFilterChange &&
-          props.onResetRaidBossFilters && (
+          props.onResetRaidBossFilters &&
+          raidBossFilters && (
             <RaidBossFilter
-              filters={raidBossFilters!}
+              filters={raidBossFilters}
               onFilterChange={props.onRaidBossFilterChange}
               onResetFilters={props.onResetRaidBossFilters}
               availableRaidTiers={props.raidBossOptions?.raidTiers || []}
@@ -141,21 +143,24 @@ function HeaderComponent(props: HeaderProps) {
       case ROUTES.RESEARCH_TASKS:
         return (
           props.onResearchTaskFilterChange &&
-          props.onResetResearchTaskFilters && (
+          props.onResetResearchTaskFilters &&
+          researchTaskFilters && (
             <ResearchTaskFilter
-              filters={researchTaskFilters!}
+              filters={researchTaskFilters}
               onFilterChange={props.onResearchTaskFilterChange}
               onResetFilters={props.onResetResearchTaskFilters}
               availableCategories={props.researchTaskOptions?.categories || []}
+              availableRewardTypes={props.researchTaskOptions?.rewardTypes || []}
             />
           )
         );
       case ROUTES.ROCKET_LINEUP:
         return (
           props.onRocketLineupFilterChange &&
-          props.onResetRocketLineupFilters && (
+          props.onResetRocketLineupFilters &&
+          rocketLineupFilters && (
             <RocketLineupFilter
-              filters={rocketLineupFilters!}
+              filters={rocketLineupFilters}
               onFilterChange={props.onRocketLineupFilterChange}
               onResetFilters={props.onResetRocketLineupFilters}
               availableLeaders={props.rocketLineupOptions?.leaders || []}

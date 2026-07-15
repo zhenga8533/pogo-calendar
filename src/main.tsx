@@ -1,6 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
+import { HashRouter } from 'react-router-dom';
 import App from './App.tsx';
 import { CalendarProvider } from './contexts/CalendarProvider.tsx';
 import { SettingsProvider } from './contexts/SettingsProvider.tsx';
@@ -9,12 +9,12 @@ import './styles/calendar.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter basename="/pogo-calendar">
+    <HashRouter>
       <SettingsProvider>
         <CalendarProvider>
           <App />
         </CalendarProvider>
       </SettingsProvider>
-    </BrowserRouter>
+    </HashRouter>
   </StrictMode>
 );

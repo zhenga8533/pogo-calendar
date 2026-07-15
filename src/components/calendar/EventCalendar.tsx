@@ -31,6 +31,7 @@ interface EventCalendarProps {
   onEditEvent: (event: CalendarEvent) => void;
   onDateSelect: (selection: { start: Date | null; end: Date | null }) => void;
   showToast: (message: string, severity?: ToastSeverity) => void;
+  onResetFilters: () => void;
 }
 
 function EventCalendar({
@@ -49,6 +50,7 @@ function EventCalendar({
   onEditEvent,
   onDateSelect,
   showToast,
+  onResetFilters,
 }: EventCalendarProps) {
   const calendarRef = useRef<FullCalendar>(null);
   const { settings } = useSettingsContext();
@@ -178,7 +180,7 @@ function EventCalendar({
         message="Try adjusting your filters or creating a new custom event."
         icon={<CalendarX className="mb-3 h-10 w-10 text-muted-foreground" />}
         action={
-          <Button variant="outline" onClick={() => window.location.reload()}>
+          <Button variant="outline" onClick={onResetFilters}>
             Reset All Filters
           </Button>
         }

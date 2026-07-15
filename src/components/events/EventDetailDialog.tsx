@@ -222,7 +222,10 @@ function EventDetailDialog({
             <div className="absolute bottom-0 left-0 w-full p-4">
               <div className="mb-2 flex flex-wrap items-center gap-1.5">
                 <CategoryTag category={category} />
-                <EventStatusTag start={event.start} end={event.end} />
+                <EventStatusTag
+                  start={event.extendedProps.start_instant ?? event.start}
+                  end={event.extendedProps.end_instant ?? event.end}
+                />
               </div>
               <h2
                 className="text-xl font-bold leading-tight text-white"
@@ -354,9 +357,18 @@ function EventDetailDialog({
               )}
               <Button
                 variant="outline"
-                onClick={() =>
-                  downloadIcsFile(event, (error) => showToast(error, 'error'))
-                }
+                onClick={() => {
+                  void downloadIcsFile(event)
+                    .then(() => showToast('Calendar file created!', 'success'))
+                    .catch((error: unknown) =>
+                      showToast(
+                        error instanceof Error
+                          ? error.message
+                          : 'Failed to generate calendar file',
+                        'error'
+                      )
+                    );
+                }}
               >
                 <CalendarDays className="h-4 w-4" />
                 Add to Calendar

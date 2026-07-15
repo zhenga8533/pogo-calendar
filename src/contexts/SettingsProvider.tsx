@@ -11,16 +11,44 @@ const initialSettings: Settings = {
   hour12: true,
 };
 
+function isValidTimeZone(value: unknown): value is string {
+  if (typeof value !== 'string') return false;
+  try {
+    new Intl.DateTimeFormat('en-US', { timeZone: value }).format();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function loadSettings(): Settings {
+  const saved = safeGetJSON<Record<string, unknown>>(SETTINGS_KEY, {});
+  return {
+    theme:
+      saved.theme === 'light' ||
+      saved.theme === 'dark' ||
+      saved.theme === 'auto'
+        ? saved.theme
+        : initialSettings.theme,
+    firstDay:
+      typeof saved.firstDay === 'number' &&
+      Number.isInteger(saved.firstDay) &&
+      saved.firstDay >= 0 &&
+      saved.firstDay <= 6
+        ? saved.firstDay
+        : initialSettings.firstDay,
+    timezone: isValidTimeZone(saved.timezone)
+      ? saved.timezone
+      : initialSettings.timezone,
+    hour12:
+      typeof saved.hour12 === 'boolean'
+        ? saved.hour12
+        : initialSettings.hour12,
+  };
+}
+
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
-  const [settings, setSettings] = useState<Settings>(() => {
-    const saved = safeGetJSON<Partial<Settings>>(SETTINGS_KEY, {});
-    // Merge saved settings with initial to ensure new fields (if any) are present
-    // and removed fields (like showNextEvent) don't persist if we don't want them to
-    // Although for safeGetJSON, we usually just cast.
-    // To cleaner remove the old key from local storage,
-    // the useEffect below will handle saving the "clean" version on next render.
-    return { ...initialSettings, ...saved };
-  });
+  const [settings, setSettings] = useState<Settings>(loadSettings);
 
   useEffect(() => {
     safeSetJSON(SETTINGS_KEY, settings);

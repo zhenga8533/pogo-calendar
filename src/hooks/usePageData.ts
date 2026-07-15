@@ -23,24 +23,26 @@ export function usePageData<T>(
   const [refetchTrigger, setRefetchTrigger] = useState(0);
 
   useEffect(() => {
+    let cancelled = false;
     const loadData = async () => {
       try {
         setLoading(true);
         setError(null);
         const result = await fetchFn();
-        setData(result);
+        if (!cancelled) setData(result);
       } catch (err) {
         console.error('Error loading data:', err);
-        setError(errorMessage);
+        if (!cancelled) setError(errorMessage);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
-    loadData();
-    // fetchFn is excluded from dependencies as it's expected to be a stable reference
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [errorMessage, refetchTrigger]);
+    void loadData();
+    return () => {
+      cancelled = true;
+    };
+  }, [errorMessage, fetchFn, refetchTrigger]);
 
   const refetch = useCallback(() => {
     setRefetchTrigger((prev) => prev + 1);

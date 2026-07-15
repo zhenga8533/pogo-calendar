@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ShinyChip } from '../components/filters/shared';
 import { DataErrorDisplay } from '../components/shared/DataErrorDisplay';
+import { DataImage } from '../components/shared/DataImage';
 import { DataLoadingSkeleton } from '../components/shared/DataLoadingSkeleton';
 import { NoResults } from '../components/shared/NoResults';
 import { PageHeader } from '../components/shared/PageHeader';
@@ -120,7 +121,7 @@ function RocketLineupPage({ filters, onSetFilterOptions }: RocketLineupPageProps
   const renderPokemon = (pokemon: RocketPokemon) => (
     <div className="flex items-center gap-3 rounded-lg border border-border bg-muted p-3">
       <div className="flex h-14 w-14 min-w-14 items-center justify-center overflow-hidden rounded-md bg-card">
-        <img src={pokemon.asset_url} alt={pokemon.name} className="max-h-full max-w-full object-contain" />
+        <DataImage src={pokemon.asset_url} alt={pokemon.name} className="max-h-full max-w-full object-contain" />
       </div>
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-semibold">{pokemon.name}</p>
@@ -212,7 +213,7 @@ function RocketLineupPage({ filters, onSetFilterOptions }: RocketLineupPageProps
                 {slot.pokemons.map((pokemon, idx) => (
                   <div key={idx} className="flex items-center gap-1.5 rounded-md bg-muted py-1 pl-1 pr-2.5">
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-md bg-card">
-                      <img
+                      <DataImage
                         src={pokemon.asset_url}
                         alt={pokemon.name}
                         className="max-h-full max-w-full object-contain"

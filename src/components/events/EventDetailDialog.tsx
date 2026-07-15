@@ -3,7 +3,6 @@ import {
   Clock,
   ExternalLink,
   Pencil,
-  Sparkles,
   Star,
   Trash2,
 } from 'lucide-react';
@@ -18,6 +17,7 @@ import { formatDateLine } from '../../utils/dateUtils';
 import { CategoryTag } from '../shared/CategoryTag';
 import { DeleteConfirmationDialog } from '../shared/DeleteConfirmationDialog';
 import { EventStatusTag } from '../shared/EventStatusTag';
+import { ShinyIndicator } from '../shared/ShinyIndicator';
 import { UnsavedChangesDialog } from '../shared/UnsavedChangesDialog';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
@@ -75,9 +75,7 @@ const PokemonBadge = ({ pokemon }: { pokemon: EventPokemon }) => {
         />
       )}
       {pokemon.name}
-      {pokemon.shiny_available && (
-        <Sparkles className="h-3.5 w-3.5" aria-label="Shiny available" />
-      )}
+      {pokemon.shiny_available && <ShinyIndicator />}
     </Badge>
   );
 

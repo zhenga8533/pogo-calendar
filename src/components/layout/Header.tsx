@@ -5,6 +5,7 @@ import {
   Egg,
   Filter,
   HelpCircle,
+  Menu,
   RefreshCw,
   Ship,
   Sliders,
@@ -190,7 +191,11 @@ function HeaderComponent(props: HeaderProps) {
 
   const filterTriggerButton = (
     <div className="relative">
-      <IconButton onClick={() => handleFilterOpenChange(true)} aria-label="Search & filters">
+      <IconButton
+        onClick={() => handleFilterOpenChange(true)}
+        aria-label="Search & filters"
+        title="Search & filters"
+      >
         <Filter />
       </IconButton>
       {filterCount > 0 && (
@@ -213,7 +218,7 @@ function HeaderComponent(props: HeaderProps) {
           to="/"
           className="flex shrink-0 items-center gap-2 text-inherit no-underline"
         >
-          <img src={LogoIcon} alt="Logo" className="h-8 w-8" />
+          <img src={LogoIcon} alt="PoGo Calendar" className="h-8 w-8" />
           <span className="hidden text-lg font-bold tracking-tight md:block">
             PoGo Calendar
           </span>
@@ -227,7 +232,7 @@ function HeaderComponent(props: HeaderProps) {
                 key={item.path}
                 to={item.path}
                 className={cn(
-                  'rounded-full px-3 py-1.5 text-sm font-semibold text-muted-foreground no-underline transition-colors duration-150 hover:bg-accent hover:text-foreground',
+                  'rounded-md px-3 py-1.5 text-sm font-semibold text-muted-foreground no-underline transition-colors duration-150 hover:bg-accent hover:text-foreground',
                   isActive && 'bg-accent text-primary'
                 )}
               >
@@ -260,8 +265,8 @@ function HeaderComponent(props: HeaderProps) {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               {isMobile ? (
-                <IconButton aria-label="Menu">
-                  <ChevronDown />
+                <IconButton aria-label="Open navigation" title="Navigation">
+                  <Menu />
                 </IconButton>
               ) : (
                 <Button variant="ghost" className="lg:hidden">
@@ -291,7 +296,11 @@ function HeaderComponent(props: HeaderProps) {
               <SheetContent side="right" className="max-w-md">
                 <SheetHeader>
                   <SheetTitle>Filters</SheetTitle>
-                  <IconButton onClick={() => setFilterSheetOpen(false)} aria-label="Close filters">
+                  <IconButton
+                    onClick={() => setFilterSheetOpen(false)}
+                    aria-label="Close filters"
+                    title="Close filters"
+                  >
                     <X className="h-4 w-4" />
                   </IconButton>
                 </SheetHeader>
@@ -299,7 +308,7 @@ function HeaderComponent(props: HeaderProps) {
               </SheetContent>
             </Sheet>}
 
-          <IconButton onClick={onSettingsClick} aria-label="Settings">
+          <IconButton onClick={onSettingsClick} aria-label="Settings" title="Settings">
             <Sliders />
           </IconButton>
         </div>

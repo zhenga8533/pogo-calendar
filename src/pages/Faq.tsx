@@ -179,7 +179,7 @@ function FaqPage() {
           <AccordionItem
             key={item.question}
             value={item.question}
-            className="rounded-lg border border-border px-4 last:border-b"
+            className="rounded-md border border-border px-4 last:border-b"
           >
             <AccordionTrigger className="text-base">{item.question}</AccordionTrigger>
             <AccordionContent className="border-t border-border pt-3 leading-relaxed text-muted-foreground">
